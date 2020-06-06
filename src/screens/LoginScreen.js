@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View, TouchableOpacity } from "react-native";
 import Button from "react-native-button";
 import { AppStyles } from "../AppStyles";
 //import firebase from "react-native-firebase";
@@ -21,6 +21,7 @@ class LoginScreen extends React.Component {
   }
 
   onPressLogin = async () => {
+    
     const { telefone, senha } = this.state;
     if (telefone.length <= 0 || senha.length <= 0) {
       this.setState({errorMessage: "Por favor, preencha todos os dados."});
@@ -149,17 +150,19 @@ class LoginScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
+         
         <Text style={[styles.title, styles.leftTitle]}>Login</Text>
         <View style={styles.InputContainer}>
-          <TextInput
+          {/*<TextInput
             style={styles.body}
             placeholder="Telefone"
             onChangeText={text => this.setState({ telefone: text })}
             value={this.state.telefone}
             placeholderTextColor={AppStyles.color.grey}
             underlineColorAndroid="transparent"
-          />
-          {/*<TextInputMask
+          />*/
+          }
+          <TextInputMask
             style={styles.body}
             placeholder="Telefone"
             placeholderTextColor={AppStyles.color.grey}
@@ -176,8 +179,7 @@ class LoginScreen extends React.Component {
                 telefone: text
               })
             }}
-          />*/
-          }
+          />
         </View>
         <View style={styles.InputContainer}>
           <TextInput
@@ -190,6 +192,7 @@ class LoginScreen extends React.Component {
             underlineColorAndroid="transparent"
           />
         </View>
+
         <Button
           containerStyle={styles.loginContainer}
           style={styles.loginText}

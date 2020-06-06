@@ -8,10 +8,10 @@
     "eject": "expo eject"
   },
   "dependencies": {
-    "@babel/runtime": "^7.9.6",
+    "@babel/runtime": "^7.10.2",
     "@use-expo/font": "^2.0.0",
     "apisauce": "^1.1.1",
-    "aws-sdk": "^2.681.0",
+    "aws-sdk": "^2.688.0",
     "axios": "^0.19.2",
     "expo": "~37.0.3",
     "expo-file-system": "^8.1.0",
@@ -38,10 +38,11 @@
     "react-native-masked-text": "^1.13.0",
     "react-native-modal-selector": "0.0.29",
     "react-native-paper": "^3.10.1",
+    "react-native-popup-dialog": "^0.18.3",
     "react-native-reanimated": "^1.9.0",
     "react-native-safe-area-context": "^1.0.2",
     "react-native-screens": "^2.8.0",
-    "react-native-snap-carousel": "^3.7.5",
+    "react-native-snap-carousel": "^3.9.1",
     "react-native-star-rating": "^1.1.0",
     "react-native-status-bar-height": "^2.5.0",
     "react-native-vector-icons": "^5.0.0",
@@ -52,12 +53,14 @@
     "react-navigation-tabs": "^2.8.13",
     "react-redux": "^5.0.7",
     "redux": "^4.0.0",
-    "styled-components": "^5.1.0",
-    "watchman": "^1.0.0"
+    "styled-components": "^5.1.1",
+    "watchman": "^1.0.0",
+    "webpack": "^4.43.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.10.2",
     "babel-preset-expo": "~8.1.0",
-    "@babel/core": "^7.8.6"
+    "webpack-cli": "^3.3.11"
   },
   "rnpm": {
     "assets": [

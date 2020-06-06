@@ -10,6 +10,7 @@ import {
   createReactNavigationReduxMiddleware,
   reduxifyNavigator
 } from "react-navigation-redux-helpers";
+import StatsScreen from "../screens/StatsScreen";
 import HomeScreen from "../screens/HomeScreen";
 import LoginScreen from "../screens/LoginScreen";
 import SignupScreen from "../screens/SignupScreen";
@@ -69,15 +70,19 @@ const HomeStack = createStackNavigator(
 
 const TabNavigator = createBottomTabNavigator(
   {
-    Home: { screen: HomeStack }
+    Início: { screen: HomeStack },
+    Relatórios: { screen: StatsScreen}
   },
   {
     navigationOptions: ({ navigation }) => ({
       tabBarIcon: ({ focused, tintColor }) => {
         const { routeName } = navigation.state;
         let iconName;
-        if (routeName === "Home") {
+        if (routeName === "Início") {
           iconName = AppIcon.images.home;
+        } 
+        if(routeName === "Relatórios") {
+          iconName = AppIcon.images.stats;
         }
 
         // You can return any component that you like here! We usually use an

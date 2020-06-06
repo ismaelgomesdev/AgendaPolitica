@@ -31,7 +31,7 @@ let idLogado = "";
 let nomeLogado = "";
 let tipoLogado = "";
 
-class HomeScreen extends React.Component {
+class StatsScreen extends React.Component {
 
   constructor(props){
     super(props);
@@ -97,31 +97,7 @@ class HomeScreen extends React.Component {
     return nomeLogado;
   }
 
-  static navigationOptions = ({ navigation }) => ({
-    headerLeft: () => {
-      return (
-        <TouchableOpacity style={styles.header}
-          onPress={() => {
-            navigation.openDrawer();
-          }}
-        >
-          {navigation.state.params && navigation.state.params.menuIcon ? (
-            <Image
-              style={styles.userPhoto}
-              source={{ uri: navigation.state.params.menuIcon }}
-            />
-          ) : (
-            <Image
-              style={styles.userPhoto}
-              source={AppIcon.images.defaultUser}
-            />
-          )}
 
-          <Text style={[styles.titleHeader, styles.leftTitle]}>Nome do Candidato</Text>
-        </TouchableOpacity>
-      );
-    }
-  });
 
   cadastrarLider = async() => {
     const { nome_lider, telefone_lider, senha_lider, conf_senha } = this.state;
@@ -436,7 +412,30 @@ class HomeScreen extends React.Component {
     );
 */
     if(tipoLogado == 'candidato'){
+        const navigation = this.props;
       return (
+          <View>
+              <TouchableOpacity style={styles.header}
+          onPress={() => {
+            navigation.openDrawer();
+          }}
+        >
+          {navigation.state.params && navigation.state.params.menuIcon ? (
+            <Image
+              style={styles.userPhoto}
+              source={{ uri: navigation.state.params.menuIcon }}
+            />
+          ) : (
+            <Image
+              style={styles.userPhoto}
+              source={AppIcon.images.defaultUser}
+            />
+          )}
+
+          <Text style={[styles.titleHeader, styles.leftTitle]}>Nome do Candidato</Text>
+        </TouchableOpacity>
+
+          
         <ScrollView style={styles.container}>
           <View style={styles.containerForm}>
             <Text style={styles.title}>Novo líder de campanha 
@@ -543,6 +542,7 @@ class HomeScreen extends React.Component {
             </View>
 
         </ScrollView>
+        </View>
       );
     } else {
       const { disabled } = this.state;
@@ -831,4 +831,4 @@ const mapStateToProps = state => ({
   user: state.auth.user
 });
 
-export default connect(mapStateToProps)(HomeScreen);
+export default connect(mapStateToProps)(StatsScreen);

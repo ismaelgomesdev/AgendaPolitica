@@ -55,11 +55,13 @@ export const AppIcon = {
   },
   style: {
     tintColor: AppStyles.color.tint,
+    
     width: 25,
     height: 25
   },
   images: {
-    home: require("../assets/icons/home.png"),
+    stats: require("../assets/icons/statistics.png"),
+    home: require("../assets/icons/home1.png"),
     defaultUser: require("../assets/icons/default_user.jpg"),
     logout: require("../assets/icons/shutdown.png")
   }

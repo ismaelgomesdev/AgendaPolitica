@@ -21,6 +21,11 @@ function nav(state = initialNavState, action) {
       break;
     case "Logout":
       try {
+        AsyncStorage.clear(); 
+        nextState = RootNavigator.router.getStateForAction(
+          NavigationActions.navigate({ routeName: "LoginStack" }),
+          state
+        );
         /*firebase.auth().signOut();
         nextState = RootNavigator.router.getStateForAction(
           NavigationActions.navigate({ routeName: "LoginStack" }),
