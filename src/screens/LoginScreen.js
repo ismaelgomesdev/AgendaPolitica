@@ -1,10 +1,16 @@
 import React from "react";
-import { StyleSheet, Text, TextInput, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import Button from "react-native-button";
 import { AppStyles } from "../AppStyles";
 //import firebase from "react-native-firebase";
-import api from '../services/api';
-import { TextInputMask } from 'react-native-masked-text'
+import api from "../services/api";
+import { TextInputMask } from "react-native-masked-text";
 import { AsyncStorage } from "react-native";
 const FBSDK = require("react-native-fbsdk");
 const { LoginManager, AccessToken } = FBSDK;
@@ -21,36 +27,30 @@ class LoginScreen extends React.Component {
   }
 
   onPressLogin = async () => {
-    
     const { telefone, senha } = this.state;
     if (telefone.length <= 0 || senha.length <= 0) {
-      this.setState({errorMessage: "Por favor, preencha todos os dados."});
-    }
-    else{
+      this.setState({ errorMessage: "Por favor, preencha todos os dados." });
+    } else {
       try {
-        const response = await api.post('/V_User.php', {
-          tipo: '2',
+        const response = await api.post("/V_User.php", {
+          tipo: "2",
           telefone,
           senha,
         });
-        if(response.data != null){
-          console.log(response.data);      
-          const { 
-            token, 
-          } = response.data;
+        if (response.data != null) {
+          console.log(response.data);
+          const { token } = response.data;
           //console.log(qrkey)
-          await AsyncStorage.setItem('@PoliNet_token', token)
+          await AsyncStorage.setItem("@PoliNet_token", token);
           //console.log(AsyncStorage.getItem('@InvestSe_token'))
           //this.props.navigation.navigate("AppNavigator", {keyRef: qrkey});
           const { navigation } = this.props;
           navigation.dispatch({ type: "Login", user: null });
-                
+        } else {
+          console.log("erro");
+          this.setState({ errorMessage: "Dados incorretos. Tente novamente." });
         }
-        else{
-          console.log("erro")
-          this.setState({errorMessage: "Dados incorretos. Tente novamente."});  
-        }
-      }catch (err){
+      } catch (err) {
         console.log(err);
       }
     }
@@ -150,7 +150,6 @@ class LoginScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-         
         <Text style={[styles.title, styles.leftTitle]}>Login</Text>
         <View style={styles.InputContainer}>
           {/*<TextInput
@@ -160,24 +159,23 @@ class LoginScreen extends React.Component {
             value={this.state.telefone}
             placeholderTextColor={AppStyles.color.grey}
             underlineColorAndroid="transparent"
-          />*/
-          }
+          />*/}
           <TextInputMask
             style={styles.body}
             placeholder="Telefone"
             placeholderTextColor={AppStyles.color.grey}
             underlineColorAndroid="transparent"
-            type={'cel-phone'}
+            type={"cel-phone"}
             options={{
-              maskType: 'BRL',
+              maskType: "BRL",
               withDDD: true,
-              dddMask: '(99) '
+              dddMask: "(99) ",
             }}
             value={this.state.telefone}
-            onChangeText={text => {
+            onChangeText={(text) => {
               this.setState({
-                telefone: text
-              })
+                telefone: text,
+              });
             }}
           />
         </View>
@@ -186,7 +184,7 @@ class LoginScreen extends React.Component {
             style={styles.body}
             secureTextEntry={true}
             placeholder="Senha"
-            onChangeText={text => this.setState({ senha: text })}
+            onChangeText={(text) => this.setState({ senha: text })}
             value={this.state.senha}
             placeholderTextColor={AppStyles.color.grey}
             underlineColorAndroid="transparent"
@@ -216,46 +214,46 @@ class LoginScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center"
+    alignItems: "center",
   },
   or: {
     fontFamily: AppStyles.fontName.main,
     color: "black",
     marginTop: 40,
-    marginBottom: 10
+    marginBottom: 10,
   },
   title: {
     fontSize: AppStyles.fontSize.title,
     fontWeight: "bold",
     color: AppStyles.color.tint,
     marginTop: 20,
-    marginBottom: 20
+    marginBottom: 20,
   },
   leftTitle: {
     alignSelf: "stretch",
     textAlign: "left",
-    marginLeft: 20
+    marginLeft: 20,
   },
   content: {
     paddingLeft: 50,
     paddingRight: 50,
     textAlign: "center",
     fontSize: AppStyles.fontSize.content,
-    color: AppStyles.color.text
+    color: AppStyles.color.text,
   },
   loginContainer: {
     width: AppStyles.buttonWidth.main,
     backgroundColor: AppStyles.color.tint,
     borderRadius: AppStyles.borderRadius.main,
     padding: 10,
-    marginTop: 30
+    marginTop: 30,
   },
   loginText: {
-    color: AppStyles.color.white
+    color: AppStyles.color.white,
   },
   placeholder: {
     fontFamily: AppStyles.fontName.text,
-    color: "red"
+    color: "red",
   },
   InputContainer: {
     width: AppStyles.textInputWidth.main,
@@ -263,24 +261,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: AppStyles.color.grey,
-    borderRadius: AppStyles.borderRadius.main
+    borderRadius: AppStyles.borderRadius.main,
   },
   body: {
     height: 42,
     paddingLeft: 20,
     paddingRight: 20,
-    color: AppStyles.color.text
+    color: AppStyles.color.text,
   },
   facebookContainer: {
     width: AppStyles.buttonWidth.main,
     backgroundColor: AppStyles.color.facebook,
     borderRadius: AppStyles.borderRadius.main,
     padding: 10,
-    marginTop: 30
+    marginTop: 30,
   },
   facebookText: {
-    color: AppStyles.color.white
-  }
+    color: AppStyles.color.white,
+  },
 });
 
 export default LoginScreen;

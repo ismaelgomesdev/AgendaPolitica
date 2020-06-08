@@ -1,14 +1,21 @@
 import React from "react";
-import { Animated, Easing, Image, StyleSheet } from "react-native";
+import {
+  Animated,
+  Easing,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 import { connect } from "react-redux";
 import {
   DrawerNavigator,
   createStackNavigator,
-  createBottomTabNavigator
+  createBottomTabNavigator,
 } from "react-navigation";
 import {
   createReactNavigationReduxMiddleware,
-  reduxifyNavigator
+  reduxifyNavigator,
 } from "react-navigation-redux-helpers";
 import StatsScreen from "../screens/StatsScreen";
 import HomeScreen from "../screens/HomeScreen";
@@ -23,13 +30,13 @@ const noTransitionConfig = () => ({
   transitionSpec: {
     duration: 0,
     timing: Animated.timing,
-    easing: Easing.step0
-  }
+    easing: Easing.step0,
+  },
 });
 
 const middleware = createReactNavigationReduxMiddleware(
   "root",
-  state => state.nav
+  (state) => state.nav
 );
 
 // login stack
@@ -37,22 +44,22 @@ const LoginStack = createStackNavigator(
   {
     Login: { screen: LoginScreen },
     Signup: { screen: SignupScreen },
-    Welcome: { screen: WelcomeScreen }
+    Welcome: { screen: WelcomeScreen },
   },
   {
     initialRouteName: "Welcome",
     headerMode: "float",
     navigationOptions: ({ navigation }) => ({
       headerTintColor: AppStyles.color.tint,
-      headerTitleStyle: styles.headerTitleStyle
+      headerTitleStyle: styles.headerTitleStyle,
     }),
-    cardStyle: { backgroundColor: "#FFFFFF" }
+    cardStyle: { backgroundColor: "#FFFFFF" },
   }
 );
 
 const HomeStack = createStackNavigator(
   {
-    Home: { screen: HomeScreen}
+    Home: { screen: HomeScreen },
   },
   {
     initialRouteName: "Home",
@@ -61,17 +68,79 @@ const HomeStack = createStackNavigator(
     headerLayoutPreset: "center",
     navigationOptions: ({ navigation }) => ({
       headerTintColor: AppStyles.color.tint,
-      headerTitleStyle: styles.headerTitleStyle,     
+      headerTitleStyle: styles.headerTitleStyle,
     }),
     cardStyle: { backgroundColor: "#FFFFFF" },
-   
+  }
+);
+
+const StatsStack = createStackNavigator(
+  {
+    Relatórios: { screen: StatsScreen },
+  },
+  {
+    initialRouteName: "Relatórios",
+    headerMode: "float",
+
+    headerLayoutPreset: "center",
+    navigationOptions: ({ navigation }) => ({
+      headerTintColor: AppStyles.color.tint,
+      headerTitleStyle: styles.headerTitleStyle,
+      headerLeft: () => {
+        return (
+          <TouchableOpacity
+            style={{ flexDirection: "row" }}
+            onPress={() => {
+              navigation.openDrawer();
+            }}
+          >
+            {navigation.state.params && navigation.state.params.menuIcon ? (
+              <Image
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  marginLeft: 5,
+                }}
+                source={{ uri: navigation.state.params.menuIcon }}
+              />
+            ) : (
+              <Image
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  marginLeft: 5,
+                }}
+                source={AppIcon.images.defaultUser}
+              />
+            )}
+
+            <Text
+              style={{
+                fontFamily: AppStyles.fontName.bold,
+                color: AppStyles.color.tint,
+                fontSize: 19,
+                marginTop: 10,
+                alignSelf: "stretch",
+                textAlign: "left",
+                marginLeft: 20,
+              }}
+            >
+              Nome do Candidato
+            </Text>
+          </TouchableOpacity>
+        );
+      },
+    }),
+    cardStyle: { backgroundColor: "#FFFFFF" },
   }
 );
 
 const TabNavigator = createBottomTabNavigator(
   {
     Início: { screen: HomeStack },
-    Relatórios: { screen: StatsScreen}
+    Relatórios: { screen: StatsStack },
   },
   {
     navigationOptions: ({ navigation }) => ({
@@ -80,8 +149,8 @@ const TabNavigator = createBottomTabNavigator(
         let iconName;
         if (routeName === "Início") {
           iconName = AppIcon.images.home;
-        } 
-        if(routeName === "Relatórios") {
+        }
+        if (routeName === "Relatórios") {
           iconName = AppIcon.images.stats;
         }
 
@@ -90,38 +159,37 @@ const TabNavigator = createBottomTabNavigator(
         return (
           <Image
             style={{
-              tintColor: focused ? AppStyles.color.tint : AppStyles.color.grey
+              tintColor: focused ? AppStyles.color.tint : AppStyles.color.grey,
             }}
             source={iconName}
           />
         );
       },
-      params:{ nomeLogado: 'teste' },
+      params: { nomeLogado: "teste" },
     }),
     initialLayout: {
-      height: 300
+      height: 300,
     },
     tabBarOptions: {
       activeTintColor: AppStyles.color.tint,
       inactiveTintColor: "gray",
       style: {
-        height: Configuration.home.tab_bar_height
-      }
-    } 
-  },
-  
+        height: Configuration.home.tab_bar_height,
+      },
+    },
+  }
 );
 
 // drawer stack
 const DrawerStack = DrawerNavigator(
   {
-    Tab: TabNavigator
+    Tab: TabNavigator,
   },
   {
     drawerPosition: "left",
     initialRouteName: "Tab",
     drawerWidth: 200,
-    contentComponent: DrawerContainer
+    contentComponent: DrawerContainer,
   }
 );
 
@@ -129,7 +197,7 @@ const DrawerStack = DrawerNavigator(
 const RootNavigator = createStackNavigator(
   {
     LoginStack: { screen: LoginStack },
-    DrawerStack: { screen: DrawerStack }
+    DrawerStack: { screen: DrawerStack },
   },
   {
     // Default config for all screens
@@ -137,15 +205,15 @@ const RootNavigator = createStackNavigator(
     initialRouteName: "DrawerStack",
     transitionConfig: noTransitionConfig,
     navigationOptions: ({ navigation }) => ({
-      color: "black"
-    })
+      color: "black",
+    }),
   }
 );
 
 const AppWithNavigationState = reduxifyNavigator(RootNavigator, "root");
 
-const mapStateToProps = state => ({
-  state: state.nav
+const mapStateToProps = (state) => ({
+  state: state.nav,
 });
 
 const AppNavigator = connect(mapStateToProps)(AppWithNavigationState);
@@ -157,8 +225,8 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     color: "black",
     flex: 1,
-    fontFamily: AppStyles.fontName.main
-  }
+    fontFamily: AppStyles.fontName.main,
+  },
 });
 
 export { RootNavigator, AppNavigator, middleware };

@@ -10,251 +10,233 @@ import {
   SafeAreaView,
   SectionList,
   FlatList,
-  ActivityIndicator
+  ActivityIndicator,
+  Dimensions,
+  AsyncStorage,
+  Platform,
+  PixelRatio,
 } from "react-native";
 import { List, ListItem, SearchBar } from "react-native-elements";
-import  Button  from "react-native-button";
+import Button from "react-native-button";
 import { connect } from "react-redux";
-import {
-  AppIcon,
-  AppStyles,
-} from "../AppStyles";
-import api from '../services/api';
-import { TextInputMask } from 'react-native-masked-text'
-import { Configuration } from "../Configuration";
-import { Dimensions, AsyncStorage } from 'react-native';
-import Constants from "expo-constants";
-import Dialog, { ScaleAnimation, DialogFooter, DialogButton, DialogContent } from 'react-native-popup-dialog';
+import NumberFormat from "react-number-format";
+import { AppIcon, AppStyles } from "../AppStyles";
+import api from "../services/api";
 
-const width = Dimensions.get('window').width;
+import {
+  LineChart,
+  BarChart,
+  PieChart,
+  ProgressChart,
+  ContributionGraph,
+  StackedBarChart,
+} from "react-native-chart-kit";
+
+import { TextInputMask } from "react-native-masked-text";
+import { Configuration } from "../Configuration";
+import Constants from "expo-constants";
+import Dialog, {
+  ScaleAnimation,
+  DialogFooter,
+  DialogButton,
+  DialogContent,
+} from "react-native-popup-dialog";
+
+const width = Dimensions.get("window").width;
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const scale = SCREEN_WIDTH / 320;
+
+export function normalize(size) {
+  const newSize = size * scale;
+  if (Platform.OS === "ios") {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+  } else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2;
+  }
+}
+
 let idLogado = "";
 let nomeLogado = "";
 let tipoLogado = "";
 
-class StatsScreen extends React.Component {
+const numColumns = 3;
 
-  constructor(props){
+class StatsScreen extends React.Component {
+  constructor(props) {
     super(props);
     this.state = {
-      token: 'teste',
-      idLog: '',
-      nomeLog: '',
-      tipoLog: '',
-      nome_lider: "",
-      telefone_lider: "",
-      senha_lider: "",
+      token: "teste",
+      idLog: "",
+      nomeLog: "",
+      tipoLog: "",
+
       errorMessage: "",
-      nome_eleitor: "",
-      telefone_eleitor: "",
-      endereco_eleitor: "",
-      num_eleitor: "",
-      bairro_eleitor: "",
-      secao: "",
+
       loading: false,
       data: [],
       error: null,
-      disabled: true
-    }
-    
+      disabled: true,
+      quantidade: null,
+      quantidade_lider: [],
+      quantidade_semana: null,
+      quantidade_mes: null,
+    };
   }
 
-  /*async componentWillMount() {
-    this.state.token = await AsyncStorage.getItem('@PoliNet_token'); 
-    console.log(this.state.token)
-  }*/
+  static navigationOptions = ({ navigation }) => ({});
 
-  pesqDados = async() => {
-    this.state.token = await AsyncStorage.getItem('@PoliNet_token');
+  totalEleitores = async () => {
+    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
     const { token } = this.state;
-    
+
     try {
-      
-      const response = await api.post('/V_User.php', {
-        tipo: '3',
-        token
+      const response = await api.post("/V_User.php", {
+        tipo: "3",
+        token,
       });
-      
-      console.log(response.data);  
-      const { nome, id, tipo } = response.data;   
+
+      console.log(response.data);
+      const { nome, id, tipo } = response.data;
       nomeLogado = nome;
       idLogado = id;
-      tipoLogado = tipo
-      
-      this.setState({idLog: id});
-      this.setState({nomeLog: nome});
-      this.setState({tipoLog: tipo});
+      tipoLogado = tipo;
 
-      console.log(idLogado + ", "+ nomeLogado + ", " + tipoLogado)
-    }catch(e){
-      console.log(e)
+      this.setState({ idLog: id });
+      this.setState({ nomeLog: nome });
+      this.setState({ tipoLog: tipo });
+
+      console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
+    } catch (e) {
+      console.log(e);
     }
-
-    
-  }
-
-  nomeCandidato = () => {
-    return nomeLogado;
-  }
-
-
-
-  cadastrarLider = async() => {
-    const { nome_lider, telefone_lider, senha_lider, conf_senha } = this.state;
-    if (nome_lider.length <= 0 || telefone_lider.length <= 0 || senha_lider.length <= 0 || conf_senha.length <= 0) {
-      this.setState({errorMessage: "Por favor, preencha todos os dados."});
-    } else if(senha_lider != conf_senha){
-      this.setState({errorMessage: "A confirmação deve ser igual à senha!"});
+    const idC = this.state.idLog;
+    try {
+      const response = await api.post("/V_Candidato.php", {
+        tipo: "3",
+        idC,
+      });
+      console.log(response.data);
+      const {
+        quantidade,
+        quantidade_lider,
+        quantidade_semana,
+        quantidade_mes,
+      } = response.data;
+      this.setState({
+        quantidade: quantidade,
+        quantidade_lider: quantidade_lider,
+        quantidade_semana: quantidade_semana,
+        quantidade_mes: quantidade_mes,
+      });
+      /*this.setState({
+        totalEleitores: response.data,
+      });*/
+    } catch (err) {
+      console.log(err);
     }
-    else{
-      try {
-        const response = await api.post('/V_Lider.php', {
-          tipo: '1',
-          nome_lider, telefone_lider, senha_lider, idLogado
-        });
-        if(response.data != null){
-          console.log(response.data);     
-          this.setState({
-            nome_lider: "", telefone_lider: "", senha_lider: "", conf_senha: ""
-          }) 
-          /*const { 
-            token, 
-          } = response.data;
-          //console.log(qrkey)
-          await AsyncStorage.setItem('@PoliNet_token', token)
-          //console.log(AsyncStorage.getItem('@InvestSe_token'))
-          //this.props.navigation.navigate("AppNavigator", {keyRef: qrkey});
-          const { navigation } = this.props;
-          navigation.dispatch({ type: "Login", user: null });
-          */
-         this.makeRemoteRequest();
-                
-        }
-        else{
-          this.setState({errorMessage: "Dados incorretos. Tente novamente."});  
-        }
-      }catch (err){
-        console.log(err);
-      }
-    }
-  }
-
-  cadastrarEleitor = async() => {
-    const { nome_eleitor, telefone_eleitor, endereco_eleitor, num_eleitor, bairro_eleitor, secao} = this.state;
-    if (nome_eleitor.length <= 0 || telefone_eleitor.length <= 0 || secao.length <= 0 ||
-       endereco_eleitor.length <= 0 || bairro_eleitor.length <= 0 || num_eleitor.length <= 0) {
-      this.setState({errorMessage: "Por favor, preencha todos os dados."});
-    }
-    else{
-      try {
-        const response = await api.post('/V_Eleitor.php', {
-          tipo: '1',
-          nome_eleitor, telefone_eleitor, endereco_eleitor, num_eleitor, bairro_eleitor, secao, idLogado
-        });
-        if(response.data != null){
-          console.log(response.data);     
-          this.setState({
-            nome_eleitor: "",
-            telefone_eleitor: "",
-            endereco_eleitor: "",
-            num_eleitor: "",
-            bairro_eleitor: "",
-            secao: "",
-            disabled: true
-          });
-
-          /*const { 
-            token, 
-          } = response.data;
-          //console.log(qrkey)
-          await AsyncStorage.setItem('@PoliNet_token', token)
-          //console.log(AsyncStorage.getItem('@InvestSe_token'))
-          //this.props.navigation.navigate("AppNavigator", {keyRef: qrkey});
-          const { navigation } = this.props;
-          navigation.dispatch({ type: "Login", user: null });
-          */
-         this.makeRemoteRequest2();
-                
-        }
-        else{
-          this.setState({errorMessage: "Dados incorretos. Tente novamente."});  
-        }
-      }catch (err){
-        console.log(err);
-      }
-    }
-  }
+  };
 
   componentDidMount() {
     this.makeRemoteRequest();
     this.makeRemoteRequest2();
+    this.totalEleitores();
   }
-  /*verificaCampos1() {
-    const { nome_lider, telefone_lider, senha_lider, conf_senha } = this.state;
-    if (nome_lider.length <= 0 || telefone_lider.length <= 0 || senha_lider.length <= 0 || conf_senha.length <= 0) {
-      this.setState({errorMessage: "Por favor, preencha todos os dados."});
-    } else if(senha_lider != conf_senha){
-      this.setState({errorMessage: "A confirmação deve ser igual à senha!"});
-    }
-  }*/
-  verificaCampos2() {
-    const { nome_eleitor, telefone_eleitor, endereco_eleitor, num_eleitor, bairro_eleitor, secao} = this.state;
-    if (nome_eleitor.length <= 0 || telefone_eleitor.length <= 0 || secao.length <= 0 ||
-       endereco_eleitor.length <= 0 || bairro_eleitor.length <= 0 || num_eleitor.length <= 0) {
-      this.setState({disabled: true});
-    }
-    else{
-      this.setState({disabled: false})
-    }
-  }
-  makeRemoteRequest = async() => {
-    this.state.token = await AsyncStorage.getItem('@PoliNet_token');
+
+  makeRemoteRequest = async () => {
+    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
     const { token } = this.state;
-    
+
     try {
-      
-      const response = await api.post('/V_User.php', {
-        tipo: '3',
-        token
+      const response = await api.post("/V_User.php", {
+        tipo: "3",
+        token,
       });
-      
-      console.log(response.data);  
-      const { nome, id, tipo } = response.data;   
+
+      console.log(response.data);
+      const { nome, id, tipo } = response.data;
       nomeLogado = nome;
       idLogado = id;
-      tipoLogado = tipo
-      
-      this.setState({idLog: id});
-      this.setState({nomeLog: nome});
-      this.setState({tipoLog: tipo});
+      tipoLogado = tipo;
 
-      console.log(idLogado + ", "+ nomeLogado + ", " + tipoLogado)
+      this.setState({ idLog: id });
+      this.setState({ nomeLog: nome });
+      this.setState({ tipoLog: tipo });
+
+      console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
       this.setState({ loading: true });
       const { idLog } = this.state;
       console.log(idLog);
       try {
-        const response = await api.post('/V_Lider.php', {
-          tipo: '2',
-          idL: idLog
+        const response = await api.post("/V_Lider.php", {
+          tipo: "2",
+          idL: idLog,
         });
-        if(response.data != null){
+        if (response.data != null) {
           let dados = response.data.data;
-          console.log("dados: "+ dados)
-          response.data.data = dados
-          this.setState({data: response.data.data, loading: false})
-          console.log(this.state.data)
-        }else{
-          console.log("nullll")
+          console.log("dados: " + dados);
+          response.data.data = dados;
+          this.setState({ data: response.data.data, loading: false });
+          console.log(this.state.data);
+        } else {
+          console.log("nullll");
         }
-      }catch(e){
-        console.log("deu erro: "+ e);
+      } catch (e) {
+        console.log("deu erro: " + e);
       }
-    }catch(e){
-      console.log(e)
+    } catch (e) {
+      console.log(e);
     }
-    
+  };
 
+  makeRemoteRequest2 = async () => {
+    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
+
+    const { token } = this.state;
+
+    try {
+      const response = await api.post("/V_User.php", {
+        tipo: "3",
+        token,
+      });
+
+      console.log(response.data);
+      const { nome, id, tipo } = response.data;
+      nomeLogado = nome;
+      idLogado = id;
+      tipoLogado = tipo;
+
+      this.setState({ idLog: id });
+      this.setState({ nomeLog: nome });
+      this.setState({ tipoLog: tipo });
+
+      console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
+      this.setState({ loading: true });
+      const { idLog } = this.state;
+      console.log(idLog);
+      this.setState({ loading: true });
+      try {
+        const response = await api.post("/V_Eleitor.php", {
+          tipo: "2",
+          idL: idLog,
+        });
+        if (response.data != null) {
+          let dados = response.data.data;
+          console.log("dados: " + dados);
+          response.data.data = dados;
+          this.setState({ data: response.data.data, loading: false });
+          console.log(this.state.data);
+        } else {
+          console.log("nullll");
+        }
+      } catch (e) {
+        console.log("deu erro: " + e);
+      }
+    } catch (e) {
+      console.log(e);
+    }
     /*getUsers()
       .then(users => {
         this.setState({
@@ -265,570 +247,183 @@ class StatsScreen extends React.Component {
       .catch(error => {
         this.setState({ error, loading: false });
       });*/
-    
   };
 
-  makeRemoteRequest2 = async() => {
-    this.state.token = await AsyncStorage.getItem('@PoliNet_token');
-
-    const { token } = this.state;
-    
-    try {
-      
-      const response = await api.post('/V_User.php', {
-        tipo: '3',
-        token
-      });
-      
-      console.log(response.data);  
-      const { nome, id, tipo } = response.data;   
-      nomeLogado = nome;
-      idLogado = id;
-      tipoLogado = tipo
-      
-      this.setState({idLog: id});
-      this.setState({nomeLog: nome});
-      this.setState({tipoLog: tipo});
-
-      console.log(idLogado + ", "+ nomeLogado + ", " + tipoLogado)
-      this.setState({ loading: true });
-      const { idLog } = this.state;
-      console.log(idLog);
-      this.setState({ loading: true });
-      try {
-        const response = await api.post('/V_Eleitor.php', {
-          tipo: '2',
-          idL: idLog
-        });
-        if(response.data != null){
-          let dados = response.data.data;
-          console.log("dados: "+ dados)
-          response.data.data = dados
-          this.setState({data: response.data.data, loading: false})
-          console.log(this.state.data)
-        }else{
-          console.log("nullll")
-        }
-        }catch(e){
-          console.log("deu erro: "+ e);
-        }
-      }catch(e){
-        console.log(e)
-      }
-    /*getUsers()
-      .then(users => {
-        this.setState({
-          loading: false,
-          data: users
-        });
-      })
-      .catch(error => {
-        this.setState({ error, loading: false });
-      });*/
-    
-  };
-
-  renderSeparator = () => {
-    return (
-      <View
-        style={{
-          height: 1,
-          width: "86%",
-          backgroundColor: "#CED0CE",
-          marginLeft: "14%"
-        }}
-      />
-    );
-  };
-
-  renderHeader = () => {
-    return (
-      <View>
-        {//<Text style={styles.title}>Meus líderes de campanha</Text>
-        }<SearchBar placeholder="Pesquise aqui..." lightTheme round />
-      </View>
-    )
-  };
-
-  renderFooter = () => {
-    if (!this.state.loading) return null;
-
-    return (
-      <View
-        style={{
-          paddingVertical: 20,
-          borderTopWidth: 1,
-          borderColor: "#CED0CE"
-        }}
-      >
-        <ActivityIndicator animating size="large" />
-      </View>
-    );
-  };
-
-  renderRow ({ item }) {
-    return (
-      <ListItem
-        title={item.nome_lider}
-        subtitle={item.telefone_lider}
-      />
-    )
-  }
-
-  renderRow2 ({ item }) {
-    return (
-      <ListItem
-        title={item.nome_eleitor}
-        subtitle={item.telefone_eleitor}
-      />
-    )
-  }
-
-
-  render() {
-    /*const DATA = [
-      {
-        title: "Main dishes",
-        data: ["Pizza", "Burger", "Risotto"]
-      },
-      {
-        title: "Sides",
-        data: ["French Fries", "Onion Rings", "Fried Shrimps"]
-      },
-      {
-        title: "Drinks",
-        data: ["Water", "Coke", "Beer"]
-      },
-      {
-        title: "Desserts",
-        data: ["Cheese Cake", "Ice Cream"]
-      }
-    ];
-    
-    const Item = ({ title }) => (
-      <View style={styles.item}>
-        <Text style={styles.title}>{title}</Text>
-      </View>
-    );
-*/
-    if(tipoLogado == 'candidato'){
-        const navigation = this.props;
+  renderItem = ({ item, index }) => {
+    if (item.empty === true) {
+      return <View style={[styles.item, styles.itemInvisible]} />;
+    }
+    if (item.quantidade != null) {
       return (
-          <View>
-              <TouchableOpacity style={styles.header}
-          onPress={() => {
-            navigation.openDrawer();
-          }}
-        >
-          {navigation.state.params && navigation.state.params.menuIcon ? (
-            <Image
-              style={styles.userPhoto}
-              source={{ uri: navigation.state.params.menuIcon }}
-            />
-          ) : (
-            <Image
-              style={styles.userPhoto}
-              source={AppIcon.images.defaultUser}
-            />
-          )}
+        <View style={styles.item}>
+          <Text style={styles.itemText}>Total de eleitores cadastrados:</Text>
 
-          <Text style={[styles.titleHeader, styles.leftTitle]}>Nome do Candidato</Text>
-        </TouchableOpacity>
-
-          
-        <ScrollView style={styles.container}>
-          <View style={styles.containerForm}>
-            <Text style={styles.title}>Novo líder de campanha 
-      {/*{this.props.user.email}*/}
+          <Text style={styles.itemNumber}>
+            <Text style={styles.itemNumber}>{item.quantidade}</Text>
           </Text>
-          <Text>{this.state.errorMessage}</Text>
-          <View style={styles.InputContainer}>
-            <TextInput
-              style={styles.body}
-              placeholder="Nome completo"
-              onChangeText={text => this.setState({ nome_lider: text })}
-              value={this.state.nome_lider}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </View>
-          <View style={styles.InputContainer}>
-            <TextInputMask
-            style={styles.body}
-            placeholder="Telefone"
-            placeholderTextColor={AppStyles.color.grey}
-            underlineColorAndroid="transparent"
-            type={'cel-phone'}
-            options={{
-              maskType: 'BRL',
-              withDDD: true,
-              dddMask: '(99) '
-            }}
-            value={this.state.telefone_lider}
-            onChangeText={text => {
-              this.setState({
-                telefone_lider: text
-              })
-            }}
-            />
-          </View>
-          
-          {/*<View style={styles.InputContainer}>
-            <TextInput
-              style={styles.body}
-              placeholder="E-mail"
-              onChangeText={text => this.setState({ email: text })}
-              value={this.state.email}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </View>*/
-          }
-          <View style={styles.InputContainer}>
-            <TextInput
-              style={styles.body}
-              placeholder="Senha de acesso"
-              secureTextEntry={true}
-              onChangeText={text => this.setState({ senha_lider: text })}
-              value={this.state.senha_lider}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </View>
-          <View style={styles.InputContainer}>
-            <TextInput
-              style={styles.body}
-              placeholder="Confirme a senha"
-              secureTextEntry={true}
-              onChangeText={text => this.setState({ conf_senha: text })}
-              value={this.state.conf_senha}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </View>
-          <Button
-            
-            containerStyle={[styles.facebookContainer]}
-            style={styles.facebookText}
-            onPress={() => this.cadastrarLider()}
-            
-          >
-            Cadastrar
-          </Button>
         </View>
-          {/*
-        <SafeAreaView style={styles.containerList}>
-          <SectionList
-            sections={DATA}
-            keyExtractor={(item, index) => item + index}
-            renderItem={({ item }) => <Item title={item} />}
-            renderSectionHeader={({ section: { title } }) => (
-              <Text style={styles.header}>{title}</Text>
-            )}
-          />
-            </SafeAreaView>*/}
-            <View containerStyle={{ flex: 1,borderTopWidth: 0, borderBottomWidth: 0 }}>
-            <Text style={styles.title}>Líderes cadastrados
-      {/*{this.props.user.email}*/}
-          </Text>
-              <FlatList
-                data={this.state.data}
-                renderItem={this.renderRow}
-                keyExtractor={item => item.id_lider}
-                ItemSeparatorComponent={this.renderSeparator}
-                ListHeaderComponent={this.renderHeader}
-                ListFooterComponent={this.renderFooter}
-              />
-            </View>
-
-        </ScrollView>
+      );
+    } else if (item.quantidade_semana != null) {
+      return (
+        <View style={styles.item}>
+          <Text style={styles.itemText}>Novos eleitores nesta semana:</Text>
+          <Text style={styles.itemNumber}>{item.quantidade_semana}</Text>
         </View>
       );
     } else {
-      const { disabled } = this.state;
+      return (
+        <View style={styles.item}>
+          <Text style={styles.itemText}>Novos eleitores neste mês:</Text>
+          <Text style={styles.itemNumber}>{item.quantidade_mes}</Text>
+        </View>
+      );
+    }
+  };
+
+  renderItem2 = ({ item, index }) => {
+    if (item.empty === true) {
+      return <View style={[styles.item, styles.itemInvisible]} />;
+    }
+    return (
+      <View style={styles.item}>
+        <Text style={styles.itemText}>{item.nome_lider}</Text>
+        <Text style={styles.itemNumber}>{item.quantidade_lider}</Text>
+        <Text style={styles.itemText}>eleitores</Text>
+      </View>
+    );
+  };
+
+  render() {
+    if (tipoLogado == "candidato") {
+      const data = [
+        { quantidade: this.state.quantidade },
+        { quantidade_semana: this.state.quantidade_semana },
+        { quantidade_mes: this.state.quantidade_mes },
+
+        // { key: 'K' },
+        // { key: 'L' },
+      ];
+
+      const porLider = this.state.quantidade_lider;
+
+      const formatData = (data, numColumns) => {
+        const numberOfFullRows = Math.floor(data.length / numColumns);
+
+        let numberOfElementsLastRow =
+          data.length - numberOfFullRows * numColumns;
+        while (
+          numberOfElementsLastRow !== numColumns &&
+          numberOfElementsLastRow !== 0
+        ) {
+          data.push({ key: `blank-${numberOfElementsLastRow}`, empty: true });
+          numberOfElementsLastRow++;
+        }
+
+        return data;
+      };
+
       return (
         <ScrollView style={styles.container}>
-          <Dialog
-          visible={this.state.visible}
-          dialogAnimation={new ScaleAnimation({
-            
-          })}
-          width = {0.8}
-          footer={
-          <DialogFooter>
-              <DialogButton
-                text="Não"
-                onPress={() => {
-                  this.setState({ visible: false });
-                }}
+          <FlatList
+            data={formatData(data, numColumns)}
+            style={styles.container}
+            renderItem={this.renderItem}
+            numColumns={numColumns}
           />
-          <DialogButton
-            text="Sim"
-            onPress={() => {this.cadastrarEleitor(); this.setState({ visible: false })}}
-          />
-          </DialogFooter>
-    }
-          >
-          <DialogContent>
-            <View style={{flexDirection: "row", marginTop: 5}}>
-              <Text style={{fontWeight: "bold", fontSize: 15}}>Nome: </Text>
-              <Text style={{fontSize: 15}}>{this.state.nome_eleitor}</Text>
-            </View>
-            <View style={{flexDirection: "row", marginTop: 5}}>
-              <Text style={{fontWeight: "bold", fontSize: 15}}>Telefone: </Text>
-              <Text style={{fontSize: 15}}>{this.state.telefone_eleitor}</Text>
-            </View>
-            <View style={{flexDirection: "row", marginTop: 5}}>
-              <Text style={{fontWeight: "bold", fontSize: 15}}>Endereço: </Text>
-              <Text style={{fontSize: 15}}>{this.state.endereco_eleitor}</Text>
-            </View>
-            <View style={{flexDirection: "row", marginTop: 5}}>
-              <Text style={{fontWeight: "bold", fontSize: 15}}>Número da residência: </Text>
-              <Text style={{fontSize: 15}}>{this.state.num_eleitor}</Text>
-            </View>
-            <View style={{flexDirection: "row", marginTop: 5}}>
-              <Text style={{fontWeight: "bold", fontSize: 15}}>Bairro: </Text>
-              <Text style={{fontSize: 15}}>{this.state.bairro_eleitor}</Text>
-            </View>
-            <View style={{flexDirection: "row", marginTop: 5}}>
-              <Text style={{fontWeight: "bold", fontSize: 15}}>Seção de votação: </Text>
-              <Text style={{fontSize: 15}}>{this.state.secao}</Text>
-            </View>
-            <Text style={{textAlign: "center", marginTop: 5, fontWeight: "bold", fontSize: 20}}>Tudo certo?</Text>
-          </DialogContent>
-          </Dialog>
-          <View style={styles.containerForm}>
-            <Text style={styles.title}>Novo apoiador 
-      {/*{this.props.user.email}*/}
-          </Text>
-          <Text>{this.state.errorMessage}</Text>
-          <View style={styles.InputContainer}>
-            <TextInput
-              style={styles.body}
-              placeholder="Nome completo"
-              onChangeText={text => {this.setState({ nome_eleitor: text }); this.verificaCampos2()}}
-              value={this.state.nome_eleitor}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </View>
-          <View style={styles.InputContainer}>
-            <TextInputMask
-              style={styles.body}
-              placeholder="Telefone"
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-              type={'cel-phone'}
-              options={{
-                maskType: 'BRL',
-                withDDD: true,
-                dddMask: '(99) '
-              }}
-              value={this.state.telefone_eleitor}
-              onChangeText={text => {
-                this.setState({
-                  telefone_eleitor: text
-                }); this.verificaCampos2()
-              }}
-            />
-          </View>
-          <View style={styles.InputContainer}>
-            <TextInput
-              style={styles.body}
-              placeholder="Endereço"
-              onChangeText={text => {this.setState({ endereco_eleitor: text }); this.verificaCampos2()}}
-              value={this.state.endereco_eleitor}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </View>
-          <View style={styles.InputContainer}>
-            <TextInput
-              style={styles.body}
-              placeholder="Número da residência"
-              onChangeText={text => {this.setState({ num_eleitor: text }); this.verificaCampos2()}}
-              value={this.state.num_eleitor}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </View>
-          <View style={styles.InputContainer}>
-            <TextInput
-              style={styles.body}
-              placeholder="Bairro"
-              onChangeText={text => {this.setState({ bairro_eleitor: text }); this.verificaCampos2()}}
-              value={this.state.bairro_eleitor}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </View>
-          <View style={styles.InputContainer}>
-            <TextInput
-              style={styles.body}
-              placeholder="Seção de votação"
-              onChangeText={text => {this.setState({ secao: text }); this.verificaCampos2()}}
-              value={this.state.secao}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </View>
 
-          <Button
-            containerStyle={[styles.facebookContainer]}
-            style={styles.facebookText}
-            disabled={disabled}
-            disabledContainerStyle={{ backgroundColor: '#547397' }}
-            styleDisabled={{ color: 'white' }}
-            onPress={() => 
-              //this.cadastrarEleitor()
-      {this.setState({ visible: true })
-    }
-            }    
-          >
-            Cadastrar
-          </Button>
-        </View>
-        <View containerStyle={{ flex: 1,borderTopWidth: 0, borderBottomWidth: 0 }}>
-            <Text style={styles.title}>Eleitores cadastrados por você
-      {/*{this.props.user.email}*/}
-          </Text>
-              <FlatList
-                data={this.state.data}
-                renderItem={this.renderRow2}
-                keyExtractor={item => item.id_eleitor}
-                ItemSeparatorComponent={this.renderSeparator}
-                ListHeaderComponent={this.renderHeader}
-                ListFooterComponent={this.renderFooter}
-              />
-            </View>
+          <View>
+            <Text style={styles.title}>Evolução mensal</Text>
+            <LineChart
+              data={{
+                labels: ["Maio", "Junho"],
+                datasets: [
+                  {
+                    data: [1, 5],
+                  },
+                ],
+              }}
+              width={Dimensions.get("window").width} // from react-native
+              height={220}
+              yAxisLabel=""
+              yAxisSuffix=""
+              yAxisInterval={1} // optional, defaults to 1
+              chartConfig={{
+                backgroundColor: "#E2B500",
+                backgroundGradientFrom: "#3179CF",
+                backgroundGradientTo: "#2F70BD",
+                decimalPlaces: 0, // optional, defaults to 2dp
+                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                style: {
+                  borderRadius: 16,
+                },
+                propsForDots: {
+                  r: "6",
+                  strokeWidth: "2",
+                  stroke: "#ffa726",
+                },
+              }}
+              bezier
+              style={{
+                marginVertical: 8,
+                borderRadius: 16,
+              }}
+            />
+          </View>
+          <Text style={styles.title}>Desempenho dos líderes</Text>
+          <FlatList
+            data={formatData(porLider, numColumns)}
+            style={styles.container}
+            renderItem={this.renderItem2}
+            numColumns={numColumns}
+          />
         </ScrollView>
       );
+    } else {
+      const { disabled } = this.state;
+      return <ScrollView style={styles.container}></ScrollView>;
     }
   }
 }
 
 const styles = StyleSheet.create({
-  header:{
-    flexDirection: "row"
-  },
   container: {
-    backgroundColor: "white",
     flex: 1,
-    padding: Configuration.home.listing_item.offset,
-    
-  },
-  containerForm: {
-    flex: 1,
-    alignItems: "center"
-  },
-  titleHeader: {
-    fontFamily: AppStyles.fontName.bold,
-    color: AppStyles.color.tint,
-    fontSize: 19,
-    marginTop: 10,
-  },
-  leftTitle: {
-    alignSelf: "stretch",
-    textAlign: "left",
-    marginLeft: 5
-  },
-  title: {
-    fontFamily: AppStyles.fontName.bold,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: AppStyles.color.title,
-    fontSize: 25
-  },
-  userPhoto: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginLeft: 5
-  },
-  container1: {
-    flex: 1,
-    alignItems: "center"
+    marginVertical: 1,
   },
   title: {
     fontSize: AppStyles.fontSize.normal,
-    fontWeight: "bold",
+    fontWeight: "normal",
+    textAlign: "center",
     color: AppStyles.color.tint,
     marginTop: 20,
-    marginBottom: 20
-  },
-  leftTitle: {
-    alignSelf: "stretch",
-    textAlign: "left",
-    marginLeft: 20
-  },
-  content: {
-    textAlign: "center",
-    fontSize: AppStyles.fontSize.content,
-    color: AppStyles.color.text
-  },
-  loginContainer: {
-    width: AppStyles.buttonWidth.main,
-    backgroundColor: AppStyles.color.tint,
-    borderRadius: AppStyles.borderRadius.main,
-    padding: 10,
-    marginTop: 30
-  },
-  loginText: {
-    color: AppStyles.color.white
-  },
-  placeholder: {
-    fontFamily: AppStyles.fontName.text,
-    color: "red"
-  },
-  InputContainer: {
-    width: AppStyles.textInputWidth.main,
-    marginBottom: 30,
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: AppStyles.color.grey,
-    borderRadius: AppStyles.borderRadius.main
-  },
-  RadioContainer: {
-    width: AppStyles.textInputWidth.main,
-    marginTop: 30,
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: AppStyles.color.grey,
-    borderRadius: AppStyles.borderRadius.main,
-    flexDirection: "row"
-  },
-  radioText: {
-    fontSize: AppStyles.fontSize.title
-  },
-  body: {
-    height: 42,
-    paddingLeft: 20,
-    paddingRight: 20,
-    color: AppStyles.color.text
-  },
-  facebookContainer: {
-    width: AppStyles.buttonWidth.main,
-    backgroundColor: AppStyles.color.tint,
-    borderRadius: AppStyles.borderRadius.main,
-    padding: 10,
-  },
-  facebookText: {
-    color: AppStyles.color.white
-  },
-  containerList: {
-    flex: 1,
-    marginTop: Constants.statusBarHeight,
-    marginHorizontal: 16
+    marginBottom: 20,
   },
   item: {
-    backgroundColor: "#f9c2ff",
-    padding: 20,
-    marginVertical: 8
+    backgroundColor: "#3179CF",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    margin: 1,
+    height: Dimensions.get("window").width / numColumns, // approximate a square
+  },
+  itemInvisible: {
+    backgroundColor: "transparent",
+  },
+  itemText: {
+    color: "#fff",
+    textAlign: "center",
+    justifyContent: "center",
+  },
+  itemNumber: {
+    color: "#fff",
+    fontSize: normalize(30),
   },
 });
 
-const mapStateToProps = state => ({
-  user: state.auth.user
+const mapStateToProps = (state) => ({
+  user: state.auth.user,
 });
 
 export default connect(mapStateToProps)(StatsScreen);

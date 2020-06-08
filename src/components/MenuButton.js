@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Text,
   TouchableHighlight,
-  View
+  View,
 } from "react-native";
 import { AppStyles } from "../AppStyles";
 
@@ -34,21 +34,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: 5,
     marginTop: 5,
-    marginBottom: 5
+    marginBottom: 5,
   },
   btnContainer: {
     flex: 1,
     flexDirection: "row",
-    alignItems: "flex-start"
+    alignItems: "flex-start",
   },
   btnIcon: {
     height: 25,
-    width: 25
+    width: 25,
   },
   btnText: {
     fontFamily: AppStyles.fontName.bold,
     fontSize: 16,
     marginLeft: 10,
-    marginTop: 2
-  }
+    marginTop: 2,
+  },
 });

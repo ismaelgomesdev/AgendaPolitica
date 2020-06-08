@@ -7,13 +7,13 @@ import { AsyncStorage, ActivityIndicator } from "react-native";
 
 class WelcomeScreen extends React.Component {
   static navigationOptions = {
-    header: null
+    header: null,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      isLoading: true
+      isLoading: true,
     };
     this.tryToLoginFirst();
   }
@@ -30,10 +30,13 @@ class WelcomeScreen extends React.Component {
     }
     return (
       <View style={styles.container}>
-
-        {//<Text style={styles.title}>[[Logo do App]]</Text>
+        {
+          //<Text style={styles.title}>[[Logo do App]]</Text>
         }
-        <Image source={require("../assets/images/eleicoes-2020.png")} style={styles.logo}></Image>
+        <Image
+          source={require("../assets/images/eleicoes-2020.png")}
+          style={styles.logo}
+        ></Image>
         <Button
           containerStyle={styles.loginContainer}
           style={styles.loginText}
@@ -138,32 +141,32 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 150
+    marginBottom: 150,
   },
   logo: {
     width: 150,
-    height: 115
+    height: 115,
   },
   title: {
     fontSize: AppStyles.fontSize.title,
     fontWeight: "bold",
-    fontFamily: 'Inter-SemiBoldItalic',
+    fontFamily: "Inter-SemiBoldItalic",
     color: AppStyles.color.tint,
     marginTop: 20,
     textAlign: "center",
     marginBottom: 20,
     marginLeft: 20,
-    marginRight: 20
+    marginRight: 20,
   },
   loginContainer: {
     width: AppStyles.buttonWidth.main,
     backgroundColor: AppStyles.color.tint,
     borderRadius: AppStyles.borderRadius.main,
     padding: 10,
-    marginTop: 30
+    marginTop: 30,
   },
   loginText: {
-    color: AppStyles.color.white
+    color: AppStyles.color.white,
   },
   signupContainer: {
     width: AppStyles.buttonWidth.main,
@@ -172,14 +175,14 @@ const styles = StyleSheet.create({
     padding: 8,
     borderWidth: 1,
     borderColor: AppStyles.color.tint,
-    marginTop: 15
+    marginTop: 15,
   },
   signupText: {
-    color: AppStyles.color.tint
+    color: AppStyles.color.tint,
   },
   spinner: {
-    marginTop: 200
-  }
+    marginTop: 200,
+  },
 });
 
 export default WelcomeScreen;
