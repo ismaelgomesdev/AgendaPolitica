@@ -183,7 +183,7 @@ class HomeScreen extends React.Component {
       telefone_eleitor,
       endereco_eleitor,
       num_eleitor,
-      bairro_eleitor,
+      id_local,
       secao,
     } = this.state;
     if (
@@ -191,7 +191,7 @@ class HomeScreen extends React.Component {
       telefone_eleitor.length <= 0 ||
       secao.length <= 0 ||
       endereco_eleitor.length <= 0 ||
-      bairro_eleitor.length <= 0 ||
+      id_local.length <= 0 ||
       num_eleitor.length <= 0
     ) {
       this.setState({ errorMessage: "Por favor, preencha todos os dados." });
@@ -203,7 +203,7 @@ class HomeScreen extends React.Component {
           telefone_eleitor,
           endereco_eleitor,
           num_eleitor,
-          bairro_eleitor,
+          id_local,
           secao,
           idLogado,
         });
@@ -214,7 +214,7 @@ class HomeScreen extends React.Component {
             telefone_eleitor: "",
             endereco_eleitor: "",
             num_eleitor: "",
-            bairro_eleitor: "",
+            id_local: "",
             secao: "",
             disabled: true,
           });
@@ -262,7 +262,7 @@ class HomeScreen extends React.Component {
       telefone_eleitor,
       endereco_eleitor,
       num_eleitor,
-      bairro_eleitor,
+      id_local,
       secao,
     } = this.state;
     if (
@@ -270,7 +270,7 @@ class HomeScreen extends React.Component {
       telefone_eleitor.length <= 0 ||
       secao.length <= 0 ||
       endereco_eleitor.length <= 0 ||
-      bairro_eleitor.length <= 0 ||
+      id_local.length <= 0 ||
       num_eleitor.length <= 0
     ) {
       this.setState({ disabled: true });
@@ -402,7 +402,7 @@ class HomeScreen extends React.Component {
       if (response.data != null) {
         console.log(response.data);
         const dados = response.data.dados;
-        const bairros = dados.filter((dado) => dado.distrito === "0");
+        const bairros = dados.filter((dado) => dado.distrito === "0");        
         const distritos = dados.filter((dado) => dado.distrito === "1");
         this.setState({
           bairros: bairros,
@@ -716,7 +716,7 @@ class HomeScreen extends React.Component {
               </View>
               <View style={{ flexDirection: "row", marginTop: 5 }}>
                 <Text style={{ fontWeight: "bold", fontSize: 15 }}>
-                  Bairro:{" "}
+                  Bairro/Distrito:{" "}
                 </Text>
                 <Text style={{ fontSize: 15 }}>
                   {this.state.bairro_eleitor}
@@ -779,6 +779,7 @@ class HomeScreen extends React.Component {
                   this.verificaCampos2();
                 }}
               />
+              
             </View>
             <View style={styles.InputContainer}>
               <TextInput
