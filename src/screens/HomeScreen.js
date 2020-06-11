@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   ScrollView,
   View,
@@ -52,11 +52,12 @@ class HomeScreen extends React.Component {
       endereco_eleitor: "",
       num_eleitor: "",
       bairro_eleitor: "",
-      local: "Selecione o bairro ou o distrito",
+      id_local: null,
       secao: "",
       loading: false,
       data: [],
       bairros: [],
+      distritos: [],
       error: null,
       disabled: true,
       checked: "bairro",
@@ -243,6 +244,10 @@ class HomeScreen extends React.Component {
     this.makeRemoteRequest2();
     this.retornaBairros();
   }
+  componentDidUpdate() {
+    console.log("component did update :", this.state); // one step behind child state
+  }
+
   /*verificaCampos1() {
     const { nome_lider, telefone_lider, senha_lider, conf_senha } = this.state;
     if (nome_lider.length <= 0 || telefone_lider.length <= 0 || senha_lider.length <= 0 || conf_senha.length <= 0) {
@@ -397,8 +402,13 @@ class HomeScreen extends React.Component {
       if (response.data != null) {
         console.log(response.data);
         const dados = response.data.dados;
-        console.log("dadoooooooooooos: " + dados);
-        this.setState({ bairros: dados, loading: false });
+        const bairros = dados.filter((dado) => dado.distrito === "0");
+        const distritos = dados.filter((dado) => dado.distrito === "1");
+        this.setState({
+          bairros: bairros,
+          distritos: distritos,
+          loading: false,
+        });
         console.log(this.state.bairros);
       } else {
         console.log("nullll");
@@ -456,9 +466,62 @@ class HomeScreen extends React.Component {
       <ListItem title={item.nome_eleitor} subtitle={item.telefone_eleitor} />
     );
   }
+  mudaLocal = (local) => {
+    this.setState({ id_local: local }); // receives date and updates state
+  };
+  renderPicker(props) {
+    const [selectedValue, setSelectedValue] = React.useState(
+      props.selectedValue
+    );
+    const { mudaLocal } = props;
+
+    useEffect(() => {
+      mudaLocal(selectedValue);
+    }, [selectedValue, mudaLocal]);
+
+    const change = (local) => {
+      setSelectedValue(local);
+    };
+    if (props.checked == "bairro") {
+      return (
+        <Picker selectedValue={selectedValue} onValueChange={change}>
+          <Picker.Item
+            label={"Selecione o bairro do apoiador"}
+            value={null}
+            key={null}
+          />
+          {props.bairros.map((item) => (
+            <Picker.Item
+              label={item.nome_local}
+              value={item.id_local}
+              key={item.id_local}
+            />
+          ))}
+        </Picker>
+      );
+    } else {
+      return (
+        <Picker selectedValue={selectedValue} onValueChange={change}>
+          <Picker.Item
+            label={"Selecione o distrito do apoiador"}
+            value={null}
+            key={null}
+          />
+          {props.distritos.map((item) => (
+            <Picker.Item
+              label={item.nome_local}
+              value={item.id_local}
+              key={item.id_local}
+            />
+          ))}
+        </Picker>
+      );
+    }
+  }
 
   render() {
     const bairros = this.state.bairros;
+    const distritos = this.state.distritos;
     const { checked } = this.state;
     /*const DATA = [
       {
@@ -775,25 +838,13 @@ class HomeScreen extends React.Component {
                 placeholderTextColor={AppStyles.color.grey}
                 underlineColorAndroid="transparent"
               />*/}
-              <Picker
-                selectedValue={this.state.local}
-                onValueChange={(modeValue, modeIndex) =>
-                  this.setState({ local: modeValue })
-                }
-              >
-                <Picker.Item
-                  label={"Selecione o bairro ou o distrito"}
-                  value={null}
-                  key={null}
-                />
-                {bairros.map((item) => (
-                  <Picker.Item
-                    label={item.nome_local}
-                    value={item.id_local}
-                    key={item.id_local}
-                  />
-                ))}
-              </Picker>
+
+              <this.renderPicker
+                checked={checked}
+                bairros={bairros}
+                distritos={distritos}
+                mudaLocal={this.mudaLocal}
+              ></this.renderPicker>
             </View>
             <View style={styles.InputContainer}>
               <TextInput
@@ -933,7 +984,7 @@ const styles = StyleSheet.create({
   },
   RadioContainer: {
     width: AppStyles.textInputWidth.main,
-    marginTop: 30,
+    marginBottom: 30,
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: AppStyles.color.grey,
@@ -941,7 +992,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   labelRadio: {
-    justifyContent: "center"
+    justifyContent: "center",
+    paddingTop: 10
   },
   radioText: {
     fontSize: AppStyles.fontSize.title,
