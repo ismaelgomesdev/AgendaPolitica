@@ -7,6 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  Picker,
   SafeAreaView,
   SectionList,
   FlatList,
@@ -21,6 +22,7 @@ import { TextInputMask } from "react-native-masked-text";
 import { Configuration } from "../Configuration";
 import { Dimensions, AsyncStorage } from "react-native";
 import Constants from "expo-constants";
+import { RadioButton } from "react-native-paper";
 import Dialog, {
   ScaleAnimation,
   DialogFooter,
@@ -50,11 +52,14 @@ class HomeScreen extends React.Component {
       endereco_eleitor: "",
       num_eleitor: "",
       bairro_eleitor: "",
+      local: "Selecione o bairro ou o distrito",
       secao: "",
       loading: false,
       data: [],
+      bairros: [],
       error: null,
       disabled: true,
+      checked: "bairro",
     };
   }
 
@@ -236,6 +241,7 @@ class HomeScreen extends React.Component {
   componentDidMount() {
     this.makeRemoteRequest();
     this.makeRemoteRequest2();
+    this.retornaBairros();
   }
   /*verificaCampos1() {
     const { nome_lider, telefone_lider, senha_lider, conf_senha } = this.state;
@@ -371,6 +377,7 @@ class HomeScreen extends React.Component {
     } catch (e) {
       console.log(e);
     }
+
     /*getUsers()
       .then(users => {
         this.setState({
@@ -382,7 +389,24 @@ class HomeScreen extends React.Component {
         this.setState({ error, loading: false });
       });*/
   };
-
+  retornaBairros = async () => {
+    try {
+      const response = await api.post("/V_Lider.php", {
+        tipo: "3",
+      });
+      if (response.data != null) {
+        console.log(response.data);
+        const dados = response.data.dados;
+        console.log("dadoooooooooooos: " + dados);
+        this.setState({ bairros: dados, loading: false });
+        console.log(this.state.bairros);
+      } else {
+        console.log("nullll");
+      }
+    } catch (e) {
+      console.log("deu erro: " + e);
+    }
+  };
   renderSeparator = () => {
     return (
       <View
@@ -434,6 +458,8 @@ class HomeScreen extends React.Component {
   }
 
   render() {
+    const bairros = this.state.bairros;
+    const { checked } = this.state;
     /*const DATA = [
       {
         title: "Main dishes",
@@ -717,8 +743,28 @@ class HomeScreen extends React.Component {
                 underlineColorAndroid="transparent"
               />
             </View>
+            <View style={styles.RadioContainer}>
+              <RadioButton
+                color="#3179CF"
+                value="bairro"
+                status={checked === "bairro" ? "checked" : "unchecked"}
+                onPress={() => {
+                  this.setState({ checked: "bairro" });
+                }}
+              />
+              <Text style={styles.labelRadio}>Bairro</Text>
+              <RadioButton
+                value="distrito"
+                color="#3179CF"
+                status={checked === "distrito" ? "checked" : "unchecked"}
+                onPress={() => {
+                  this.setState({ checked: "distrito" });
+                }}
+              />
+              <Text style={styles.labelRadio}>Distrito</Text>
+            </View>
             <View style={styles.InputContainer}>
-              <TextInput
+              {/*<TextInput
                 style={styles.body}
                 placeholder="Bairro"
                 onChangeText={(text) => {
@@ -728,7 +774,26 @@ class HomeScreen extends React.Component {
                 value={this.state.bairro_eleitor}
                 placeholderTextColor={AppStyles.color.grey}
                 underlineColorAndroid="transparent"
-              />
+              />*/}
+              <Picker
+                selectedValue={this.state.local}
+                onValueChange={(modeValue, modeIndex) =>
+                  this.setState({ local: modeValue })
+                }
+              >
+                <Picker.Item
+                  label={"Selecione o bairro ou o distrito"}
+                  value={null}
+                  key={null}
+                />
+                {bairros.map((item) => (
+                  <Picker.Item
+                    label={item.nome_local}
+                    value={item.id_local}
+                    key={item.id_local}
+                  />
+                ))}
+              </Picker>
             </View>
             <View style={styles.InputContainer}>
               <TextInput
@@ -874,6 +939,9 @@ const styles = StyleSheet.create({
     borderColor: AppStyles.color.grey,
     borderRadius: AppStyles.borderRadius.main,
     flexDirection: "row",
+  },
+  labelRadio: {
+    justifyContent: "center"
   },
   radioText: {
     fontSize: AppStyles.fontSize.title,

@@ -152,15 +152,15 @@ class LoginScreen extends React.Component {
       <View style={styles.container}>
         <Text style={[styles.title, styles.leftTitle]}>Login</Text>
         <View style={styles.InputContainer}>
-          {/*<TextInput
+          <TextInput
             style={styles.body}
             placeholder="Telefone"
             onChangeText={text => this.setState({ telefone: text })}
             value={this.state.telefone}
             placeholderTextColor={AppStyles.color.grey}
             underlineColorAndroid="transparent"
-          />*/}
-          <TextInputMask
+          />
+          {/*<TextInputMask
             style={styles.body}
             placeholder="Telefone"
             placeholderTextColor={AppStyles.color.grey}
@@ -177,7 +177,7 @@ class LoginScreen extends React.Component {
                 telefone: text,
               });
             }}
-          />
+          />*/}
         </View>
         <View style={styles.InputContainer}>
           <TextInput

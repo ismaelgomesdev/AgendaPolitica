@@ -621,6 +621,7 @@ class StatsScreen extends React.Component {
             paddingLeft="15"
             absolute
           />
+          
         </ScrollView>
       );
     } else {
