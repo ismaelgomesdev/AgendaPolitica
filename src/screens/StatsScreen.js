@@ -93,7 +93,10 @@ class StatsScreen extends React.Component {
       quantidade_lider: [],
       quantidade_semana: null,
       quantidade_mes: null,
+      quantidade_mes2: [],
       quantidade_local: [],
+      labels: [],
+      datasets: [],
     };
   }
 
@@ -136,6 +139,7 @@ class StatsScreen extends React.Component {
         quantidade_lider,
         quantidade_semana,
         quantidade_mes,
+        quantidade_mes2,
         quantidade_local,
       } = response.data;
       this.setState({
@@ -143,8 +147,10 @@ class StatsScreen extends React.Component {
         quantidade_lider: quantidade_lider,
         quantidade_semana: quantidade_semana,
         quantidade_mes: quantidade_mes,
+        quantidade_mes2: quantidade_mes2,
         quantidade_local: quantidade_local,
       });
+      console.log(quantidade_mes2);
       const quantidade_bairro = quantidade_local.filter(
         (item) => item.distrito === "0"
       );
@@ -174,9 +180,18 @@ class StatsScreen extends React.Component {
         }),
           data3.push(aux);
       });
-      console.log(data2);
-      console.log(data3);
-
+      let aux2 = [];
+      let aux3 = [];
+      quantidade_mes2.map((item) => {
+        aux2.push(item.mes);
+        aux3.push(parseInt(item.qtd));
+      });
+      this.setState({
+        labels: aux2,
+        datasets: aux3,
+      });
+      console.log(this.state.labels);
+      console.log(this.state.datasets)
     } catch (err) {
       console.log(err);
     }
@@ -404,15 +419,17 @@ class StatsScreen extends React.Component {
             renderItem={this.renderItem}
             numColumns={numColumns}
           />
-
+          {
+          // eslint-disable-next-line react/destructuring-assignment
+          this.state.labels.length > 0 && (
           <View>
             <Text style={styles.title}>Evolução mensal</Text>
             <LineChart
               data={{
-                labels: ["Maio", "Junho"],
+                labels: this.state.labels,
                 datasets: [
                   {
-                    data: [1, 5],
+                    data: this.state.datasets,
                   },
                 ],
               }}
@@ -444,6 +461,7 @@ class StatsScreen extends React.Component {
               }}
             />
           </View>
+          )}
           <Text style={styles.title}>Desempenho dos líderes</Text>
           <FlatList
             data={formatData(porLider, numColumns)}
