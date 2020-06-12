@@ -163,7 +163,7 @@ class StatsScreen extends React.Component {
       quantidade_bairro.map((item) => {
         (aux = {
           name: item.nome_local,
-          population: item.qtd,
+          population: parseInt(item.qtd),
           color: item.color,
           legendFontColor: "#7F7F7F",
           legendFontSize: 15,
@@ -173,7 +173,7 @@ class StatsScreen extends React.Component {
       quantidade_distrito.map((item) => {
         (aux = {
           name: item.nome_local,
-          population: item.qtd,
+          population: parseInt(item.qtd),
           color: item.color,
           legendFontColor: "#7F7F7F",
           legendFontSize: 15,
@@ -394,7 +394,7 @@ class StatsScreen extends React.Component {
       quantidade_bairro.map((item) => {
         (aux = {
           name: item.nome_local,
-          population: item.qtd,
+          population: parseInt(item.qtd),
           color: item.color,
           legendFontColor: "#7F7F7F",
           legendFontSize: 15,
@@ -404,7 +404,7 @@ class StatsScreen extends React.Component {
       quantidade_distrito.map((item) => {
         (aux = {
           name: item.nome_local,
-          population: item.qtd,
+          population: parseInt(item.qtd),
           color: item.color,
           legendFontColor: "#7F7F7F",
           legendFontSize: 15,

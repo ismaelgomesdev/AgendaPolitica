@@ -820,6 +820,7 @@ class HomeScreen extends React.Component {
                   this.setState({ num_eleitor: text });
                   this.verificaCampos2();
                 }}
+                keyboardType='numeric'
                 value={this.state.num_eleitor}
                 placeholderTextColor={AppStyles.color.grey}
                 underlineColorAndroid="transparent"
@@ -873,6 +874,7 @@ class HomeScreen extends React.Component {
                   this.setState({ secao: text });
                   this.verificaCampos2();
                 }}
+                keyboardType='numeric'
                 value={this.state.secao}
                 placeholderTextColor={AppStyles.color.grey}
                 underlineColorAndroid="transparent"
