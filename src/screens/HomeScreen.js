@@ -56,6 +56,7 @@ class HomeScreen extends React.Component {
       secao: "",
       loading: false,
       data: [],
+      locais: [],
       bairros: [],
       distritos: [],
       error: null,
@@ -405,6 +406,7 @@ class HomeScreen extends React.Component {
         const bairros = dados.filter((dado) => dado.distrito === "0");        
         const distritos = dados.filter((dado) => dado.distrito === "1");
         this.setState({
+          locais: dados,
           bairros: bairros,
           distritos: distritos,
           loading: false,
@@ -663,6 +665,10 @@ class HomeScreen extends React.Component {
       );
     } else {
       const { disabled } = this.state;
+      const { locais } = this.state;
+      const { id_local } = this.state;
+      const local = locais.filter((dado) => dado.id_local === id_local);
+      console.log(local);
       return (
         <ScrollView style={styles.container}>
           <Dialog
@@ -719,7 +725,7 @@ class HomeScreen extends React.Component {
                   Bairro/Distrito:{" "}
                 </Text>
                 <Text style={{ fontSize: 15 }}>
-                  {this.state.bairro_eleitor}
+                  {local.map(item => item.nome_local)}
                 </Text>
               </View>
               <View style={{ flexDirection: "row", marginTop: 5 }}>
@@ -760,6 +766,19 @@ class HomeScreen extends React.Component {
               />
             </View>
             <View style={styles.InputContainer}>
+              {/*<TextInput
+                style={styles.body}
+                placeholder="Telefone"
+                placeholderTextColor={AppStyles.color.grey}
+                underlineColorAndroid="transparent"
+                value={this.state.telefone_eleitor}
+                onChangeText={(text) => {
+                  this.setState({
+                    telefone_eleitor: text,
+                  });
+                  this.verificaCampos2();
+                }}
+              />*/}
               <TextInputMask
                 style={styles.body}
                 placeholder="Telefone"
@@ -779,7 +798,6 @@ class HomeScreen extends React.Component {
                   this.verificaCampos2();
                 }}
               />
-              
             </View>
             <View style={styles.InputContainer}>
               <TextInput

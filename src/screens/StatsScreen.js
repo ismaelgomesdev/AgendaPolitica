@@ -52,7 +52,7 @@ const chartConfig = {
   color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
   strokeWidth: 2, // optional, default 3
   barPercentage: 0.5,
-  useShadowColorFromDataset: false // optional
+  useShadowColorFromDataset: false, // optional
 };
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -70,7 +70,8 @@ export function normalize(size) {
 let idLogado = "";
 let nomeLogado = "";
 let tipoLogado = "";
-
+let data2 = [];
+let data3 = [];
 const numColumns = 3;
 
 class StatsScreen extends React.Component {
@@ -92,7 +93,7 @@ class StatsScreen extends React.Component {
       quantidade_lider: [],
       quantidade_semana: null,
       quantidade_mes: null,
-      quantidade_bairro: null,
+      quantidade_local: [],
     };
   }
 
@@ -135,18 +136,47 @@ class StatsScreen extends React.Component {
         quantidade_lider,
         quantidade_semana,
         quantidade_mes,
-        quantidade_bairro,
+        quantidade_local,
       } = response.data;
       this.setState({
         quantidade: quantidade,
         quantidade_lider: quantidade_lider,
         quantidade_semana: quantidade_semana,
         quantidade_mes: quantidade_mes,
-        quantidade_bairro: quantidade_bairro,
+        quantidade_local: quantidade_local,
       });
-      /*this.setState({
-        totalEleitores: response.data,
-      });*/
+      const quantidade_bairro = quantidade_local.filter(
+        (item) => item.distrito === "0"
+      );
+      console.log(quantidade_bairro);
+      const quantidade_distrito = quantidade_local.filter(
+        (item) => item.distrito === "1"
+      );
+      let aux = [];
+      console.log(quantidade_distrito);
+      quantidade_bairro.map((item) => {
+        (aux = {
+          name: item.nome_local,
+          population: item.qtd,
+          color: item.color,
+          legendFontColor: "#7F7F7F",
+          legendFontSize: 15,
+        }),
+          data2.push(aux);
+      });
+      quantidade_distrito.map((item) => {
+        (aux = {
+          name: item.nome_local,
+          population: item.qtd,
+          color: item.color,
+          legendFontColor: "#7F7F7F",
+          legendFontSize: 15,
+        }),
+          data3.push(aux);
+      });
+      console.log(data2);
+      console.log(data3);
+
     } catch (err) {
       console.log(err);
     }
@@ -335,215 +365,37 @@ class StatsScreen extends React.Component {
 
         return data;
       };
-      const data2 = [
-        {
-          name: "Nossa Sra. das Graças",
-          population: 21500000,
-          color: "#6681bb",
+      const data2 = [];
+      const data3 = [];
+      const quantidade_bairro = this.state.quantidade_local.filter(
+        (item) => item.distrito === "0"
+      );
+      console.log(quantidade_bairro);
+      const quantidade_distrito = this.state.quantidade_local.filter(
+        (item) => item.distrito === "1"
+      );
+      let aux = [];
+      console.log(quantidade_distrito);
+      quantidade_bairro.map((item) => {
+        (aux = {
+          name: item.nome_local,
+          population: item.qtd,
+          color: item.color,
           legendFontColor: "#7F7F7F",
           legendFontSize: 15,
-        },
-        {
-          name: "Canindezinho",
-          population: 2800000,
-          color: "#56b9c3",
+        }),
+          data2.push(aux);
+      });
+      quantidade_distrito.map((item) => {
+        (aux = {
+          name: item.nome_local,
+          population: item.qtd,
+          color: item.color,
           legendFontColor: "#7F7F7F",
           legendFontSize: 15,
-        },
-        {
-          name: "Riacho São Francisco",
-          population: 527612,
-          color: "#439185",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Bela Vista",
-          population: 8538000,
-          color: "#316a4c",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Campinas",
-          population: 11920000,
-          color: "#1d4317",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Boa Vista",
-          population: 11920000,
-          color: "#3c631d",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Conjunto Habitacional",
-          population: 11920000,
-          color: "#758427",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Alto Guaramiranga",
-          population: 11920000,
-          color: "#b7a239",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Palestina",
-          population: 11920000,
-          color: "#f5bc58",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Jubaia",
-          population: 11920000,
-          color: "#6eafe1",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "São Mateus",
-          population: 11920000,
-          color: "#5e548d",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Cachoeira da Pasta",
-          population: 11920000,
-          color: "#678ac1",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "João Paulo II",
-          population: 11920000,
-          color: "purple",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Monte",
-          population: 11920000,
-          color: "pink",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Cap. Pedro Sampaio",
-          population: 11920000,
-          color: "red",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Santa Luzia",
-          population: 11920000,
-          color: "orange",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Imaculada Conceição",
-          population: 11920000,
-          color: "grey",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Santa Clara",
-          population: 11920000,
-          color: "black",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Centro",
-          population: 11920000,
-          color: "yellow",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-      ];
-
-      const data3 = [
-        {
-          name: "Bonito",
-          population: 21500000,
-          color: "#6eafe1",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Campos",
-          population: 2800000,
-          color: "#f5bc58",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Caiçara",
-          population: 527612,
-          color: "#b7a239",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Capitão Pedro Sampaio",
-          population: 8538000,
-          color: "#758427",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Esperança",
-          population: 11920000,
-          color: "#3c631d",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Iguaçu",
-          population: 11920000,
-          color: "#1d4317",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Ipueiras dos Gomes",
-          population: 11920000,
-          color: "#316a4c",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Monte Alegre",
-          population: 11920000,
-          color: "#439185",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Salitre",
-          population: 11920000,
-          color: "#56b9c3",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        },
-        {
-          name: "Targinos",
-          population: 11920000,
-          color: "#6681bb",
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        }
-      ];
-
+        }),
+          data3.push(aux);
+      });
       return (
         <ScrollView style={styles.container}>
           <FlatList
@@ -621,7 +473,6 @@ class StatsScreen extends React.Component {
             paddingLeft="15"
             absolute
           />
-          
         </ScrollView>
       );
     } else {
