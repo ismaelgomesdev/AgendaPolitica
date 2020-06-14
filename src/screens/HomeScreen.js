@@ -183,7 +183,7 @@ class HomeScreen extends React.Component {
       }
     }
   };
-
+  
   cadastrarEleitor = async () => {
     const {
       nome_eleitor,
@@ -194,7 +194,11 @@ class HomeScreen extends React.Component {
       secao,
       connected,
     } = this.state;
-    if (
+    this.setState({
+      dadosOffline: await AsyncStorage.getItem("@PoliNet_dadosOffline"),
+    });
+    let dadosOffline = JSON.parse(this.state.dadosOffline);
+    /*if (
       nome_eleitor.length <= 0 ||
       telefone_eleitor.length <= 0 ||
       secao.length <= 0 ||
@@ -203,71 +207,71 @@ class HomeScreen extends React.Component {
       num_eleitor.length <= 0
     ) {
       this.setState({ errorMessage: "Por favor, preencha todos os dados." });
-    } else {
-      if (connected) {
-        this.setState({
-          dadosOffline: await AsyncStorage.getItem("@PoliNet_dadosOffline"),
-        });
-        let dadosOffline = JSON.parse(this.state.dadosOffline);
-        if (dadosOffline != []) {
-          dadosOffline.map(async (item) => {
-            try {
-              const response = await api.post("/V_Eleitor.php", {
-                tipo: item.tipo,
-                nome_eleitor: item.nome_eleitor,
-                telefone_eleitor: item.telefone_eleitor,
-                endereco_eleitor: item.endereco_eleitor,
-                num_eleitor: item.num_eleitor,
-                id_local: item.id_local,
-                secao: item.secao,
-                idLogado: item.idLogado,
-              });
-              if (response.data != null) {
-                console.log(response.data);
-                this.setState({
-                  nome_eleitor: "",
-                  telefone_eleitor: "",
-                  endereco_eleitor: "",
-                  num_eleitor: "",
-                  id_local: "",
-                  secao: "",
-                  disabled: true,
-                });
-                this.makeRemoteRequest2();
-              } else {
-                this.setState({
-                  errorMessage: "Dados incorretos. Tente novamente.",
-                });
-              }
-            } catch (err) {
-              console.log(err);
-            }
-          });
-        }
-        try {
-          const response = await api.post("/V_Eleitor.php", {
-            tipo: "1",
-            nome_eleitor,
-            telefone_eleitor,
-            endereco_eleitor,
-            num_eleitor,
-            id_local,
-            secao,
-            idLogado,
-          });
-          if (response.data != null) {
-            console.log(response.data);
-            this.setState({
-              nome_eleitor: "",
-              telefone_eleitor: "",
-              endereco_eleitor: "",
-              num_eleitor: "",
-              id_local: "",
-              secao: "",
-              disabled: true,
+    } else {*/
+    if (connected) {
+      this.setState({
+        dadosOffline: await AsyncStorage.getItem("@PoliNet_dadosOffline"),
+      });
+      let dadosOffline = JSON.parse(this.state.dadosOffline);
+      if (dadosOffline != []) {
+        dadosOffline.map(async (item) => {
+          try {
+            const response = await api.post("/V_Eleitor.php", {
+              tipo: item.tipo,
+              nome_eleitor: item.nome_eleitor,
+              telefone_eleitor: item.telefone_eleitor,
+              endereco_eleitor: item.endereco_eleitor,
+              num_eleitor: item.num_eleitor,
+              id_local: item.id_local,
+              secao: item.secao,
+              idLogado: item.idLogado,
             });
+            if (response.data != null) {
+              console.log(response.data);
+              this.setState({
+                nome_eleitor: "",
+                telefone_eleitor: "",
+                endereco_eleitor: "",
+                num_eleitor: "",
+                id_local: "",
+                secao: "",
+                disabled: true,
+              });
+              this.makeRemoteRequest2();
+            } else {
+              this.setState({
+                errorMessage: "Dados incorretos. Tente novamente.",
+              });
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        });
+      }
+      try {
+        const response = await api.post("/V_Eleitor.php", {
+          tipo: "1",
+          nome_eleitor,
+          telefone_eleitor,
+          endereco_eleitor,
+          num_eleitor,
+          id_local,
+          secao,
+          idLogado,
+        });
+        if (response.data != null) {
+          console.log(response.data);
+          this.setState({
+            nome_eleitor: "",
+            telefone_eleitor: "",
+            endereco_eleitor: "",
+            num_eleitor: "",
+            id_local: "",
+            secao: "",
+            disabled: true,
+          });
 
-            /*const { 
+          /*const { 
             token, 
           } = response.data;
           //console.log(qrkey)
@@ -277,28 +281,27 @@ class HomeScreen extends React.Component {
           const { navigation } = this.props;
           navigation.dispatch({ type: "Login", user: null });
           */
-            this.makeRemoteRequest2();
-          } else {
-            this.setState({
-              errorMessage: "Dados incorretos. Tente novamente.",
-            });
-          }
-        } catch (err) {
-          console.log(err);
+          this.makeRemoteRequest2();
+        } else {
+          this.setState({
+            errorMessage: "Dados incorretos. Tente novamente.",
+          });
         }
-      } else {
-        aux.push({
-          tipo: "1",
-          nome_eleitor: nome_eleitor,
-          telefone_eleitor: telefone_eleitor,
-          endereco_eleitor: endereco_eleitor,
-          num_eleitor: num_eleitor,
-          id_local: id_local,
-          secao: secao,
-          idLogado: idLogado,
-        });
-        await AsyncStorage.setItem("@PoliNet_dadosOffline", JSON.stringify(aux));
+      } catch (err) {
+        console.log(err);
       }
+    } else {
+      aux.push({
+        tipo: "1",
+        nome_eleitor: nome_eleitor,
+        telefone_eleitor: telefone_eleitor,
+        endereco_eleitor: endereco_eleitor,
+        num_eleitor: num_eleitor,
+        id_local: id_local,
+        secao: secao,
+        idLogado: idLogado,
+      });
+      await AsyncStorage.setItem("@PoliNet_dadosOffline", JSON.stringify(aux));
     }
   };
   state = {
@@ -656,7 +659,7 @@ class HomeScreen extends React.Component {
                 underlineColorAndroid="transparent"
               />
             </View>
-            <View style={styles.InputContainer}>              
+            <View style={styles.InputContainer}>
               <TextInputMask
                 style={styles.body}
                 placeholder="Telefone"
