@@ -67,7 +67,7 @@ class HomeScreen extends React.Component {
       checked: "bairro",
       connected: true,
       dadosOffline: [],
-      aviso: "aaa",
+      aviso: "indefinido",
     };
   }
 
@@ -183,8 +183,8 @@ class HomeScreen extends React.Component {
       }
     }
   };
-  
-  cadastrarEleitor = async () => {
+  sincronizaDados = async () => {
+    aux = [];
     const {
       nome_eleitor,
       telefone_eleitor,
@@ -198,6 +198,44 @@ class HomeScreen extends React.Component {
       dadosOffline: await AsyncStorage.getItem("@PoliNet_dadosOffline"),
     });
     let dadosOffline = JSON.parse(this.state.dadosOffline);
+    await AsyncStorage.setItem("@PoliNet_dadosOffline", JSON.stringify(aux));
+    if (dadosOffline != []) {
+      dadosOffline.map(async (item) => {
+        try {
+          const response = await api.post("/V_Eleitor.php", {
+            tipo: item.tipo,
+            nome_eleitor: item.nome_eleitor,
+            telefone_eleitor: item.telefone_eleitor,
+            endereco_eleitor: item.endereco_eleitor,
+            num_eleitor: item.num_eleitor,
+            id_local: item.id_local,
+            secao: item.secao,
+            idLogado: item.idLogado,
+          });
+          if (response.data != null) {
+            console.log(response.data);
+            this.setState({
+              nome_eleitor: "",
+              telefone_eleitor: "",
+              endereco_eleitor: "",
+              num_eleitor: "",
+              id_local: "",
+              secao: "",
+              disabled: true,
+            });
+            this.makeRemoteRequest2();
+          } else {
+            this.setState({
+              errorMessage: "Dados incorretos. Tente novamente.",
+            });
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      });
+    }
+  };
+  cadastrarEleitor = async () => {
     /*if (
       nome_eleitor.length <= 0 ||
       telefone_eleitor.length <= 0 ||
@@ -208,46 +246,16 @@ class HomeScreen extends React.Component {
     ) {
       this.setState({ errorMessage: "Por favor, preencha todos os dados." });
     } else {*/
+    const {
+      nome_eleitor,
+      telefone_eleitor,
+      endereco_eleitor,
+      num_eleitor,
+      id_local,
+      secao,
+      connected,
+    } = this.state;
     if (connected) {
-      this.setState({
-        dadosOffline: await AsyncStorage.getItem("@PoliNet_dadosOffline"),
-      });
-      let dadosOffline = JSON.parse(this.state.dadosOffline);
-      if (dadosOffline != []) {
-        dadosOffline.map(async (item) => {
-          try {
-            const response = await api.post("/V_Eleitor.php", {
-              tipo: item.tipo,
-              nome_eleitor: item.nome_eleitor,
-              telefone_eleitor: item.telefone_eleitor,
-              endereco_eleitor: item.endereco_eleitor,
-              num_eleitor: item.num_eleitor,
-              id_local: item.id_local,
-              secao: item.secao,
-              idLogado: item.idLogado,
-            });
-            if (response.data != null) {
-              console.log(response.data);
-              this.setState({
-                nome_eleitor: "",
-                telefone_eleitor: "",
-                endereco_eleitor: "",
-                num_eleitor: "",
-                id_local: "",
-                secao: "",
-                disabled: true,
-              });
-              this.makeRemoteRequest2();
-            } else {
-              this.setState({
-                errorMessage: "Dados incorretos. Tente novamente.",
-              });
-            }
-          } catch (err) {
-            console.log(err);
-          }
-        });
-      }
       try {
         const response = await api.post("/V_Eleitor.php", {
           tipo: "1",
@@ -301,12 +309,22 @@ class HomeScreen extends React.Component {
         secao: secao,
         idLogado: idLogado,
       });
+      this.setState({
+        nome_eleitor: "",
+        telefone_eleitor: "",
+        endereco_eleitor: "",
+        num_eleitor: "",
+        id_local: "",
+        secao: "",
+        disabled: true,
+      });
+      console.log(aux);
       await AsyncStorage.setItem("@PoliNet_dadosOffline", JSON.stringify(aux));
     }
   };
-  state = {
+  /*state = {
     appState: AppState.currentState,
-  };
+  };*/
   async componentDidMount() {
     this.makeRemoteRequest();
     this.makeRemoteRequest2();
@@ -330,7 +348,7 @@ class HomeScreen extends React.Component {
   _handleConnectivityChange = (isConnected) => {
     if (isConnected == true) {
       this.setState({ connected: true, aviso: "online" });
-      this.cadastrarEleitor();
+      this.sincronizaDados();
     } else {
       this.setState({ connected: false, aviso: "offline" });
     }
@@ -356,12 +374,15 @@ class HomeScreen extends React.Component {
       id_local,
       secao,
     } = this.state;
+    console.log(nome_eleitor.length + " " + telefone_eleitor.length + " "
+    + secao.length + " " + endereco_eleitor.length + " "
+    +  num_eleitor.length + " " )
     if (
       nome_eleitor.length <= 0 ||
       telefone_eleitor.length <= 0 ||
       secao.length <= 0 ||
       endereco_eleitor.length <= 0 ||
-      id_local.length <= 0 ||
+      id_local == null ||
       num_eleitor.length <= 0
     ) {
       this.setState({ disabled: true });
@@ -757,7 +778,9 @@ class HomeScreen extends React.Component {
       const { disabled } = this.state;
       const { locais } = this.state;
       const { id_local } = this.state;
+
       const local = locais.filter((dado) => dado.id_local === id_local);
+
       console.log(local);
       return (
         <ScrollView style={styles.container}>
@@ -837,11 +860,12 @@ class HomeScreen extends React.Component {
             </DialogContent>
           </Dialog>
           <View style={styles.containerForm}>
-            <Text style={styles.title}>
-              Novo apoiador
-              {/*{this.props.user.email}*/}
-              {this.state.aviso}
+            <Text>Status de Rede: {" "+this.state.aviso}
             </Text>
+            <Text style={styles.title}>
+              Novo apoiador</Text>
+              {/*{this.props.user.email}*/}
+              
             <Text>{this.state.errorMessage}</Text>
             <View style={styles.InputContainer}>
               <TextInput
@@ -1012,6 +1036,7 @@ class HomeScreen extends React.Component {
               Eleitores cadastrados por você
               {/*{this.props.user.email}*/}
             </Text>
+            <Text>{aux.map(item => item.nome_eleitor + " (aguardando sincronização)\n")}</Text>
             <FlatList
               data={this.state.data}
               renderItem={this.renderRow2}
