@@ -12,6 +12,7 @@ import {
   SectionList,
   FlatList,
   ActivityIndicator,
+  AppState,
 } from "react-native";
 import { List, ListItem, SearchBar } from "react-native-elements";
 import Button from "react-native-button";
@@ -23,6 +24,7 @@ import { Configuration } from "../Configuration";
 import { Dimensions, AsyncStorage } from "react-native";
 import Constants from "expo-constants";
 import { RadioButton } from "react-native-paper";
+import NetInfo from "@react-native-community/netinfo";
 import Dialog, {
   ScaleAnimation,
   DialogFooter,
@@ -34,6 +36,7 @@ const width = Dimensions.get("window").width;
 let idLogado = "";
 let nomeLogado = "";
 let tipoLogado = "";
+let aux = [];
 
 class HomeScreen extends React.Component {
   constructor(props) {
@@ -62,6 +65,9 @@ class HomeScreen extends React.Component {
       error: null,
       disabled: true,
       checked: "bairro",
+      connected: true,
+      dadosOffline: [],
+      aviso: "aaa",
     };
   }
 
@@ -186,6 +192,7 @@ class HomeScreen extends React.Component {
       num_eleitor,
       id_local,
       secao,
+      connected,
     } = this.state;
     if (
       nome_eleitor.length <= 0 ||
@@ -197,30 +204,70 @@ class HomeScreen extends React.Component {
     ) {
       this.setState({ errorMessage: "Por favor, preencha todos os dados." });
     } else {
-      try {
-        const response = await api.post("/V_Eleitor.php", {
-          tipo: "1",
-          nome_eleitor,
-          telefone_eleitor,
-          endereco_eleitor,
-          num_eleitor,
-          id_local,
-          secao,
-          idLogado,
+      if (connected) {
+        this.setState({
+          dadosOffline: await AsyncStorage.getItem("@PoliNet_dadosOffline"),
         });
-        if (response.data != null) {
-          console.log(response.data);
-          this.setState({
-            nome_eleitor: "",
-            telefone_eleitor: "",
-            endereco_eleitor: "",
-            num_eleitor: "",
-            id_local: "",
-            secao: "",
-            disabled: true,
+        let dadosOffline = JSON.parse(this.state.dadosOffline);
+        if (dadosOffline != []) {
+          dadosOffline.map(async (item) => {
+            try {
+              const response = await api.post("/V_Eleitor.php", {
+                tipo: item.tipo,
+                nome_eleitor: item.nome_eleitor,
+                telefone_eleitor: item.telefone_eleitor,
+                endereco_eleitor: item.endereco_eleitor,
+                num_eleitor: item.num_eleitor,
+                id_local: item.id_local,
+                secao: item.secao,
+                idLogado: item.idLogado,
+              });
+              if (response.data != null) {
+                console.log(response.data);
+                this.setState({
+                  nome_eleitor: "",
+                  telefone_eleitor: "",
+                  endereco_eleitor: "",
+                  num_eleitor: "",
+                  id_local: "",
+                  secao: "",
+                  disabled: true,
+                });
+                this.makeRemoteRequest2();
+              } else {
+                this.setState({
+                  errorMessage: "Dados incorretos. Tente novamente.",
+                });
+              }
+            } catch (err) {
+              console.log(err);
+            }
           });
+        }
+        try {
+          const response = await api.post("/V_Eleitor.php", {
+            tipo: "1",
+            nome_eleitor,
+            telefone_eleitor,
+            endereco_eleitor,
+            num_eleitor,
+            id_local,
+            secao,
+            idLogado,
+          });
+          if (response.data != null) {
+            console.log(response.data);
+            this.setState({
+              nome_eleitor: "",
+              telefone_eleitor: "",
+              endereco_eleitor: "",
+              num_eleitor: "",
+              id_local: "",
+              secao: "",
+              disabled: true,
+            });
 
-          /*const { 
+            /*const { 
             token, 
           } = response.data;
           //console.log(qrkey)
@@ -230,21 +277,61 @@ class HomeScreen extends React.Component {
           const { navigation } = this.props;
           navigation.dispatch({ type: "Login", user: null });
           */
-          this.makeRemoteRequest2();
-        } else {
-          this.setState({ errorMessage: "Dados incorretos. Tente novamente." });
+            this.makeRemoteRequest2();
+          } else {
+            this.setState({
+              errorMessage: "Dados incorretos. Tente novamente.",
+            });
+          }
+        } catch (err) {
+          console.log(err);
         }
-      } catch (err) {
-        console.log(err);
+      } else {
+        aux.push({
+          tipo: "1",
+          nome_eleitor: nome_eleitor,
+          telefone_eleitor: telefone_eleitor,
+          endereco_eleitor: endereco_eleitor,
+          num_eleitor: num_eleitor,
+          id_local: id_local,
+          secao: secao,
+          idLogado: idLogado,
+        });
+        await AsyncStorage.setItem("@PoliNet_dadosOffline", JSON.stringify(aux));
       }
     }
   };
-
-  componentDidMount() {
+  state = {
+    appState: AppState.currentState,
+  };
+  async componentDidMount() {
     this.makeRemoteRequest();
     this.makeRemoteRequest2();
     this.retornaBairros();
+
+    //To get the network state once
+    NetInfo.isConnected.addEventListener(
+      "connectionChange",
+      this._handleConnectivityChange
+    );
+
+    NetInfo.isConnected.fetch().then((isConnected) => {
+      if (isConnected == true) {
+        this.setState({ connected: true, aviso: "online" });
+      } else {
+        this.setState({ connected: false, aviso: "offline" });
+      }
+    });
   }
+
+  _handleConnectivityChange = (isConnected) => {
+    if (isConnected == true) {
+      this.setState({ connected: true, aviso: "online" });
+      this.cadastrarEleitor();
+    } else {
+      this.setState({ connected: false, aviso: "offline" });
+    }
+  };
   componentDidUpdate() {
     console.log("component did update :", this.state); // one step behind child state
   }
@@ -403,7 +490,7 @@ class HomeScreen extends React.Component {
       if (response.data != null) {
         console.log(response.data);
         const dados = response.data.dados;
-        const bairros = dados.filter((dado) => dado.distrito === "0");        
+        const bairros = dados.filter((dado) => dado.distrito === "0");
         const distritos = dados.filter((dado) => dado.distrito === "1");
         this.setState({
           locais: dados,
@@ -569,7 +656,7 @@ class HomeScreen extends React.Component {
                 underlineColorAndroid="transparent"
               />
             </View>
-            <View style={styles.InputContainer}>
+            <View style={styles.InputContainer}>              
               <TextInputMask
                 style={styles.body}
                 placeholder="Telefone"
@@ -725,7 +812,7 @@ class HomeScreen extends React.Component {
                   Bairro/Distrito:{" "}
                 </Text>
                 <Text style={{ fontSize: 15 }}>
-                  {local.map(item => item.nome_local)}
+                  {local.map((item) => item.nome_local)}
                 </Text>
               </View>
               <View style={{ flexDirection: "row", marginTop: 5 }}>
@@ -750,6 +837,7 @@ class HomeScreen extends React.Component {
             <Text style={styles.title}>
               Novo apoiador
               {/*{this.props.user.email}*/}
+              {this.state.aviso}
             </Text>
             <Text>{this.state.errorMessage}</Text>
             <View style={styles.InputContainer}>
@@ -779,7 +867,20 @@ class HomeScreen extends React.Component {
                   this.verificaCampos2();
                 }}
               />*/}
-              <TextInputMask
+              <TextInput
+                style={styles.body}
+                placeholder="Telefone"
+                placeholderTextColor={AppStyles.color.grey}
+                underlineColorAndroid="transparent"
+                value={this.state.telefone_eleitor}
+                onChangeText={(text) => {
+                  this.setState({
+                    telefone_eleitor: text,
+                  });
+                  this.verificaCampos2();
+                }}
+              />
+              {/*<TextInputMask
                 style={styles.body}
                 placeholder="Telefone"
                 placeholderTextColor={AppStyles.color.grey}
@@ -797,7 +898,7 @@ class HomeScreen extends React.Component {
                   });
                   this.verificaCampos2();
                 }}
-              />
+              />*/}
             </View>
             <View style={styles.InputContainer}>
               <TextInput
@@ -820,7 +921,7 @@ class HomeScreen extends React.Component {
                   this.setState({ num_eleitor: text });
                   this.verificaCampos2();
                 }}
-                keyboardType='numeric'
+                keyboardType="numeric"
                 value={this.state.num_eleitor}
                 placeholderTextColor={AppStyles.color.grey}
                 underlineColorAndroid="transparent"
@@ -874,7 +975,7 @@ class HomeScreen extends React.Component {
                   this.setState({ secao: text });
                   this.verificaCampos2();
                 }}
-                keyboardType='numeric'
+                keyboardType="numeric"
                 value={this.state.secao}
                 placeholderTextColor={AppStyles.color.grey}
                 underlineColorAndroid="transparent"
@@ -1014,7 +1115,7 @@ const styles = StyleSheet.create({
   },
   labelRadio: {
     justifyContent: "center",
-    paddingTop: 10
+    paddingTop: 10,
   },
   radioText: {
     fontSize: AppStyles.fontSize.title,

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.10.2",
+    "@react-native-community/netinfo": "^5.9.2",
     "@use-expo/font": "^2.0.0",
     "apisauce": "^1.1.1",
     "aws-sdk": "^2.688.0",
