@@ -327,21 +327,22 @@ class HomeScreen extends React.Component {
           secao: secao,
           idLogado: idLogado,
         });
-        this.setState({
-          nome_eleitor: "",
-          telefone_eleitor: "",
-          endereco_eleitor: "",
-          num_eleitor: "",
-          id_local: "",
-          secao: "",
-          disabled: true,
-        });
+
         console.log(aux);
         await AsyncStorage.setItem(
           "@PoliNet_dadosOffline",
           JSON.stringify(aux)
         );
       }
+      this.setState({
+        nome_eleitor: "",
+        telefone_eleitor: "",
+        endereco_eleitor: "",
+        num_eleitor: "",
+        id_local: "",
+        secao: "",
+        disabled: true,
+      });
     }
   };
   /*state = {

@@ -60,6 +60,7 @@ export const AppIcon = {
     height: 25
   },
   images: {
+    config: require("../assets/icons/settings.png"),
     stats: require("../assets/icons/statistics.png"),
     home: require("../assets/icons/home1.png"),
     defaultUser: require("../assets/icons/default_user.jpg"),

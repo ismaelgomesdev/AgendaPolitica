@@ -17,6 +17,7 @@ import {
   createReactNavigationReduxMiddleware,
   reduxifyNavigator,
 } from "react-navigation-redux-helpers";
+import ConfigScreen from "../screens/ConfigScreen";
 import StatsScreen from "../screens/StatsScreen";
 import HomeScreen from "../screens/HomeScreen";
 import LoginScreen from "../screens/LoginScreen";
@@ -137,10 +138,74 @@ const StatsStack = createStackNavigator(
   }
 );
 
+const ConfigStack = createStackNavigator(
+  {
+    Configurações: { screen: ConfigScreen },
+  },
+  {
+    initialRouteName: "Configurações",
+    headerMode: "float",
+
+    headerLayoutPreset: "center",
+    navigationOptions: ({ navigation }) => ({
+      headerTintColor: AppStyles.color.tint,
+      headerTitleStyle: styles.headerTitleStyle,
+      headerLeft: () => {
+        return (
+          <TouchableOpacity
+            style={{ flexDirection: "row" }}
+            onPress={() => {
+              navigation.openDrawer();
+            }}
+          >
+            {navigation.state.params && navigation.state.params.menuIcon ? (
+              <Image
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  marginLeft: 5,
+                }}
+                source={{ uri: navigation.state.params.menuIcon }}
+              />
+            ) : (
+              <Image
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  marginLeft: 5,
+                }}
+                source={AppIcon.images.defaultUser}
+              />
+            )}
+
+            <Text
+              style={{
+                fontFamily: AppStyles.fontName.bold,
+                color: AppStyles.color.tint,
+                fontSize: 19,
+                marginTop: 10,
+                alignSelf: "stretch",
+                textAlign: "left",
+                marginLeft: 20,
+              }}
+            >
+              Nome do Candidato
+            </Text>
+          </TouchableOpacity>
+        );
+      },
+    }),
+    cardStyle: { backgroundColor: "#FFFFFF" },
+  }
+);
+
 const TabNavigator = createBottomTabNavigator(
   {
     Início: { screen: HomeStack },
     Relatórios: { screen: StatsStack },
+    Configurações: { screen: ConfigStack }
   },
   {
     navigationOptions: ({ navigation }) => ({
@@ -153,7 +218,9 @@ const TabNavigator = createBottomTabNavigator(
         if (routeName === "Relatórios") {
           iconName = AppIcon.images.stats;
         }
-
+        if (routeName === "Configurações") {
+          iconName = AppIcon.images.config;
+        }
         // You can return any component that you like here! We usually use an
         // icon component from react-native-vector-icons
         return (
