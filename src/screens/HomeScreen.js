@@ -13,6 +13,7 @@ import {
   FlatList,
   ActivityIndicator,
   AppState,
+  Platform,
 } from "react-native";
 import { List, ListItem, SearchBar } from "react-native-elements";
 import Button from "react-native-button";
@@ -24,7 +25,7 @@ import { Configuration } from "../Configuration";
 import { Dimensions, AsyncStorage } from "react-native";
 import Constants from "expo-constants";
 import { RadioButton } from "react-native-paper";
-import NetInfo from "@react-native-community/netinfo";
+import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
 import Dialog, {
   ScaleAnimation,
   DialogFooter,
@@ -69,6 +70,8 @@ class HomeScreen extends React.Component {
       dadosOffline: [],
       aviso: "indefinido",
     };
+    this.unsubscribe = null;
+    this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
   }
 
   /*async componentWillMount() {
@@ -299,43 +302,81 @@ class HomeScreen extends React.Component {
         console.log(err);
       }
     } else {
-      aux.push({
-        tipo: "1",
-        nome_eleitor: nome_eleitor,
-        telefone_eleitor: telefone_eleitor,
-        endereco_eleitor: endereco_eleitor,
-        num_eleitor: num_eleitor,
-        id_local: id_local,
-        secao: secao,
-        idLogado: idLogado,
+      let auxx = false;
+      aux.map((item) => {
+        if (
+          nome_eleitor == item.nome_eleitor &&
+          telefone_eleitor == item.telefone_eleitor &&
+          endereco_eleitor == item.endereco_eleitor &&
+          num_eleitor == item.num_eleitor &&
+          id_local == item.id_local &&
+          secao == item.secao
+        ) {
+          auxx = true;
+        }
       });
-      this.setState({
-        nome_eleitor: "",
-        telefone_eleitor: "",
-        endereco_eleitor: "",
-        num_eleitor: "",
-        id_local: "",
-        secao: "",
-        disabled: true,
-      });
-      console.log(aux);
-      await AsyncStorage.setItem("@PoliNet_dadosOffline", JSON.stringify(aux));
+      if (auxx) {
+      } else {
+        aux.push({
+          tipo: "1",
+          nome_eleitor: nome_eleitor,
+          telefone_eleitor: telefone_eleitor,
+          endereco_eleitor: endereco_eleitor,
+          num_eleitor: num_eleitor,
+          id_local: id_local,
+          secao: secao,
+          idLogado: idLogado,
+        });
+        this.setState({
+          nome_eleitor: "",
+          telefone_eleitor: "",
+          endereco_eleitor: "",
+          num_eleitor: "",
+          id_local: "",
+          secao: "",
+          disabled: true,
+        });
+        console.log(aux);
+        await AsyncStorage.setItem(
+          "@PoliNet_dadosOffline",
+          JSON.stringify(aux)
+        );
+      }
     }
   };
   /*state = {
     appState: AppState.currentState,
   };*/
-  async componentDidMount() {
+  componentDidMount() {
     this.makeRemoteRequest();
     this.makeRemoteRequest2();
     this.retornaBairros();
+    this.getConnect();
+    NetInfo.fetch().then((state) => {
+      if (state.isInternetReachable) {
+        this.setState({ connected: true, aviso: "online" });
+      } else {
+        this.setState({ connected: false, aviso: "offline" });
+      }
+    });
+    this.unsubscribe = NetInfo.addEventListener(this.handleConnectivityChange);
+  }
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
 
-    //To get the network state once
-    NetInfo.isConnected.addEventListener(
-      "connectionChange",
-      this._handleConnectivityChange
-    );
+  handleConnectivityChange = (state) => {
+    if (state.isInternetReachable) {
+      this.setState({ connected: true, aviso: "online" });
+      this.sincronizaDados();
+    } else {
+      this.setState({ connected: false, aviso: "offline" });
+    }
+    console.log(state.isConnected ? "connected" : "not connected");
+  };
 
+  async getConnect() {
+    console.log(Platform.OS);
     NetInfo.isConnected.fetch().then((isConnected) => {
       if (isConnected == true) {
         this.setState({ connected: true, aviso: "online" });
@@ -343,16 +384,22 @@ class HomeScreen extends React.Component {
         this.setState({ connected: false, aviso: "offline" });
       }
     });
+
+    NetInfo.isConnected.addEventListener(
+      "connectionChange",
+      this._handleConnectivityChange
+    );
   }
 
-  _handleConnectivityChange = (isConnected) => {
+  /*_handleConnectivityChange = (isConnected) => {
     if (isConnected == true) {
       this.setState({ connected: true, aviso: "online" });
       this.sincronizaDados();
     } else {
       this.setState({ connected: false, aviso: "offline" });
     }
-  };
+  };*/
+
   componentDidUpdate() {
     console.log("component did update :", this.state); // one step behind child state
   }
@@ -374,9 +421,18 @@ class HomeScreen extends React.Component {
       id_local,
       secao,
     } = this.state;
-    console.log(nome_eleitor.length + " " + telefone_eleitor.length + " "
-    + secao.length + " " + endereco_eleitor.length + " "
-    +  num_eleitor.length + " " )
+    console.log(
+      nome_eleitor.length +
+        " " +
+        telefone_eleitor.length +
+        " " +
+        secao.length +
+        " " +
+        endereco_eleitor.length +
+        " " +
+        num_eleitor.length +
+        " "
+    );
     if (
       nome_eleitor.length <= 0 ||
       telefone_eleitor.length <= 0 ||
@@ -632,6 +688,32 @@ class HomeScreen extends React.Component {
     }
   }
 
+  /*mudaState = (conn) => {
+    this.setState({ connected: conn });
+  };
+  ficaOn() {
+    this.setState({ connected: true });
+  }
+
+  netState(props) {
+    const netInfo = useNetInfo();
+
+    let aviso = "indefinido";
+    const { mudaState } = props;
+
+    const [selectedValue, setSelectedValue] = React.useState(
+      netInfo.isConnected
+    );
+    useEffect(() => {
+      mudaState(selectedValue);
+    }, [selectedValue, mudaState]);
+    if (netInfo.isConnected) {
+      aviso = "online";
+    } else {
+      aviso = "offline";
+    }
+    return <Text>{aviso}</Text>;
+  }*/
   render() {
     const bairros = this.state.bairros;
     const distritos = this.state.distritos;
@@ -860,12 +942,16 @@ class HomeScreen extends React.Component {
             </DialogContent>
           </Dialog>
           <View style={styles.containerForm}>
-            <Text>Status de Rede: {" "+this.state.aviso}
+            <Text>
+              Status de Rede: {this.state.aviso}
+              {
+                //<this.netState mudaState={this.mudaState}></this.netState>
+              }
             </Text>
-            <Text style={styles.title}>
-              Novo apoiador</Text>
-              {/*{this.props.user.email}*/}
-              
+
+            <Text style={styles.title}>Novo apoiador</Text>
+            {/*{this.props.user.email}*/}
+
             <Text>{this.state.errorMessage}</Text>
             <View style={styles.InputContainer}>
               <TextInput
@@ -1036,7 +1122,11 @@ class HomeScreen extends React.Component {
               Eleitores cadastrados por você
               {/*{this.props.user.email}*/}
             </Text>
-            <Text>{aux.map(item => item.nome_eleitor + " (aguardando sincronização)\n")}</Text>
+            <Text>
+              {aux.map(
+                (item) => item.nome_eleitor + " (aguardando sincronização)\n"
+              )}
+            </Text>
             <FlatList
               data={this.state.data}
               renderItem={this.renderRow2}
