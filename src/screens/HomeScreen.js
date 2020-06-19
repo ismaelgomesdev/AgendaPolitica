@@ -348,9 +348,8 @@ class HomeScreen extends React.Component {
   /*state = {
     appState: AppState.currentState,
   };*/
+  
   componentDidMount() {
-    this.makeRemoteRequest();
-    this.makeRemoteRequest2();
     this.retornaBairros();
     this.getConnect();
     NetInfo.fetch().then((state) => {
@@ -364,6 +363,10 @@ class HomeScreen extends React.Component {
   }
   componentWillUnmount() {
     this.unsubscribe();
+  }
+  componentWillMount() {
+    this.makeRemoteRequest();
+    this.makeRemoteRequest2();
   }
 
   handleConnectivityChange = (state) => {

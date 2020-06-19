@@ -68,7 +68,7 @@ class ConfigScreen extends React.Component {
       idLog: "",
       nomeLog: "",
       tipoLog: "",
-
+      data: [],
       errorMessage: "",
       mensagem: "",
       loading: false,
@@ -80,6 +80,7 @@ class ConfigScreen extends React.Component {
       local: true,
       secao: true,
       nome_campo: "",
+      cont: 0,
     };
   }
 
@@ -93,17 +94,21 @@ class ConfigScreen extends React.Component {
       this.setState({ disabled: false });
     }
   }
+
   componentDidMount() {
     this.makeRemoteRequest();
+    this.pesquisaCampos();
   }
+
   adicionarCampo = async () => {
     const { nome_campo, idLog } = this.state;
     try {
       const response = await api.post("/V_Campos.php", {
         tipo: "1",
-        fk_id_candidato: idLog,
-        nome_campo: nome_campo,
+        idLog,
+        nome_campo,
       });
+      this.pesquisaCampos();
       this.setState({
         nome_campo: "",
         disabled: true,
@@ -112,20 +117,19 @@ class ConfigScreen extends React.Component {
       console.log(e);
     }
   };
+
   alteraCampos = async () => {
-    const { nome, telefone, cpf, endereco, local, secao } = this.state;
+    const { idLog, cpf, endereco, local, secao } = this.state;
+
     try {
       const response = await api.post("/V_Candidato.php", {
         tipo: "4",
         idLog,
-        nome,
-        telefone,
         cpf,
         endereco,
         local,
         secao,
       });
-      this.setState({mensagem: response.data});
     } catch (e) {
       console.log(e);
     }
@@ -156,9 +160,73 @@ class ConfigScreen extends React.Component {
       const { idLog } = this.state;
       console.log(idLog);
     } catch (e) {
-      admin19946;
       console.log(e);
     }
+  };
+
+  pesquisaCampos = async () => {
+    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
+
+    const { token } = this.state;
+
+    try {
+      const response = await api.post("/V_User.php", {
+        tipo: "3",
+        token,
+      });
+
+      console.log(response.data);
+      const { nome, id, tipo } = response.data;
+      nomeLogado = nome;
+      idLogado = id;
+      tipoLogado = tipo;
+
+      this.setState({ idLog: id });
+      this.setState({ nomeLog: nome });
+      this.setState({ tipoLog: tipo });
+      this.setState({ loading: true });
+      const { idLog } = this.state;
+      console.log(idLog);
+    } catch (e) {
+      console.log(e);
+    }
+    const { idLog } = this.state;
+    try {
+      const response = await api.post("/V_Campos.php", {
+        tipo: "2",
+        idLog,
+      });
+      this.setState({
+        data: response.data,
+        loading: false
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  renderCampo({ item }) {
+    return (
+      <View style={{ flexDirection: "row" }}>
+        <Text>{item.nome_campo}</Text>
+        <Button>Editar</Button>
+      </View>
+    );
+  }
+  renderFooter = () => {
+    if (!this.state.loading) return null;
+
+    return (
+      <View
+        style={{
+          paddingVertical: 20,
+          borderTopWidth: 1,
+          borderColor: "#CED0CE",
+        }}
+      >
+        <ActivityIndicator animating size="large" />
+      </View>
+    );
   };
   render() {
     if (tipoLogado == "candidato") {
@@ -188,7 +256,11 @@ class ConfigScreen extends React.Component {
                   <Switch
                     value={this.state.cpf}
                     onValueChange={(v) => {
-                      this.setState({ cpf: v });
+                      if (v) {
+                        this.setState({ cpf: v });
+                      } else {
+                        this.setState({ cpf: "0" });
+                      }
                     }}
                   />
                 </View>
@@ -199,7 +271,11 @@ class ConfigScreen extends React.Component {
                   <Switch
                     value={this.state.local}
                     onValueChange={(v) => {
-                      this.setState({ local: v });
+                      if (v) {
+                        this.setState({ local: v });
+                      } else {
+                        this.setState({ local: "0" });
+                      }
                     }}
                   />
                 </View>
@@ -208,7 +284,11 @@ class ConfigScreen extends React.Component {
                   <Switch
                     value={this.state.endereco}
                     onValueChange={(v) => {
-                      this.setState({ endereco: v });
+                      if (v) {
+                        this.setState({ endereco: v });
+                      } else {
+                        this.setState({ endereco: "0" });
+                      }
                     }}
                   />
                 </View>
@@ -217,13 +297,16 @@ class ConfigScreen extends React.Component {
                   <Switch
                     value={this.state.secao}
                     onValueChange={(v) => {
-                      this.setState({ secao: v });
+                      if (v) {
+                        this.setState({ secao: v });
+                      } else {
+                        this.setState({ secao: "0" });
+                      }
                     }}
                   />
                 </View>
               </View>
             </View>
-            <Text>{this.state.mensagem}</Text>
             <Button
               containerStyle={[styles.facebookContainer]}
               style={styles.facebookText}
@@ -267,6 +350,13 @@ class ConfigScreen extends React.Component {
                 +
               </Button>
             </View>
+            <Text>{this.state.mensagem}</Text>
+            <FlatList
+              data={this.state.data}
+              renderItem={this.renderCampo}
+              keyExtractor={(item) => item.id_campo}
+              ListFooterComponent={this.renderFooter}
+            />
           </View>
         </ScrollView>
       );
