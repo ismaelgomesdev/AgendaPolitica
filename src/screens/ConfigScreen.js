@@ -121,12 +121,29 @@ class ConfigScreen extends React.Component {
 
   alteraCampos = async () => {
     let { idLog, cpf, endereco, local, secao } = this.state;
-    //cpf = cpf ? '1' : '0';
-    endereco = !endereco ? '0' : '1';
-    local = !local ? '0' : '1';
-    secao = !secao ? '0' : '1';
+    if(cpf == true || cpf != '0'){
+      cpf = '1'
+    } else {
+      cpf = '0'
+    }
+    if(endereco == true || endereco != '0'){
+      endereco = '1'
+    } else {
+      endereco = '0'
+    }
+    if(local == true || local != '0'){
+      local = '1'
+    } else {
+      local = '0'
+    }
+    if(secao == true || secao != '0'){
+      secao = '1'
+    } else {
+      secao = '0'
+    }
+
     this.setState({
-        mensagem: cpf,
+        mensagem:  cpf+local+endereco+secao,
       });
     try {
       const response = await api.post("/V_Candidato.php", {
