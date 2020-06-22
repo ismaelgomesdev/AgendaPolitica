@@ -51,6 +51,7 @@ class HomeScreen extends React.Component {
       telefone_lider: "",
       senha_lider: "",
       errorMessage: "",
+
       nome_eleitor: "",
       telefone_eleitor: "",
       endereco_eleitor: "",
@@ -58,6 +59,12 @@ class HomeScreen extends React.Component {
       bairro_eleitor: "",
       id_local: null,
       secao: "",
+
+      valida_endereco: true,
+      valida_local: true,
+      valida_secao: true,
+      valida_cpf: true,
+
       loading: false,
       data: [],
       locais: [],
@@ -69,6 +76,8 @@ class HomeScreen extends React.Component {
       connected: true,
       dadosOffline: [],
       aviso: "indefinido",
+
+      mensagem: "",
     };
     this.unsubscribe = null;
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
@@ -78,6 +87,63 @@ class HomeScreen extends React.Component {
     this.state.token = await AsyncStorage.getItem('@PoliNet_token'); 
     console.log(this.state.token)
   }*/
+
+  validaCampos = async () => {
+    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
+
+    const { token } = this.state;
+
+    try {
+      const response = await api.post("/V_User.php", {
+        tipo: "3",
+        token,
+      });
+
+      console.log(response.data);
+      const { nome, id, tipo } = response.data;
+      nomeLogado = nome;
+      idLogado = id;
+      tipoLogado = tipo;
+
+      this.setState({ idLog: id });
+      this.setState({ nomeLog: nome });
+      this.setState({ tipoLog: tipo });
+      const { idLog } = this.state;
+      try {
+        const response = await api.post("/V_Lider.php", {
+          tipo: "4",
+          idLog,
+        });
+        if (response.data != null) {
+          const {
+            cpf_eleitor,
+            local_eleitor,
+            endereco_eleitor,
+            secao_eleitor,
+          } = response.data;
+          this.setState({
+            valida_cpf: cpf_eleitor,
+            valida_local: local_eleitor,
+            valida_endereco: endereco_eleitor,
+            valida_secao: secao_eleitor,
+            mensagem: JSON.stringify(response.data),
+          });
+        } else {
+          this.setState({
+            mensagem: "deu ruim",
+          });
+        }
+      } catch (e) {
+        this.setState({
+          mensagem: e,
+        });
+      }
+    } catch (e) {
+      this.setState({
+        mensagem: e,
+      });
+    }
+  };
 
   pesqDados = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
@@ -348,9 +414,10 @@ class HomeScreen extends React.Component {
   /*state = {
     appState: AppState.currentState,
   };*/
-  
+
   componentDidMount() {
     this.retornaBairros();
+
     this.getConnect();
     NetInfo.fetch().then((state) => {
       if (state.isInternetReachable) {
@@ -365,6 +432,7 @@ class HomeScreen extends React.Component {
     this.unsubscribe();
   }
   componentWillMount() {
+    this.validaCampos();
     this.makeRemoteRequest();
     this.makeRemoteRequest2();
   }
@@ -472,7 +540,6 @@ class HomeScreen extends React.Component {
       this.setState({ tipoLog: tipo });
 
       console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
-      this.setState({ loading: true });
       const { idLog } = this.state;
       console.log(idLog);
       try {
@@ -530,10 +597,7 @@ class HomeScreen extends React.Component {
       this.setState({ tipoLog: tipo });
 
       console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
-      this.setState({ loading: true });
       const { idLog } = this.state;
-      console.log(idLog);
-      this.setState({ loading: true });
       try {
         const response = await api.post("/V_Eleitor.php", {
           tipo: "2",
@@ -558,7 +622,7 @@ class HomeScreen extends React.Component {
     /*getUsers()
       .then(users => {
         this.setState({
-          loading: false,
+           : false,
           data: users
         });
       })
@@ -630,6 +694,122 @@ class HomeScreen extends React.Component {
     );
   };
 
+  renderCpf = () => {};
+  renderLocal2() {
+    const bairros = this.state.bairros;
+    const distritos = this.state.distritos;
+    const { checked } = this.state;
+    if (this.state.valida_local) {
+      return (
+        <View style={styles.InputContainer}>
+          <this.renderPicker
+            checked={checked}
+            bairros={bairros}
+            distritos={distritos}
+            mudaLocal={this.mudaLocal}
+          ></this.renderPicker>
+        </View>
+      );
+    } else {
+      return null;
+    }
+  }
+  renderLocal() {
+    const bairros = this.state.bairros;
+    const distritos = this.state.distritos;
+    const { checked } = this.state;
+    if (this.state.valida_local) {
+      return (
+        <View style={styles.RadioContainer}>
+          <RadioButton
+            color="#3179CF"
+            value="bairro"
+            status={checked === "bairro" ? "checked" : "unchecked"}
+            onPress={() => {
+              this.setState({ checked: "bairro" });
+            }}
+          />
+          <Text style={styles.labelRadio}>Bairro</Text>
+          <RadioButton
+            value="distrito"
+            color="#3179CF"
+            status={checked === "distrito" ? "checked" : "unchecked"}
+            onPress={() => {
+              this.setState({ checked: "distrito" });
+            }}
+          />
+          <Text style={styles.labelRadio}>Distrito</Text>
+        </View>
+      );
+    } else {
+      return null;
+    }
+  }
+  renderNumero() {
+    if (this.state.valida_endereco) {
+      return (
+        <View style={styles.InputContainer}>
+          <TextInput
+            style={styles.body}
+            placeholder="Número da residência"
+            onChangeText={(text) => {
+              this.setState({ num_eleitor: text });
+              this.verificaCampos2();
+            }}
+            keyboardType="numeric"
+            value={this.state.num_eleitor}
+            placeholderTextColor={AppStyles.color.grey}
+            underlineColorAndroid="transparent"
+          />
+        </View>
+      );
+    } else {
+      return null;
+    }
+  }
+  renderEndereco() {
+    if (this.state.valida_endereco) {
+      return (
+        <View style={styles.InputContainer}>
+          <TextInput
+            style={styles.body}
+            placeholder="Endereço"
+            onChangeText={(text) => {
+              this.setState({ endereco_eleitor: text });
+              this.verificaCampos2();
+            }}
+            value={this.state.endereco_eleitor}
+            placeholderTextColor={AppStyles.color.grey}
+            underlineColorAndroid="transparent"
+          />
+        </View>
+      );
+    } else {
+      return null;
+    }
+  }
+  renderSecao(){
+    if (this.state.valida_secao) {
+      return (
+        <View style={styles.InputContainer}>
+          <TextInput
+            style={styles.body}
+            placeholder="Seção de votação"
+            onChangeText={(text) => {
+              this.setState({ secao: text });
+              this.verificaCampos2();
+            }}
+            keyboardType="numeric"
+            value={this.state.secao}
+            placeholderTextColor={AppStyles.color.grey}
+            underlineColorAndroid="transparent"
+          />
+        </View>
+      );
+    } else {
+      return null;
+    }
+  };
   renderRow({ item }) {
     return <ListItem title={item.nome_lider} subtitle={item.telefone_lider} />;
   }
@@ -755,6 +935,7 @@ class HomeScreen extends React.Component {
               Novo líder de campanha
               {/*{this.props.user.email}*/}
             </Text>
+
             <Text>{this.state.errorMessage}</Text>
             <View style={styles.InputContainer}>
               <TextInput
@@ -952,8 +1133,13 @@ class HomeScreen extends React.Component {
                 //<this.netState mudaState={this.mudaState}></this.netState>
               }
             </Text>
-
+<Text>
+              {
+                //this.state.mensagem
+              }
+            </Text>
             <Text style={styles.title}>Novo apoiador</Text>
+            
             {/*{this.props.user.email}*/}
 
             <Text>{this.state.errorMessage}</Text>
@@ -1017,88 +1203,11 @@ class HomeScreen extends React.Component {
                 }}
               />*/}
             </View>
-            <View style={styles.InputContainer}>
-              <TextInput
-                style={styles.body}
-                placeholder="Endereço"
-                onChangeText={(text) => {
-                  this.setState({ endereco_eleitor: text });
-                  this.verificaCampos2();
-                }}
-                value={this.state.endereco_eleitor}
-                placeholderTextColor={AppStyles.color.grey}
-                underlineColorAndroid="transparent"
-              />
-            </View>
-            <View style={styles.InputContainer}>
-              <TextInput
-                style={styles.body}
-                placeholder="Número da residência"
-                onChangeText={(text) => {
-                  this.setState({ num_eleitor: text });
-                  this.verificaCampos2();
-                }}
-                keyboardType="numeric"
-                value={this.state.num_eleitor}
-                placeholderTextColor={AppStyles.color.grey}
-                underlineColorAndroid="transparent"
-              />
-            </View>
-            <View style={styles.RadioContainer}>
-              <RadioButton
-                color="#3179CF"
-                value="bairro"
-                status={checked === "bairro" ? "checked" : "unchecked"}
-                onPress={() => {
-                  this.setState({ checked: "bairro" });
-                }}
-              />
-              <Text style={styles.labelRadio}>Bairro</Text>
-              <RadioButton
-                value="distrito"
-                color="#3179CF"
-                status={checked === "distrito" ? "checked" : "unchecked"}
-                onPress={() => {
-                  this.setState({ checked: "distrito" });
-                }}
-              />
-              <Text style={styles.labelRadio}>Distrito</Text>
-            </View>
-            <View style={styles.InputContainer}>
-              {/*<TextInput
-                style={styles.body}
-                placeholder="Bairro"
-                onChangeText={(text) => {
-                  this.setState({ bairro_eleitor: text });
-                  this.verificaCampos2();
-                }}
-                value={this.state.bairro_eleitor}
-                placeholderTextColor={AppStyles.color.grey}
-                underlineColorAndroid="transparent"
-              />*/}
-
-              <this.renderPicker
-                checked={checked}
-                bairros={bairros}
-                distritos={distritos}
-                mudaLocal={this.mudaLocal}
-              ></this.renderPicker>
-            </View>
-            <View style={styles.InputContainer}>
-              <TextInput
-                style={styles.body}
-                placeholder="Seção de votação"
-                onChangeText={(text) => {
-                  this.setState({ secao: text });
-                  this.verificaCampos2();
-                }}
-                keyboardType="numeric"
-                value={this.state.secao}
-                placeholderTextColor={AppStyles.color.grey}
-                underlineColorAndroid="transparent"
-              />
-            </View>
-
+            {this.renderLocal()}
+            {this.renderLocal2()}
+            {this.renderEndereco()}
+            {this.renderNumero()}
+            {this.renderSecao()}
             <Button
               containerStyle={[styles.facebookContainer]}
               style={styles.facebookText}

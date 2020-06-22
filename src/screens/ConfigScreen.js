@@ -98,6 +98,7 @@ class ConfigScreen extends React.Component {
   componentDidMount() {
     this.makeRemoteRequest();
     this.pesquisaCampos();
+    this.verificaCampos();
   }
 
   adicionarCampo = async () => {
@@ -119,8 +120,14 @@ class ConfigScreen extends React.Component {
   };
 
   alteraCampos = async () => {
-    const { idLog, cpf, endereco, local, secao } = this.state;
-
+    let { idLog, cpf, endereco, local, secao } = this.state;
+    //cpf = cpf ? '1' : '0';
+    endereco = !endereco ? '0' : '1';
+    local = !local ? '0' : '1';
+    secao = !secao ? '0' : '1';
+    this.setState({
+        mensagem: cpf,
+      });
     try {
       const response = await api.post("/V_Candidato.php", {
         tipo: "4",
@@ -130,10 +137,32 @@ class ConfigScreen extends React.Component {
         local,
         secao,
       });
+      
+    } catch (e) {
+      this.setState({
+        mensagem: e,
+      });
+    }
+  };
+
+  alteraCampo = async (id_campo, status) => {
+    const { idLog } = this.state;
+
+    try {
+      const response = await api.post("/V_Campos.php", {
+        tipo: "3",
+        idLog,
+        id_campo,
+        status,
+      });
+      this.setState({
+        mensagem: response.data,
+      });
     } catch (e) {
       console.log(e);
     }
   };
+
   makeRemoteRequest = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
@@ -163,7 +192,49 @@ class ConfigScreen extends React.Component {
       console.log(e);
     }
   };
+  verificaCampos = async () => {
+    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
+    const { token } = this.state;
+
+    try {
+      const response = await api.post("/V_User.php", {
+        tipo: "3",
+        token,
+      });
+
+      console.log(response.data);
+      const { nome, id, tipo } = response.data;
+      nomeLogado = nome;
+      idLogado = id;
+      tipoLogado = tipo;
+
+      this.setState({ idLog: id });
+      this.setState({ nomeLog: nome });
+      this.setState({ tipoLog: tipo });
+      this.setState({ loading: true });
+      const { idLog } = this.state;
+      console.log(idLog);
+    } catch (e) {
+      console.log(e);
+    }
+    const { idLog } = this.state;
+    try {
+      const response = await api.post("/V_Candidato.php", {
+        tipo: "5",
+        idLog,
+      });
+      const { cpf, endereco, local, secao } = response.data;
+      this.setState({
+        cpf: cpf,
+        endereco: endereco,
+        local: local,
+        secao: secao,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
   pesquisaCampos = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
@@ -198,21 +269,36 @@ class ConfigScreen extends React.Component {
       });
       this.setState({
         data: response.data,
-        loading: false
+        loading: false,
       });
     } catch (e) {
       console.log(e);
     }
   };
 
-  renderCampo({ item }) {
+  renderCampo = ({ item }) => {
+    if (item.status_campo == "1") {
+      item.status_campo = true;
+    } else {
+      item.status_campo = false;
+    }
+    let stts = item.status_campo;
     return (
       <View style={{ flexDirection: "row" }}>
         <Text>{item.nome_campo}</Text>
-        <Button>Editar</Button>
+        <Switch
+          value={item.status_campo}
+          onValueChange={(v) => {
+            item.status_campo = v;
+            if (!item.status_campo) {
+              stts = "0";
+            }
+            this.alteraCampo(item.id_campo, stts);
+          }}
+        />
       </View>
     );
-  }
+  };
   renderFooter = () => {
     if (!this.state.loading) return null;
 
@@ -239,6 +325,7 @@ class ConfigScreen extends React.Component {
               <Text style={{ flex: 1, textAlign: "center" }}>
                 Campos a serem preenchidos no formulário de novo apoiador
               </Text>
+              <Text>{this.state.mensagem}</Text>
               <View style={styles.InputContainer}>
                 <View style={{ padding: 10 }}>
                   <Text>Nome</Text>
@@ -316,6 +403,7 @@ class ConfigScreen extends React.Component {
             >
               Aplicar
             </Button>
+
             <Text style={{ flex: 1, marginTop: 10, textAlign: "center" }}>
               Campos personalizados
             </Text>
@@ -350,7 +438,7 @@ class ConfigScreen extends React.Component {
                 +
               </Button>
             </View>
-            <Text>{this.state.mensagem}</Text>
+
             <FlatList
               data={this.state.data}
               renderItem={this.renderCampo}
