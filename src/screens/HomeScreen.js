@@ -54,6 +54,7 @@ class HomeScreen extends React.Component {
 
       nome_eleitor: "",
       telefone_eleitor: "",
+      cpf_eleitor: "",
       endereco_eleitor: "",
       num_eleitor: "",
       bairro_eleitor: "",
@@ -318,6 +319,7 @@ class HomeScreen extends React.Component {
     const {
       nome_eleitor,
       telefone_eleitor,
+      cpf_eleitor,
       endereco_eleitor,
       num_eleitor,
       id_local,
@@ -330,6 +332,7 @@ class HomeScreen extends React.Component {
           tipo: "1",
           nome_eleitor,
           telefone_eleitor,
+          cpf_eleitor,
           endereco_eleitor,
           num_eleitor,
           id_local,
@@ -341,6 +344,7 @@ class HomeScreen extends React.Component {
           this.setState({
             nome_eleitor: "",
             telefone_eleitor: "",
+            cpf_eleitor: "",
             endereco_eleitor: "",
             num_eleitor: "",
             id_local: "",
@@ -694,7 +698,29 @@ class HomeScreen extends React.Component {
     );
   };
 
-  renderCpf = () => {};
+  renderCpf() {
+    if (this.state.valida_cpf) {
+      return (
+        <View style={styles.InputContainer}>
+          <TextInputMask
+            type={"cpf"}
+            placeholder="CPF"
+            style={styles.body}
+            value={this.state.cpf_eleitor}
+            placeholderTextColor={AppStyles.color.grey}
+            underlineColorAndroid="transparent"
+            onChangeText={(text) => {
+              this.setState({
+                cpf_eleitor: text,
+              });
+            }}
+          />
+        </View>
+      );
+    } else {
+      return null;
+    }
+  }
   renderLocal2() {
     const bairros = this.state.bairros;
     const distritos = this.state.distritos;
@@ -788,7 +814,7 @@ class HomeScreen extends React.Component {
       return null;
     }
   }
-  renderSecao(){
+  renderSecao() {
     if (this.state.valida_secao) {
       return (
         <View style={styles.InputContainer}>
@@ -809,7 +835,7 @@ class HomeScreen extends React.Component {
     } else {
       return null;
     }
-  };
+  }
   renderRow({ item }) {
     return <ListItem title={item.nome_lider} subtitle={item.telefone_lider} />;
   }
@@ -1133,13 +1159,11 @@ class HomeScreen extends React.Component {
                 //<this.netState mudaState={this.mudaState}></this.netState>
               }
             </Text>
-<Text>
-              {
-                //this.state.mensagem
-              }
-            </Text>
+            <Text>{
+            //this.state.mensagem
+            }</Text>
             <Text style={styles.title}>Novo apoiador</Text>
-            
+
             {/*{this.props.user.email}*/}
 
             <Text>{this.state.errorMessage}</Text>
@@ -1170,7 +1194,7 @@ class HomeScreen extends React.Component {
                   this.verificaCampos2();
                 }}
               />*/}
-              <TextInput
+              {/*<TextInput
                 style={styles.body}
                 placeholder="Telefone"
                 placeholderTextColor={AppStyles.color.grey}
@@ -1182,8 +1206,8 @@ class HomeScreen extends React.Component {
                   });
                   this.verificaCampos2();
                 }}
-              />
-              {/*<TextInputMask
+              />*/}
+              <TextInputMask
                 style={styles.body}
                 placeholder="Telefone"
                 placeholderTextColor={AppStyles.color.grey}
@@ -1201,8 +1225,9 @@ class HomeScreen extends React.Component {
                   });
                   this.verificaCampos2();
                 }}
-              />*/}
+              />
             </View>
+            {this.renderCpf()}
             {this.renderLocal()}
             {this.renderLocal2()}
             {this.renderEndereco()}

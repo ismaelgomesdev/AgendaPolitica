@@ -342,7 +342,6 @@ class ConfigScreen extends React.Component {
               <Text style={{ flex: 1, textAlign: "center" }}>
                 Campos a serem preenchidos no formulário de novo apoiador
               </Text>
-              <Text>{this.state.mensagem}</Text>
               <View style={styles.InputContainer}>
                 <View style={{ padding: 10 }}>
                   <Text>Nome</Text>
