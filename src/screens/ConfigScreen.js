@@ -377,7 +377,17 @@ class ConfigScreen extends React.Component {
       console.log(e);
     }
   };
-
+  renderSeparator = () => {
+    return (
+      <View
+        style={{
+          height: 1,
+          width: "100%",
+          backgroundColor: "#CED0CE",
+        }}
+      />
+    );
+  };
   renderDemanda = ({ item }) => {
     if (item.status_demanda == "1") {
       item.status_demanda = true;
@@ -386,10 +396,13 @@ class ConfigScreen extends React.Component {
     }
     let stts = item.status_demanda;
     return (
-      <View style={{ flexDirection: "row" }}>
+      <View>
         <Text style={{ fontSize: normalize(15) }}>{item.desc_demanda}</Text>
-        <Text style={{ fontSize: normalize(12) }}>{`\n Demanda de:`} {item.nome_eleitor}</Text>
+        <Text style={{ fontSize: normalize(12) }}>
+          (Demanda de: {item.nome_eleitor})
+        </Text>
         <Switch
+          style={{position: "absolute", alignSelf: "flex-end"}}
           value={item.status_demanda}
           onValueChange={(v) => {
             item.status_demanda = v;
@@ -427,7 +440,7 @@ class ConfigScreen extends React.Component {
         <ScrollView style={styles.container}>
           <View style={styles.containerForm}>
             <View style={styles.containerForm1}>
-              <Text style={{ flex: 1, textAlign: "center" }}>
+              <Text style={styles.title}>
                 Campos a serem preenchidos no formulário de novo apoiador
               </Text>
               <View style={styles.InputContainer}>
@@ -507,8 +520,9 @@ class ConfigScreen extends React.Component {
             >
               Aplicar
             </Button>
-
-            <Text style={{ flex: 1, marginTop: 10, textAlign: "center" }}>
+          </View>
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <Text style={styles.title}>
               Campos personalizados
             </Text>
             <View style={styles.containerForm2}>
@@ -542,7 +556,7 @@ class ConfigScreen extends React.Component {
                 +
               </Button>
             </View>
-            <View style={{ flexDirection: "row", marginBottom: 50}}>
+            <View style={{ flexDirection: "row", marginBottom: 50 }}>
               <FlatList
                 data={this.state.data}
                 renderItem={this.renderCampo}
@@ -551,7 +565,7 @@ class ConfigScreen extends React.Component {
               />
             </View>
             <View style={styles.containerForm1}>
-              <Text style={{ flex: 1, textAlign: "center" }}>
+              <Text style={styles.title}>
                 Demandas dos apoiadores
               </Text>
               <View style={{ flexDirection: "row" }}>
@@ -560,6 +574,7 @@ class ConfigScreen extends React.Component {
                   renderItem={this.renderDemanda}
                   keyExtractor={(item) => item.id_demanda}
                   ListFooterComponent={this.renderFooter}
+                  ItemSeparatorComponent={this.renderSeparator}
                 />
               </View>
             </View>
@@ -594,6 +609,7 @@ const styles = StyleSheet.create({
   containerForm: {
     flex: 1,
     alignItems: "center",
+    marginBottom: 50
   },
   containerForm1: {
     flex: 1,
@@ -601,19 +617,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 0,
     justifyContent: "center",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: AppStyles.color.grey,
-    borderRadius: AppStyles.borderRadius.main,
   },
   title: {
-    justifyContent: "center",
-    /*fontSize: AppStyles.fontSize.normal,
-    fontWeight: "normal",
-    textAlign: "center",
+    fontSize: AppStyles.fontSize.normal,
+    fontWeight: "bold",
     color: AppStyles.color.tint,
-    marginTop: 20,
-    marginBottom: 20,*/
+    textAlign: "center",
+    justifyContent: "center"
   },
   InputContainer: {
     flexDirection: "row",
@@ -637,17 +647,19 @@ const styles = StyleSheet.create({
     backgroundColor: AppStyles.color.tint,
     borderRadius: 50,
     height: "60%",
-    marginBottom: 30,
+    marginBottom: 0,
+    marginTop: 0,
   },
   facebookText1: {
     color: AppStyles.color.white,
     fontSize: normalize(30),
+    paddingBottom: 30,
   },
   facebookContainer: {
     width: AppStyles.buttonWidth.main,
     backgroundColor: AppStyles.color.tint,
     borderRadius: AppStyles.borderRadius.main,
-    padding: 10,
+    padding: 10
   },
   facebookText: {
     color: AppStyles.color.white,
