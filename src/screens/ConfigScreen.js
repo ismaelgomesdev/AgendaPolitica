@@ -69,6 +69,7 @@ class ConfigScreen extends React.Component {
       nomeLog: "",
       tipoLog: "",
       data: [],
+      data1: [],
       errorMessage: "",
       mensagem: "",
       loading: false,
@@ -98,6 +99,7 @@ class ConfigScreen extends React.Component {
   componentDidMount() {
     this.makeRemoteRequest();
     this.pesquisaCampos();
+    this.pesquisaDemandas();
     this.verificaCampos();
   }
 
@@ -121,30 +123,30 @@ class ConfigScreen extends React.Component {
 
   alteraCampos = async () => {
     let { idLog, cpf, endereco, local, secao } = this.state;
-    if(cpf == true || cpf != '0'){
-      cpf = '1'
+    if (cpf == true || cpf != "0") {
+      cpf = "1";
     } else {
-      cpf = '0'
+      cpf = "0";
     }
-    if(endereco == true || endereco != '0'){
-      endereco = '1'
+    if (endereco == true || endereco != "0") {
+      endereco = "1";
     } else {
-      endereco = '0'
+      endereco = "0";
     }
-    if(local == true || local != '0'){
-      local = '1'
+    if (local == true || local != "0") {
+      local = "1";
     } else {
-      local = '0'
+      local = "0";
     }
-    if(secao == true || secao != '0'){
-      secao = '1'
+    if (secao == true || secao != "0") {
+      secao = "1";
     } else {
-      secao = '0'
+      secao = "0";
     }
 
     this.setState({
-        mensagem:  cpf+local+endereco+secao,
-      });
+      mensagem: cpf + local + endereco + secao,
+    });
     try {
       const response = await api.post("/V_Candidato.php", {
         tipo: "4",
@@ -154,7 +156,6 @@ class ConfigScreen extends React.Component {
         local,
         secao,
       });
-      
     } catch (e) {
       this.setState({
         mensagem: e,
@@ -170,6 +171,22 @@ class ConfigScreen extends React.Component {
         tipo: "3",
         idLog,
         id_campo,
+        status,
+      });
+      this.setState({
+        mensagem: response.data,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  alteraDemanda = async (id_demanda, status) => {
+    const { idLog } = this.state;
+
+    try {
+      const response = await api.post("/V_Demanda.php", {
+        tipo: "3",
+        id_demanda,
         status,
       });
       this.setState({
@@ -309,8 +326,79 @@ class ConfigScreen extends React.Component {
             item.status_campo = v;
             if (!item.status_campo) {
               stts = "0";
+            } else {
+              stts = "1";
             }
             this.alteraCampo(item.id_campo, stts);
+          }}
+        />
+      </View>
+    );
+  };
+
+  pesquisaDemandas = async () => {
+    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
+
+    const { token } = this.state;
+
+    try {
+      const response = await api.post("/V_User.php", {
+        tipo: "3",
+        token,
+      });
+
+      console.log(response.data);
+      const { nome, id, tipo } = response.data;
+      nomeLogado = nome;
+      idLogado = id;
+      tipoLogado = tipo;
+
+      this.setState({ idLog: id });
+      this.setState({ nomeLog: nome });
+      this.setState({ tipoLog: tipo });
+      this.setState({ loading: true });
+      const { idLog } = this.state;
+      console.log(idLog);
+    } catch (e) {
+      console.log(e);
+    }
+    const { idLog } = this.state;
+    try {
+      const response = await api.post("/V_Demanda.php", {
+        tipo: "2",
+        idLog,
+      });
+      this.setState({
+        data1: response.data,
+        mensagem: JSON.stringify(response.data),
+        loading: false,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  renderDemanda = ({ item }) => {
+    if (item.status_demanda == "1") {
+      item.status_demanda = true;
+    } else {
+      item.status_demanda = false;
+    }
+    let stts = item.status_demanda;
+    return (
+      <View style={{ flexDirection: "row" }}>
+        <Text style={{ fontSize: normalize(15) }}>{item.desc_demanda}</Text>
+        <Text style={{ fontSize: normalize(12) }}>{`\n Demanda de:`} {item.nome_eleitor}</Text>
+        <Switch
+          value={item.status_demanda}
+          onValueChange={(v) => {
+            item.status_demanda = v;
+            if (!item.status_demanda) {
+              stts = "0";
+            } else {
+              stts = "1";
+            }
+            this.alteraDemanda(item.id_demanda, stts);
           }}
         />
       </View>
@@ -454,13 +542,27 @@ class ConfigScreen extends React.Component {
                 +
               </Button>
             </View>
-
-            <FlatList
-              data={this.state.data}
-              renderItem={this.renderCampo}
-              keyExtractor={(item) => item.id_campo}
-              ListFooterComponent={this.renderFooter}
-            />
+            <View style={{ flexDirection: "row", marginBottom: 50}}>
+              <FlatList
+                data={this.state.data}
+                renderItem={this.renderCampo}
+                keyExtractor={(item) => item.id_campo}
+                ListFooterComponent={this.renderFooter}
+              />
+            </View>
+            <View style={styles.containerForm1}>
+              <Text style={{ flex: 1, textAlign: "center" }}>
+                Demandas dos apoiadores
+              </Text>
+              <View style={{ flexDirection: "row" }}>
+                <FlatList
+                  data={this.state.data1}
+                  renderItem={this.renderDemanda}
+                  keyExtractor={(item) => item.id_demanda}
+                  ListFooterComponent={this.renderFooter}
+                />
+              </View>
+            </View>
           </View>
         </ScrollView>
       );
@@ -468,7 +570,15 @@ class ConfigScreen extends React.Component {
       const { disabled } = this.state;
       return (
         <ScrollView style={styles.container}>
-          <Text style={styles.title}>Tela de configuração :D</Text>
+          <Text
+            style={{
+              textAlign: "center",
+              marginTop: "80%",
+              fontSize: normalize(15),
+            }}
+          >
+            Recurso exclusivo da Área de Candidato
+          </Text>
         </ScrollView>
       );
     }
@@ -489,7 +599,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 0,
     justifyContent: "center",
     borderWidth: 1,
     borderStyle: "solid",
@@ -516,7 +626,6 @@ const styles = StyleSheet.create({
   },
   InputContainer1: {
     width: "87%",
-    marginBottom: 30,
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: AppStyles.color.grey,

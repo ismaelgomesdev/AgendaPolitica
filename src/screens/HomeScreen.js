@@ -60,6 +60,7 @@ class HomeScreen extends React.Component {
       bairro_eleitor: "",
       id_local: null,
       secao: "",
+      desc_demanda: "",
 
       valida_endereco: true,
       valida_local: true,
@@ -258,6 +259,7 @@ class HomeScreen extends React.Component {
     const {
       nome_eleitor,
       telefone_eleitor,
+      cpf_eleitor,
       endereco_eleitor,
       num_eleitor,
       id_local,
@@ -276,6 +278,7 @@ class HomeScreen extends React.Component {
             tipo: item.tipo,
             nome_eleitor: item.nome_eleitor,
             telefone_eleitor: item.telefone_eleitor,
+            cpf_eleitor: item.cpf_eleitor,
             endereco_eleitor: item.endereco_eleitor,
             num_eleitor: item.num_eleitor,
             id_local: item.id_local,
@@ -287,6 +290,7 @@ class HomeScreen extends React.Component {
             this.setState({
               nome_eleitor: "",
               telefone_eleitor: "",
+              cpf_eleitor: "",
               endereco_eleitor: "",
               num_eleitor: "",
               id_local: "",
@@ -324,6 +328,7 @@ class HomeScreen extends React.Component {
       num_eleitor,
       id_local,
       secao,
+      desc_demanda,
       connected,
     } = this.state;
     if (connected) {
@@ -337,6 +342,7 @@ class HomeScreen extends React.Component {
           num_eleitor,
           id_local,
           secao,
+          desc_demanda,
           idLogado,
         });
         if (response.data != null) {
@@ -349,6 +355,7 @@ class HomeScreen extends React.Component {
             num_eleitor: "",
             id_local: "",
             secao: "",
+            desc_demanda: "",
             disabled: true,
           });
 
@@ -362,6 +369,9 @@ class HomeScreen extends React.Component {
           const { navigation } = this.props;
           navigation.dispatch({ type: "Login", user: null });
           */
+         this.setState({
+           mensagem: JSON.stringify(response.data)
+         })
           this.makeRemoteRequest2();
         } else {
           this.setState({
@@ -378,6 +388,7 @@ class HomeScreen extends React.Component {
           nome_eleitor == item.nome_eleitor &&
           telefone_eleitor == item.telefone_eleitor &&
           endereco_eleitor == item.endereco_eleitor &&
+          cpf_eleitor == item.cpf_eleitor &&
           num_eleitor == item.num_eleitor &&
           id_local == item.id_local &&
           secao == item.secao
@@ -391,6 +402,7 @@ class HomeScreen extends React.Component {
           tipo: "1",
           nome_eleitor: nome_eleitor,
           telefone_eleitor: telefone_eleitor,
+          cpf_eleitor: cpf_eleitor,
           endereco_eleitor: endereco_eleitor,
           num_eleitor: num_eleitor,
           id_local: id_local,
@@ -407,7 +419,8 @@ class HomeScreen extends React.Component {
       this.setState({
         nome_eleitor: "",
         telefone_eleitor: "",
-        endereco_eleitor: "",
+        cpf_eleitor: "",
+        endereco_eleitor: "",        
         num_eleitor: "",
         id_local: "",
         secao: "",
@@ -1159,9 +1172,11 @@ class HomeScreen extends React.Component {
                 //<this.netState mudaState={this.mudaState}></this.netState>
               }
             </Text>
-            <Text>{
-            //this.state.mensagem
-            }</Text>
+            <Text>
+              {
+                //this.state.mensagem
+              }
+            </Text>
             <Text style={styles.title}>Novo apoiador</Text>
 
             {/*{this.props.user.email}*/}
@@ -1233,6 +1248,19 @@ class HomeScreen extends React.Component {
             {this.renderEndereco()}
             {this.renderNumero()}
             {this.renderSecao()}
+            <View style={styles.InputContainer}>
+              <TextInput
+                style={styles.body}
+                placeholder="Demanda do apoiador"
+                onChangeText={(text) => {
+                  this.setState({ desc_demanda: text });
+                  this.verificaCampos2();
+                }}
+                value={this.state.desc_demanda}
+                placeholderTextColor={AppStyles.color.grey}
+                underlineColorAndroid="transparent"
+              />
+            </View>
             <Button
               containerStyle={[styles.facebookContainer]}
               style={styles.facebookText}

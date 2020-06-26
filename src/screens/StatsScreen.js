@@ -191,7 +191,7 @@ class StatsScreen extends React.Component {
         datasets: aux3,
       });
       console.log(this.state.labels);
-      console.log(this.state.datasets)
+      console.log(this.state.datasets);
     } catch (err) {
       console.log(err);
     }
@@ -420,48 +420,50 @@ class StatsScreen extends React.Component {
             numColumns={numColumns}
           />
           {
-          // eslint-disable-next-line react/destructuring-assignment
-          this.state.labels.length > 0 && (
-          <View>
-            <Text style={styles.title}>Evolução mensal</Text>
-            <LineChart
-              data={{
-                labels: this.state.labels,
-                datasets: [
-                  {
-                    data: this.state.datasets,
-                  },
-                ],
-              }}
-              width={Dimensions.get("window").width} // from react-native
-              height={220}
-              yAxisLabel=""
-              yAxisSuffix=""
-              yAxisInterval={1} // optional, defaults to 1
-              chartConfig={{
-                backgroundColor: "#E2B500",
-                backgroundGradientFrom: "#3179CF",
-                backgroundGradientTo: "#2F70BD",
-                decimalPlaces: 0, // optional, defaults to 2dp
-                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                style: {
-                  borderRadius: 16,
-                },
-                propsForDots: {
-                  r: "6",
-                  strokeWidth: "2",
-                  stroke: "#ffa726",
-                },
-              }}
-              bezier
-              style={{
-                marginVertical: 8,
-                borderRadius: 16,
-              }}
-            />
-          </View>
-          )}
+            // eslint-disable-next-line react/destructuring-assignment
+            this.state.labels.length > 0 && (
+              <View>
+                <Text style={styles.title}>Evolução mensal</Text>
+                <LineChart
+                  data={{
+                    labels: this.state.labels,
+                    datasets: [
+                      {
+                        data: this.state.datasets,
+                      },
+                    ],
+                  }}
+                  width={Dimensions.get("window").width} // from react-native
+                  height={220}
+                  yAxisLabel=""
+                  yAxisSuffix=""
+                  yAxisInterval={1} // optional, defaults to 1
+                  chartConfig={{
+                    backgroundColor: "#E2B500",
+                    backgroundGradientFrom: "#3179CF",
+                    backgroundGradientTo: "#2F70BD",
+                    decimalPlaces: 0, // optional, defaults to 2dp
+                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    labelColor: (opacity = 1) =>
+                      `rgba(255, 255, 255, ${opacity})`,
+                    style: {
+                      borderRadius: 16,
+                    },
+                    propsForDots: {
+                      r: "6",
+                      strokeWidth: "2",
+                      stroke: "#ffa726",
+                    },
+                  }}
+                  bezier
+                  style={{
+                    marginVertical: 8,
+                    borderRadius: 16,
+                  }}
+                />
+              </View>
+            )
+          }
           <Text style={styles.title}>Desempenho dos líderes</Text>
           <FlatList
             data={formatData(porLider, numColumns)}
@@ -495,7 +497,13 @@ class StatsScreen extends React.Component {
       );
     } else {
       const { disabled } = this.state;
-      return <ScrollView style={styles.container}></ScrollView>;
+      return (
+        <ScrollView style={styles.container}>
+          <Text style={{ textAlign: "center", marginTop: "78%", fontSize: normalize(15) }}>
+            Recurso exclusivo da Área de Candidato
+          </Text>
+        </ScrollView>
+      );
     }
   }
 }
