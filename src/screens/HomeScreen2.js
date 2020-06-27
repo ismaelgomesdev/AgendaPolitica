@@ -32,12 +32,14 @@ import Dialog, {
   DialogButton,
   DialogContent,
 } from "react-native-popup-dialog";
+
 const width = Dimensions.get("window").width;
 let idLogado = "";
 let nomeLogado = "";
 let tipoLogado = "";
 let aux = [];
-class HomeScreen extends React.Component {
+
+class HomeScreen2 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -49,6 +51,7 @@ class HomeScreen extends React.Component {
       telefone_lider: "",
       senha_lider: "",
       errorMessage: "",
+
       nome_eleitor: "",
       telefone_eleitor: "",
       cpf_eleitor: "",
@@ -58,10 +61,12 @@ class HomeScreen extends React.Component {
       id_local: null,
       secao: "",
       desc_demanda: "",
+
       valida_endereco: true,
       valida_local: true,
       valida_secao: true,
       valida_cpf: true,
+
       loading: false,
       data: [],
       locais: [],
@@ -73,28 +78,35 @@ class HomeScreen extends React.Component {
       connected: true,
       dadosOffline: [],
       aviso: "indefinido",
+
       mensagem: "",
     };
     this.unsubscribe = null;
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
   }
+
   /*async componentWillMount() {
     this.state.token = await AsyncStorage.getItem('@PoliNet_token'); 
     console.log(this.state.token)
   }*/
+
   validaCampos = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
+
     const { token } = this.state;
+
     try {
       const response = await api.post("/V_User.php", {
         tipo: "3",
         token,
       });
+
       console.log(response.data);
       const { nome, id, tipo } = response.data;
       nomeLogado = nome;
       idLogado = id;
       tipoLogado = tipo;
+
       this.setState({ idLog: id });
       this.setState({ nomeLog: nome });
       this.setState({ tipoLog: tipo });
@@ -134,30 +146,38 @@ class HomeScreen extends React.Component {
       });
     }
   };
+
   pesqDados = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
+
     const { token } = this.state;
+
     try {
       const response = await api.post("/V_User.php", {
         tipo: "3",
         token,
       });
+
       console.log(response.data);
       const { nome, id, tipo } = response.data;
       nomeLogado = nome;
       idLogado = id;
       tipoLogado = tipo;
+
       this.setState({ idLog: id });
       this.setState({ nomeLog: nome });
       this.setState({ tipoLog: tipo });
+
       console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
     } catch (e) {
       console.log(e);
     }
   };
+
   nomeCandidato = () => {
     return nomeLogado;
   };
+
   static navigationOptions = ({ navigation }) => ({
     headerLeft: () => {
       return (
@@ -178,6 +198,7 @@ class HomeScreen extends React.Component {
               source={AppIcon.images.defaultUser}
             />
           )}
+
           <Text style={[styles.titleHeader, styles.leftTitle]}>
             Nome do Candidato
           </Text>
@@ -185,6 +206,7 @@ class HomeScreen extends React.Component {
       );
     },
   });
+
   cadastrarLider = async () => {
     const { nome_lider, telefone_lider, senha_lider, conf_senha } = this.state;
     if (
@@ -212,7 +234,6 @@ class HomeScreen extends React.Component {
             telefone_lider: "",
             senha_lider: "",
             conf_senha: "",
-            errorMessage: ""
           });
           /*const { 
             token, 
@@ -337,6 +358,7 @@ class HomeScreen extends React.Component {
             desc_demanda: "",
             disabled: true,
           });
+
           /*const { 
             token, 
           } = response.data;
@@ -387,6 +409,7 @@ class HomeScreen extends React.Component {
           secao: secao,
           idLogado: idLogado,
         });
+
         console.log(aux);
         await AsyncStorage.setItem(
           "@PoliNet_dadosOffline",
@@ -408,8 +431,10 @@ class HomeScreen extends React.Component {
   /*state = {
     appState: AppState.currentState,
   };*/
+
   componentDidMount() {
     this.retornaBairros();
+
     this.getConnect();
     NetInfo.fetch().then((state) => {
       if (state.isInternetReachable) {
@@ -428,6 +453,7 @@ class HomeScreen extends React.Component {
     this.makeRemoteRequest();
     this.makeRemoteRequest2();
   }
+
   handleConnectivityChange = (state) => {
     if (state.isInternetReachable) {
       this.setState({ connected: true, aviso: "online" });
@@ -437,6 +463,7 @@ class HomeScreen extends React.Component {
     }
     console.log(state.isConnected ? "connected" : "not connected");
   };
+
   async getConnect() {
     console.log(Platform.OS);
     NetInfo.isConnected.fetch().then((isConnected) => {
@@ -446,11 +473,13 @@ class HomeScreen extends React.Component {
         this.setState({ connected: false, aviso: "offline" });
       }
     });
+
     NetInfo.isConnected.addEventListener(
       "connectionChange",
       this._handleConnectivityChange
     );
   }
+
   /*_handleConnectivityChange = (isConnected) => {
     if (isConnected == true) {
       this.setState({ connected: true, aviso: "online" });
@@ -459,9 +488,11 @@ class HomeScreen extends React.Component {
       this.setState({ connected: false, aviso: "offline" });
     }
   };*/
+
   componentDidUpdate() {
     console.log("component did update :", this.state); // one step behind child state
   }
+
   /*verificaCampos1() {
     const { nome_lider, telefone_lider, senha_lider, conf_senha } = this.state;
     if (nome_lider.length <= 0 || telefone_lider.length <= 0 || senha_lider.length <= 0 || conf_senha.length <= 0) {
@@ -506,20 +537,25 @@ class HomeScreen extends React.Component {
   }
   makeRemoteRequest = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
+
     const { token } = this.state;
+
     try {
       const response = await api.post("/V_User.php", {
         tipo: "3",
         token,
       });
+
       console.log(response.data);
       const { nome, id, tipo } = response.data;
       nomeLogado = nome;
       idLogado = id;
       tipoLogado = tipo;
+
       this.setState({ idLog: id });
       this.setState({ nomeLog: nome });
       this.setState({ tipoLog: tipo });
+
       console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
       const { idLog } = this.state;
       console.log(idLog);
@@ -543,6 +579,7 @@ class HomeScreen extends React.Component {
     } catch (e) {
       console.log(e);
     }
+
     /*getUsers()
       .then(users => {
         this.setState({
@@ -554,22 +591,28 @@ class HomeScreen extends React.Component {
         this.setState({ error, loading: false });
       });*/
   };
+
   makeRemoteRequest2 = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
+
     const { token } = this.state;
+
     try {
       const response = await api.post("/V_User.php", {
         tipo: "3",
         token,
       });
+
       console.log(response.data);
       const { nome, id, tipo } = response.data;
       nomeLogado = nome;
       idLogado = id;
       tipoLogado = tipo;
+
       this.setState({ idLog: id });
       this.setState({ nomeLog: nome });
       this.setState({ tipoLog: tipo });
+
       console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
       const { idLog } = this.state;
       try {
@@ -592,6 +635,7 @@ class HomeScreen extends React.Component {
     } catch (e) {
       console.log(e);
     }
+
     /*getUsers()
       .then(users => {
         this.setState({
@@ -639,6 +683,7 @@ class HomeScreen extends React.Component {
       />
     );
   };
+
   renderHeader = () => {
     return (
       <View>
@@ -649,8 +694,10 @@ class HomeScreen extends React.Component {
       </View>
     );
   };
+
   renderFooter = () => {
     if (!this.state.loading) return null;
+
     return (
       <View
         style={{
@@ -663,6 +710,7 @@ class HomeScreen extends React.Component {
       </View>
     );
   };
+
   renderCpf() {
     if (this.state.valida_cpf) {
       return (
@@ -804,6 +852,7 @@ class HomeScreen extends React.Component {
   renderRow({ item }) {
     return <ListItem title={item.nome_lider} subtitle={item.telefone_lider} />;
   }
+
   renderRow2({ item }) {
     return (
       <ListItem title={item.nome_eleitor} subtitle={item.telefone_eleitor} />
@@ -817,9 +866,11 @@ class HomeScreen extends React.Component {
       props.selectedValue
     );
     const { mudaLocal } = props;
+
     useEffect(() => {
       mudaLocal(selectedValue);
     }, [selectedValue, mudaLocal]);
+
     const change = (local) => {
       setSelectedValue(local);
     };
@@ -859,16 +910,20 @@ class HomeScreen extends React.Component {
       );
     }
   }
+
   /*mudaState = (conn) => {
     this.setState({ connected: conn });
   };
   ficaOn() {
     this.setState({ connected: true });
   }
+
   netState(props) {
     const netInfo = useNetInfo();
+
     let aviso = "indefinido";
     const { mudaState } = props;
+
     const [selectedValue, setSelectedValue] = React.useState(
       netInfo.isConnected
     );
@@ -911,26 +966,147 @@ class HomeScreen extends React.Component {
       </View>
     );
 */
+    const { disabled } = this.state;
+    const { locais } = this.state;
+    const { id_local } = this.state;
 
+    const local = locais.filter((dado) => dado.id_local === id_local);
+
+    console.log(local);
     return (
       <ScrollView style={styles.container}>
+        <Dialog
+          visible={this.state.visible}
+          dialogAnimation={new ScaleAnimation({})}
+          width={0.8}
+          footer={
+            <DialogFooter>
+              <DialogButton
+                text="Não"
+                onPress={() => {
+                  this.setState({ visible: false });
+                }}
+              />
+              <DialogButton
+                text="Sim"
+                onPress={() => {
+                  this.cadastrarEleitor();
+                  this.setState({ visible: false });
+                }}
+              />
+            </DialogFooter>
+          }
+        >
+          <DialogContent>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>Nome: </Text>
+              <Text style={{ fontSize: 15 }}>{this.state.nome_eleitor}</Text>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+                Telefone:{" "}
+              </Text>
+              <Text style={{ fontSize: 15 }}>
+                {this.state.telefone_eleitor}
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+                Endereço:{" "}
+              </Text>
+              <Text style={{ fontSize: 15 }}>
+                {this.state.endereco_eleitor}
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+                Número da residência:{" "}
+              </Text>
+              <Text style={{ fontSize: 15 }}>{this.state.num_eleitor}</Text>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+                Bairro/Distrito:{" "}
+              </Text>
+              <Text style={{ fontSize: 15 }}>
+                {local.map((item) => item.nome_local)}
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+                Seção de votação:{" "}
+              </Text>
+              <Text style={{ fontSize: 15 }}>{this.state.secao}</Text>
+            </View>
+            <Text
+              style={{
+                textAlign: "center",
+                marginTop: 5,
+                fontWeight: "bold",
+                fontSize: 20,
+              }}
+            >
+              Tudo certo?
+            </Text>
+          </DialogContent>
+        </Dialog>
         <View style={styles.containerForm}>
-          <Text style={styles.title}>
-            Novo líder de campanha
-            {/*{this.props.user.email}*/}
+          <Text>
+            Status de Rede: {this.state.aviso}
+            {
+              //<this.netState mudaState={this.mudaState}></this.netState>
+            }
           </Text>
+          <Text>
+            {
+              //this.state.mensagem
+            }
+          </Text>
+          <Text style={styles.title}>Novo apoiador</Text>
+
+          {/*{this.props.user.email}*/}
+
           <Text>{this.state.errorMessage}</Text>
           <View style={styles.InputContainer}>
             <TextInput
               style={styles.body}
               placeholder="Nome completo"
-              onChangeText={(text) => this.setState({ nome_lider: text })}
-              value={this.state.nome_lider}
+              onChangeText={(text) => {
+                this.setState({ nome_eleitor: text });
+                this.verificaCampos2();
+              }}
+              value={this.state.nome_eleitor}
               placeholderTextColor={AppStyles.color.grey}
               underlineColorAndroid="transparent"
             />
           </View>
           <View style={styles.InputContainer}>
+            {/*<TextInput
+                style={styles.body}
+                placeholder="Telefone"
+                placeholderTextColor={AppStyles.color.grey}
+                underlineColorAndroid="transparent"
+                value={this.state.telefone_eleitor}
+                onChangeText={(text) => {
+                  this.setState({
+                    telefone_eleitor: text,
+                  });
+                  this.verificaCampos2();
+                }}
+              />*/}
+            {/*<TextInput
+                style={styles.body}
+                placeholder="Telefone"
+                placeholderTextColor={AppStyles.color.grey}
+                underlineColorAndroid="transparent"
+                value={this.state.telefone_eleitor}
+                onChangeText={(text) => {
+                  this.setState({
+                    telefone_eleitor: text,
+                  });
+                  this.verificaCampos2();
+                }}
+              />*/}
             <TextInputMask
               style={styles.body}
               placeholder="Telefone"
@@ -942,42 +1118,30 @@ class HomeScreen extends React.Component {
                 withDDD: true,
                 dddMask: "(99) ",
               }}
-              value={this.state.telefone_lider}
+              value={this.state.telefone_eleitor}
               onChangeText={(text) => {
                 this.setState({
-                  telefone_lider: text,
+                  telefone_eleitor: text,
                 });
+                this.verificaCampos2();
               }}
             />
           </View>
-          {/*<View style={styles.InputContainer}>
-            <TextInput
-              style={styles.body}
-              placeholder="E-mail"
-              onChangeText={text => this.setState({ email: text })}
-              value={this.state.email}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </View>*/}
+          {this.renderCpf()}
+          {this.renderLocal()}
+          {this.renderLocal2()}
+          {this.renderEndereco()}
+          {this.renderNumero()}
+          {this.renderSecao()}
           <View style={styles.InputContainer}>
             <TextInput
               style={styles.body}
-              placeholder="Senha de acesso"
-              secureTextEntry={true}
-              onChangeText={(text) => this.setState({ senha_lider: text })}
-              value={this.state.senha_lider}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </View>
-          <View style={styles.InputContainer}>
-            <TextInput
-              style={styles.body}
-              placeholder="Confirme a senha"
-              secureTextEntry={true}
-              onChangeText={(text) => this.setState({ conf_senha: text })}
-              value={this.state.conf_senha}
+              placeholder="Demanda do apoiador"
+              onChangeText={(text) => {
+                this.setState({ desc_demanda: text });
+                this.verificaCampos2();
+              }}
+              value={this.state.desc_demanda}
               placeholderTextColor={AppStyles.color.grey}
               underlineColorAndroid="transparent"
             />
@@ -985,22 +1149,19 @@ class HomeScreen extends React.Component {
           <Button
             containerStyle={[styles.facebookContainer]}
             style={styles.facebookText}
-            onPress={() => this.cadastrarLider()}
+            disabled={disabled}
+            disabledContainerStyle={{ backgroundColor: "#547397" }}
+            styleDisabled={{ color: "white" }}
+            onPress={() =>
+              //this.cadastrarEleitor()
+              {
+                this.setState({ visible: true });
+              }
+            }
           >
             Cadastrar
           </Button>
         </View>
-        {/*
-        <SafeAreaView style={styles.containerList}>
-          <SectionList
-            sections={DATA}
-            keyExtractor={(item, index) => item + index}
-            renderItem={({ item }) => <Item title={item} />}
-            renderSectionHeader={({ section: { title } }) => (
-              <Text style={styles.header}>{title}</Text>
-            )}
-          />
-            </SafeAreaView>*/}
         <View
           containerStyle={{
             flex: 1,
@@ -1009,13 +1170,18 @@ class HomeScreen extends React.Component {
           }}
         >
           <Text style={styles.title}>
-            Líderes cadastrados
-            {/*{this.props.user.email}*/}
+            Eleitores cadastrados por você
+           
+          </Text>
+          <Text>
+            {aux.map(
+              (item) => item.nome_eleitor + " (aguardando sincronização)\n"
+            )}
           </Text>
           <FlatList
             data={this.state.data}
-            renderItem={this.renderRow}
-            keyExtractor={(item) => item.id_lider}
+            renderItem={this.renderRow2}
+            keyExtractor={(item) => item.id_eleitor}
             ItemSeparatorComponent={this.renderSeparator}
             ListFooterComponent={this.renderFooter}
           />
@@ -1024,6 +1190,7 @@ class HomeScreen extends React.Component {
     );
   }
 }
+
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
@@ -1146,7 +1313,9 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
 });
+
 const mapStateToProps = (state) => ({
   user: state.auth.user,
 });
-export default connect(mapStateToProps)(HomeScreen);
+
+export default connect(mapStateToProps)(HomeScreen2);

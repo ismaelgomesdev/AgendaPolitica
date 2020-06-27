@@ -38,20 +38,25 @@ class LoginScreen extends React.Component {
           senha,
         });
         if (response.data != null) {
+
+          const { token, tipo } = response.data;
           console.log(response.data);
-          const { token } = response.data;
           //console.log(qrkey)
           await AsyncStorage.setItem("@PoliNet_token", token);
           //console.log(AsyncStorage.getItem('@InvestSe_token'))
           //this.props.navigation.navigate("AppNavigator", {keyRef: qrkey});
           const { navigation } = this.props;
-          navigation.dispatch({ type: "Login", user: null });
+          if(tipo == 'candidato'){
+            navigation.dispatch({ type: "LoginC", user: null });
+          } else {
+            navigation.dispatch({ type: "LoginL", user: null });
+          }
         } else {
-          console.log("erro");
+
           this.setState({ errorMessage: "Dados incorretos. Tente novamente." });
         }
       } catch (err) {
-        console.log(err);
+
       }
     }
     /*firebase
@@ -190,7 +195,7 @@ class LoginScreen extends React.Component {
             underlineColorAndroid="transparent"
           />
         </View>
-
+          <Text>{this.state.errorMessage}</Text>
         <Button
           containerStyle={styles.loginContainer}
           style={styles.loginText}

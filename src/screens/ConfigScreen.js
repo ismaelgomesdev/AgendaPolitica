@@ -116,9 +116,7 @@ class ConfigScreen extends React.Component {
         nome_campo: "",
         disabled: true,
       });
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
 
   alteraCampos = async () => {
@@ -176,9 +174,7 @@ class ConfigScreen extends React.Component {
       this.setState({
         mensagem: response.data,
       });
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
   alteraDemanda = async (id_demanda, status) => {
     const { idLog } = this.state;
@@ -192,9 +188,7 @@ class ConfigScreen extends React.Component {
       this.setState({
         mensagem: response.data,
       });
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
 
   makeRemoteRequest = async () => {
@@ -208,7 +202,6 @@ class ConfigScreen extends React.Component {
         token,
       });
 
-      console.log(response.data);
       const { nome, id, tipo } = response.data;
       nomeLogado = nome;
       idLogado = id;
@@ -218,13 +211,9 @@ class ConfigScreen extends React.Component {
       this.setState({ nomeLog: nome });
       this.setState({ tipoLog: tipo });
 
-      console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
       this.setState({ loading: true });
       const { idLog } = this.state;
-      console.log(idLog);
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
   verificaCampos = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
@@ -237,7 +226,6 @@ class ConfigScreen extends React.Component {
         token,
       });
 
-      console.log(response.data);
       const { nome, id, tipo } = response.data;
       nomeLogado = nome;
       idLogado = id;
@@ -248,10 +236,7 @@ class ConfigScreen extends React.Component {
       this.setState({ tipoLog: tipo });
       this.setState({ loading: true });
       const { idLog } = this.state;
-      console.log(idLog);
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
     const { idLog } = this.state;
     try {
       const response = await api.post("/V_Candidato.php", {
@@ -265,9 +250,7 @@ class ConfigScreen extends React.Component {
         local: local,
         secao: secao,
       });
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
   pesquisaCampos = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
@@ -280,7 +263,6 @@ class ConfigScreen extends React.Component {
         token,
       });
 
-      console.log(response.data);
       const { nome, id, tipo } = response.data;
       nomeLogado = nome;
       idLogado = id;
@@ -291,10 +273,7 @@ class ConfigScreen extends React.Component {
       this.setState({ tipoLog: tipo });
       this.setState({ loading: true });
       const { idLog } = this.state;
-      console.log(idLog);
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
     const { idLog } = this.state;
     try {
       const response = await api.post("/V_Campos.php", {
@@ -305,9 +284,7 @@ class ConfigScreen extends React.Component {
         data: response.data,
         loading: false,
       });
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
 
   renderCampo = ({ item }) => {
@@ -347,7 +324,6 @@ class ConfigScreen extends React.Component {
         token,
       });
 
-      console.log(response.data);
       const { nome, id, tipo } = response.data;
       nomeLogado = nome;
       idLogado = id;
@@ -358,10 +334,7 @@ class ConfigScreen extends React.Component {
       this.setState({ tipoLog: tipo });
       this.setState({ loading: true });
       const { idLog } = this.state;
-      console.log(idLog);
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
     const { idLog } = this.state;
     try {
       const response = await api.post("/V_Demanda.php", {
@@ -373,9 +346,7 @@ class ConfigScreen extends React.Component {
         mensagem: JSON.stringify(response.data),
         loading: false,
       });
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
   renderSeparator = () => {
     return (
@@ -402,7 +373,7 @@ class ConfigScreen extends React.Component {
           (Demanda de: {item.nome_eleitor})
         </Text>
         <Switch
-          style={{position: "absolute", alignSelf: "flex-end"}}
+          style={{ position: "absolute", alignSelf: "flex-end" }}
           value={item.status_demanda}
           onValueChange={(v) => {
             item.status_demanda = v;
@@ -433,170 +404,146 @@ class ConfigScreen extends React.Component {
     );
   };
   render() {
-    if (tipoLogado == "candidato") {
-      const { disabled } = this.state;
-      const { nome_campo } = this.state;
-      return (
-        <ScrollView style={styles.container}>
-          <View style={styles.containerForm}>
-            <View style={styles.containerForm1}>
-              <Text style={styles.title}>
-                Campos a serem preenchidos no formulário de novo apoiador
-              </Text>
-              <View style={styles.InputContainer}>
-                <View style={{ padding: 10 }}>
-                  <Text>Nome</Text>
-                  <Switch value={this.state.nome} onValueChange={(v) => {}} />
-                </View>
-                <View style={{ padding: 10 }}>
-                  <Text>Telefone</Text>
-                  <Switch
-                    value={this.state.telefone}
-                    onValueChange={(v) => {}}
-                  />
-                </View>
-                <View style={{ padding: 10 }}>
-                  <Text>CPF</Text>
-                  <Switch
-                    value={this.state.cpf}
-                    onValueChange={(v) => {
-                      if (v) {
-                        this.setState({ cpf: v });
-                      } else {
-                        this.setState({ cpf: "0" });
-                      }
-                    }}
-                  />
-                </View>
-              </View>
-              <View style={styles.InputContainer}>
-                <View style={{ padding: 10 }}>
-                  <Text>Bairro/Distrito</Text>
-                  <Switch
-                    value={this.state.local}
-                    onValueChange={(v) => {
-                      if (v) {
-                        this.setState({ local: v });
-                      } else {
-                        this.setState({ local: "0" });
-                      }
-                    }}
-                  />
-                </View>
-                <View style={{ padding: 10 }}>
-                  <Text>Endereço</Text>
-                  <Switch
-                    value={this.state.endereco}
-                    onValueChange={(v) => {
-                      if (v) {
-                        this.setState({ endereco: v });
-                      } else {
-                        this.setState({ endereco: "0" });
-                      }
-                    }}
-                  />
-                </View>
-                <View style={{ padding: 10 }}>
-                  <Text>Seção</Text>
-                  <Switch
-                    value={this.state.secao}
-                    onValueChange={(v) => {
-                      if (v) {
-                        this.setState({ secao: v });
-                      } else {
-                        this.setState({ secao: "0" });
-                      }
-                    }}
-                  />
-                </View>
-              </View>
-            </View>
-            <Button
-              containerStyle={[styles.facebookContainer]}
-              style={styles.facebookText}
-              onPress={() => {
-                this.alteraCampos();
-              }}
-            >
-              Aplicar
-            </Button>
-          </View>
-          <View style={{ flex: 1, alignItems: "center" }}>
+    const { disabled } = this.state;
+    const { nome_campo } = this.state;
+    return (
+      <ScrollView style={styles.container}>
+        <View style={styles.containerForm}>
+          <View style={styles.containerForm1}>
             <Text style={styles.title}>
-              Campos personalizados
+              Campos a serem preenchidos no formulário de novo apoiador
             </Text>
-            <View style={styles.containerForm2}>
-              <View style={styles.InputContainer1}>
-                <View style={{ padding: 10 }}>
-                  <TextInput
-                    style={styles.body}
-                    placeholder="Nome do campo"
-                    value={nome_campo}
-                    onChangeText={(text) => {
-                      this.setState({ nome_campo: text });
-                      this.verificaCampos2();
-                    }}
-                    placeholderTextColor={AppStyles.color.grey}
-                    underlineColorAndroid="transparent"
-                  />
-                </View>
+            <View style={styles.InputContainer}>
+              <View style={{ padding: 10 }}>
+                <Text>Nome</Text>
+                <Switch value={this.state.nome} onValueChange={(v) => {}} />
               </View>
-
-              <Button
-                containerStyle={[styles.facebookContainer1]}
-                style={styles.facebookText1}
-                disabled={disabled}
-                disabledContainerStyle={{ backgroundColor: "#547397" }}
-                styleDisabled={{ color: "white" }}
-                onPress={() => {
-                  this.adicionarCampo();
-                  this.setState({ visible: true });
-                }}
-              >
-                +
-              </Button>
+              <View style={{ padding: 10 }}>
+                <Text>Telefone</Text>
+                <Switch value={this.state.telefone} onValueChange={(v) => {}} />
+              </View>
+              <View style={{ padding: 10 }}>
+                <Text>CPF</Text>
+                <Switch
+                  value={this.state.cpf}
+                  onValueChange={(v) => {
+                    if (v) {
+                      this.setState({ cpf: v });
+                    } else {
+                      this.setState({ cpf: "0" });
+                    }
+                  }}
+                />
+              </View>
             </View>
-            <View style={{ flexDirection: "row", marginBottom: 50 }}>
-              <FlatList
-                data={this.state.data}
-                renderItem={this.renderCampo}
-                keyExtractor={(item) => item.id_campo}
-                ListFooterComponent={this.renderFooter}
-              />
-            </View>
-            <View style={styles.containerForm1}>
-              <Text style={styles.title}>
-                Demandas dos apoiadores
-              </Text>
-              <View style={{ flexDirection: "row" }}>
-                <FlatList
-                  data={this.state.data1}
-                  renderItem={this.renderDemanda}
-                  keyExtractor={(item) => item.id_demanda}
-                  ListFooterComponent={this.renderFooter}
-                  ItemSeparatorComponent={this.renderSeparator}
+            <View style={styles.InputContainer}>
+              <View style={{ padding: 10 }}>
+                <Text>Bairro/Distrito</Text>
+                <Switch
+                  value={this.state.local}
+                  onValueChange={(v) => {
+                    if (v) {
+                      this.setState({ local: v });
+                    } else {
+                      this.setState({ local: "0" });
+                    }
+                  }}
+                />
+              </View>
+              <View style={{ padding: 10 }}>
+                <Text>Endereço</Text>
+                <Switch
+                  value={this.state.endereco}
+                  onValueChange={(v) => {
+                    if (v) {
+                      this.setState({ endereco: v });
+                    } else {
+                      this.setState({ endereco: "0" });
+                    }
+                  }}
+                />
+              </View>
+              <View style={{ padding: 10 }}>
+                <Text>Seção</Text>
+                <Switch
+                  value={this.state.secao}
+                  onValueChange={(v) => {
+                    if (v) {
+                      this.setState({ secao: v });
+                    } else {
+                      this.setState({ secao: "0" });
+                    }
+                  }}
                 />
               </View>
             </View>
           </View>
-        </ScrollView>
-      );
-    } else {
-      const { disabled } = this.state;
-      return (
-        <ScrollView style={styles.container}>
-          <Text
-            style={{
-              textAlign: "center",
-              marginTop: "80%",
-              fontSize: normalize(15),
+          <Button
+            containerStyle={[styles.facebookContainer]}
+            style={styles.facebookText}
+            onPress={() => {
+              this.alteraCampos();
             }}
           >
-            Recurso exclusivo da Área de Candidato
-          </Text>
-        </ScrollView>
-      );
-    }
+            Aplicar
+          </Button>
+        </View>
+        <View style={{ flex: 1, alignItems: "center" }}>
+          <Text style={styles.title}>Campos personalizados</Text>
+          <View style={styles.containerForm2}>
+            <View style={styles.InputContainer1}>
+              <View style={{ padding: 10 }}>
+                <TextInput
+                  style={styles.body}
+                  placeholder="Nome do campo"
+                  value={nome_campo}
+                  onChangeText={(text) => {
+                    this.setState({ nome_campo: text });
+                    this.verificaCampos2();
+                  }}
+                  placeholderTextColor={AppStyles.color.grey}
+                  underlineColorAndroid="transparent"
+                />
+              </View>
+            </View>
+
+            <Button
+              containerStyle={[styles.facebookContainer1]}
+              style={styles.facebookText1}
+              disabled={disabled}
+              disabledContainerStyle={{ backgroundColor: "#547397" }}
+              styleDisabled={{ color: "white" }}
+              onPress={() => {
+                this.adicionarCampo();
+                this.setState({ visible: true });
+              }}
+            >
+              +
+            </Button>
+          </View>
+          <View style={{ flexDirection: "row", marginBottom: 50 }}>
+            <FlatList
+              data={this.state.data}
+              renderItem={this.renderCampo}
+              keyExtractor={(item) => item.id_campo}
+              ListFooterComponent={this.renderFooter}
+            />
+          </View>
+          <View style={styles.containerForm1}>
+            <Text style={styles.title}>Demandas dos apoiadores</Text>
+            <View style={{ flexDirection: "row" }}>
+              <FlatList
+                data={this.state.data1}
+                renderItem={this.renderDemanda}
+                keyExtractor={(item) => item.id_demanda}
+                ListFooterComponent={this.renderFooter}
+                ItemSeparatorComponent={this.renderSeparator}
+              />
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    );
   }
 }
 
@@ -609,7 +556,7 @@ const styles = StyleSheet.create({
   containerForm: {
     flex: 1,
     alignItems: "center",
-    marginBottom: 50
+    marginBottom: 50,
   },
   containerForm1: {
     flex: 1,
@@ -623,7 +570,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: AppStyles.color.tint,
     textAlign: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   InputContainer: {
     flexDirection: "row",
@@ -659,7 +606,7 @@ const styles = StyleSheet.create({
     width: AppStyles.buttonWidth.main,
     backgroundColor: AppStyles.color.tint,
     borderRadius: AppStyles.borderRadius.main,
-    padding: 10
+    padding: 10,
   },
   facebookText: {
     color: AppStyles.color.white,

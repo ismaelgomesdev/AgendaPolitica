@@ -1,7 +1,7 @@
 import { create } from 'apisauce';
 
 const api = create({
-    baseURL: "http://10.0.0.102/api_PoliNet/View",
+    baseURL: "http://agenda.invest153.com.br/View/",
 });
 
 api.addResponseTransform(response => {

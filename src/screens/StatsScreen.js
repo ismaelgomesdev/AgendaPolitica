@@ -353,7 +353,6 @@ class StatsScreen extends React.Component {
   };
 
   render() {
-    if (tipoLogado == "candidato") {
       const data = [
         { quantidade: this.state.quantidade },
         { quantidade_semana: this.state.quantidade_semana },
@@ -495,16 +494,6 @@ class StatsScreen extends React.Component {
           />
         </ScrollView>
       );
-    } else {
-      const { disabled } = this.state;
-      return (
-        <ScrollView style={styles.container}>
-          <Text style={{ textAlign: "center", marginTop: "78%", fontSize: normalize(15) }}>
-            Recurso exclusivo da Área de Candidato
-          </Text>
-        </ScrollView>
-      );
-    }
   }
 }
 

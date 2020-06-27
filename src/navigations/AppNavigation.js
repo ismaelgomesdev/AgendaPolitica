@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Text,
 } from "react-native";
+
 import { connect } from "react-redux";
 import {
   DrawerNavigator,
@@ -20,6 +21,7 @@ import {
 import ConfigScreen from "../screens/ConfigScreen";
 import StatsScreen from "../screens/StatsScreen";
 import HomeScreen from "../screens/HomeScreen";
+import HomeScreen2 from "../screens/HomeScreen2";
 import LoginScreen from "../screens/LoginScreen";
 import SignupScreen from "../screens/SignupScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
@@ -61,6 +63,23 @@ const LoginStack = createStackNavigator(
 const HomeStack = createStackNavigator(
   {
     Home: { screen: HomeScreen },
+  },
+  {
+    initialRouteName: "Home",
+    headerMode: "float",
+
+    headerLayoutPreset: "center",
+    navigationOptions: ({ navigation }) => ({
+      headerTintColor: AppStyles.color.tint,
+      headerTitleStyle: styles.headerTitleStyle,
+    }),
+    cardStyle: { backgroundColor: "#FFFFFF" },
+  }
+);
+
+const HomeStack2 = createStackNavigator(
+  {
+    Home: { screen: HomeScreen2 },
   },
   {
     initialRouteName: "Home",
@@ -201,11 +220,11 @@ const ConfigStack = createStackNavigator(
   }
 );
 
-const TabNavigator = createBottomTabNavigator(
+const TabNavigatorC = createBottomTabNavigator(
   {
     Início: { screen: HomeStack },
     Relatórios: { screen: StatsStack },
-    Configurações: { screen: ConfigStack }
+    Configurações: { screen: ConfigStack },
   },
   {
     navigationOptions: ({ navigation }) => ({
@@ -247,10 +266,59 @@ const TabNavigator = createBottomTabNavigator(
   }
 );
 
-// drawer stack
-const DrawerStack = DrawerNavigator(
+const TabNavigatorL = createBottomTabNavigator(
   {
-    Tab: TabNavigator,
+    Início: { screen: HomeStack2 },
+  },
+  {
+    navigationOptions: ({ navigation }) => ({
+      tabBarIcon: ({ focused, tintColor }) => {
+        const { routeName } = navigation.state;
+        let iconName;
+        if (routeName === "Início") {
+          iconName = AppIcon.images.home;
+        }
+        // You can return any component that you like here! We usually use an
+        // icon component from react-native-vector-icons
+        return (
+          <Image
+            style={{
+              tintColor: focused ? AppStyles.color.tint : AppStyles.color.grey,
+            }}
+            source={iconName}
+          />
+        );
+      },
+      params: { nomeLogado: "teste" },
+    }),
+    initialLayout: {
+      height: 300,
+    },
+    tabBarOptions: {
+      activeTintColor: AppStyles.color.tint,
+      inactiveTintColor: "gray",
+      style: {
+        height: Configuration.home.tab_bar_height,
+      },
+    },
+  }
+);
+
+// drawer stack
+const DrawerStackC = DrawerNavigator(
+  {
+    Tab: TabNavigatorC,
+  },
+  {
+    drawerPosition: "left",
+    initialRouteName: "Tab",
+    drawerWidth: 200,
+    contentComponent: DrawerContainer,
+  }
+);
+const DrawerStackL = DrawerNavigator(
+  {
+    Tab: TabNavigatorL,
   },
   {
     drawerPosition: "left",
@@ -264,12 +332,13 @@ const DrawerStack = DrawerNavigator(
 const RootNavigator = createStackNavigator(
   {
     LoginStack: { screen: LoginStack },
-    DrawerStack: { screen: DrawerStack },
+    DrawerStackC: { screen: DrawerStackC },
+    DrawerStackL: { screen: DrawerStackL },
   },
   {
     // Default config for all screens
     headerMode: "none",
-    initialRouteName: "DrawerStack",
+    initialRouteName: "LoginStack",
     transitionConfig: noTransitionConfig,
     navigationOptions: ({ navigation }) => ({
       color: "black",

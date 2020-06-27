@@ -64,7 +64,8 @@ export const AppIcon = {
     stats: require("../assets/icons/statistics.png"),
     home: require("../assets/icons/home1.png"),
     defaultUser: require("../assets/icons/default_user.jpg"),
-    logout: require("../assets/icons/shutdown.png")
+    logout: require("../assets/icons/shutdown.png"),
+    search: require("../assets/icons/search.png")
   }
 };
 

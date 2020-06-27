@@ -34,7 +34,7 @@ class WelcomeScreen extends React.Component {
           //<Text style={styles.title}>[[Logo do App]]</Text>
         }
         <Image
-          source={require("../assets/images/eleicoes-2020.png")}
+          source={require("../assets/images/download.png")}
           style={styles.logo}
         ></Image>
         <Button
@@ -44,13 +44,13 @@ class WelcomeScreen extends React.Component {
         >
           Entrar na minha conta
         </Button>
-        <Button
+        {/*<Button
           containerStyle={styles.signupContainer}
           style={styles.signupText}
           onPress={() => this.props.navigation.navigate("Signup")}
         >
           Solicitar acesso
-        </Button>
+        </Button>*/}
       </View>
     );
   }

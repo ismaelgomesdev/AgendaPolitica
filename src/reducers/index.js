@@ -13,12 +13,18 @@ const initialNavState = RootNavigator.router.getStateForAction(firstAction);
 function nav(state = initialNavState, action) {
   let nextState;
   switch (action.type) {
-    case "Login":
+    case "LoginC":
       nextState = RootNavigator.router.getStateForAction(
-        NavigationActions.navigate({ routeName: "DrawerStack" }),
+        NavigationActions.navigate({ routeName: "DrawerStackC" }),
         state
       );
       break;
+    case "LoginL":
+        nextState = RootNavigator.router.getStateForAction(
+          NavigationActions.navigate({ routeName: "DrawerStackL" }),
+          state
+        );
+        break;
     case "Logout":
       try {
         AsyncStorage.clear(); 
