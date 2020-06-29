@@ -269,10 +269,14 @@ class HomeScreen2 extends React.Component {
     this.setState({
       dadosOffline: await AsyncStorage.getItem("@PoliNet_dadosOffline"),
     });
+    
     let dadosOffline = JSON.parse(this.state.dadosOffline);
     await AsyncStorage.setItem("@PoliNet_dadosOffline", JSON.stringify(aux));
+
+    let cont = 0;
     if (dadosOffline != []) {
       dadosOffline.map(async (item) => {
+        cont = (cont + 1);
         try {
           const response = await api.post("/V_Eleitor.php", {
             tipo: item.tipo,
@@ -285,6 +289,9 @@ class HomeScreen2 extends React.Component {
             secao: item.secao,
             idLogado: item.idLogado,
           });
+          aux.push(JSON.stringify(response.data))
+          this.setState({mensagem: JSON.stringify(aux)})
+          aux = [];
           if (response.data != null) {
             console.log(response.data);
             this.setState({
@@ -293,7 +300,6 @@ class HomeScreen2 extends React.Component {
               cpf_eleitor: "",
               endereco_eleitor: "",
               num_eleitor: "",
-              id_local: "",
               secao: "",
               disabled: true,
             });
@@ -391,6 +397,7 @@ class HomeScreen2 extends React.Component {
           cpf_eleitor == item.cpf_eleitor &&
           num_eleitor == item.num_eleitor &&
           id_local == item.id_local &&
+          desc_demanda == desc_demanda &&
           secao == item.secao
         ) {
           auxx = true;
@@ -407,9 +414,12 @@ class HomeScreen2 extends React.Component {
           num_eleitor: num_eleitor,
           id_local: id_local,
           secao: secao,
+          desc_demanda: desc_demanda,
           idLogado: idLogado,
         });
-
+        this.setState({
+          mensagem:JSON.stringify(aux)
+        });
         console.log(aux);
         await AsyncStorage.setItem(
           "@PoliNet_dadosOffline",
@@ -422,8 +432,8 @@ class HomeScreen2 extends React.Component {
         cpf_eleitor: "",
         endereco_eleitor: "",
         num_eleitor: "",
-        id_local: "",
         secao: "",
+        desc_demanda: "",
         disabled: true,
       });
     }
@@ -434,7 +444,9 @@ class HomeScreen2 extends React.Component {
 
   componentDidMount() {
     this.retornaBairros();
-
+    this.validaCampos();
+    this.makeRemoteRequest();
+    this.makeRemoteRequest2();
     this.getConnect();
     NetInfo.fetch().then((state) => {
       if (state.isInternetReachable) {
@@ -509,6 +521,10 @@ class HomeScreen2 extends React.Component {
       num_eleitor,
       id_local,
       secao,
+      valida_cpf,
+      valida_endereco,
+      valida_local,
+      valida_secao
     } = this.state;
     console.log(
       nome_eleitor.length +
@@ -524,16 +540,13 @@ class HomeScreen2 extends React.Component {
     );
     if (
       nome_eleitor.length <= 0 ||
-      telefone_eleitor.length <= 0 ||
-      secao.length <= 0 ||
-      endereco_eleitor.length <= 0 ||
-      id_local == null ||
-      num_eleitor.length <= 0
+      telefone_eleitor.length <= 0
     ) {
       this.setState({ disabled: true });
     } else {
       this.setState({ disabled: false });
     }
+
   }
   makeRemoteRequest = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");

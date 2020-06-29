@@ -50,8 +50,8 @@ const LoginStack = createStackNavigator(
     Welcome: { screen: WelcomeScreen },
   },
   {
-    initialRouteName: "Welcome",
-    headerMode: "float",
+    initialRouteName: "Login",
+    headerMode: "none",
     navigationOptions: ({ navigation }) => ({
       headerTintColor: AppStyles.color.tint,
       headerTitleStyle: styles.headerTitleStyle,

@@ -25,13 +25,6 @@ import { Configuration } from "../Configuration";
 import { Dimensions, AsyncStorage } from "react-native";
 import Constants from "expo-constants";
 import { RadioButton } from "react-native-paper";
-import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
-import Dialog, {
-  ScaleAnimation,
-  DialogFooter,
-  DialogButton,
-  DialogContent,
-} from "react-native-popup-dialog";
 const width = Dimensions.get("window").width;
 let idLogado = "";
 let nomeLogado = "";
@@ -49,91 +42,24 @@ class HomeScreen extends React.Component {
       telefone_lider: "",
       senha_lider: "",
       errorMessage: "",
-      nome_eleitor: "",
-      telefone_eleitor: "",
-      cpf_eleitor: "",
-      endereco_eleitor: "",
-      num_eleitor: "",
-      bairro_eleitor: "",
-      id_local: null,
-      secao: "",
-      desc_demanda: "",
-      valida_endereco: true,
-      valida_local: true,
-      valida_secao: true,
-      valida_cpf: true,
+      
+      
       loading: false,
       data: [],
-      locais: [],
-      bairros: [],
-      distritos: [],
+      
       error: null,
       disabled: true,
-      checked: "bairro",
-      connected: true,
-      dadosOffline: [],
+
+
       aviso: "indefinido",
       mensagem: "",
     };
-    this.unsubscribe = null;
-    this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
   }
   /*async componentWillMount() {
     this.state.token = await AsyncStorage.getItem('@PoliNet_token'); 
     console.log(this.state.token)
   }*/
-  validaCampos = async () => {
-    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
-    const { token } = this.state;
-    try {
-      const response = await api.post("/V_User.php", {
-        tipo: "3",
-        token,
-      });
-      console.log(response.data);
-      const { nome, id, tipo } = response.data;
-      nomeLogado = nome;
-      idLogado = id;
-      tipoLogado = tipo;
-      this.setState({ idLog: id });
-      this.setState({ nomeLog: nome });
-      this.setState({ tipoLog: tipo });
-      const { idLog } = this.state;
-      try {
-        const response = await api.post("/V_Lider.php", {
-          tipo: "4",
-          idLog,
-        });
-        if (response.data != null) {
-          const {
-            cpf_eleitor,
-            local_eleitor,
-            endereco_eleitor,
-            secao_eleitor,
-          } = response.data;
-          this.setState({
-            valida_cpf: cpf_eleitor,
-            valida_local: local_eleitor,
-            valida_endereco: endereco_eleitor,
-            valida_secao: secao_eleitor,
-            mensagem: JSON.stringify(response.data),
-          });
-        } else {
-          this.setState({
-            mensagem: "deu ruim",
-          });
-        }
-      } catch (e) {
-        this.setState({
-          mensagem: e,
-        });
-      }
-    } catch (e) {
-      this.setState({
-        mensagem: e,
-      });
-    }
-  };
+  
   pesqDados = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
     const { token } = this.state;
@@ -155,9 +81,7 @@ class HomeScreen extends React.Component {
       console.log(e);
     }
   };
-  nomeCandidato = () => {
-    return nomeLogado;
-  };
+
   static navigationOptions = ({ navigation }) => ({
     headerLeft: () => {
       return (
@@ -233,224 +157,23 @@ class HomeScreen extends React.Component {
       }
     }
   };
-  sincronizaDados = async () => {
-    aux = [];
-    const {
-      nome_eleitor,
-      telefone_eleitor,
-      cpf_eleitor,
-      endereco_eleitor,
-      num_eleitor,
-      id_local,
-      secao,
-      connected,
-    } = this.state;
-    this.setState({
-      dadosOffline: await AsyncStorage.getItem("@PoliNet_dadosOffline"),
-    });
-    let dadosOffline = JSON.parse(this.state.dadosOffline);
-    await AsyncStorage.setItem("@PoliNet_dadosOffline", JSON.stringify(aux));
-    if (dadosOffline != []) {
-      dadosOffline.map(async (item) => {
-        try {
-          const response = await api.post("/V_Eleitor.php", {
-            tipo: item.tipo,
-            nome_eleitor: item.nome_eleitor,
-            telefone_eleitor: item.telefone_eleitor,
-            cpf_eleitor: item.cpf_eleitor,
-            endereco_eleitor: item.endereco_eleitor,
-            num_eleitor: item.num_eleitor,
-            id_local: item.id_local,
-            secao: item.secao,
-            idLogado: item.idLogado,
-          });
-          if (response.data != null) {
-            console.log(response.data);
-            this.setState({
-              nome_eleitor: "",
-              telefone_eleitor: "",
-              cpf_eleitor: "",
-              endereco_eleitor: "",
-              num_eleitor: "",
-              id_local: "",
-              secao: "",
-              disabled: true,
-            });
-            this.makeRemoteRequest2();
-          } else {
-            this.setState({
-              errorMessage: "Dados incorretos. Tente novamente.",
-            });
-          }
-        } catch (err) {
-          console.log(err);
-        }
-      });
-    }
-  };
-  cadastrarEleitor = async () => {
-    /*if (
-      nome_eleitor.length <= 0 ||
-      telefone_eleitor.length <= 0 ||
-      secao.length <= 0 ||
-      endereco_eleitor.length <= 0 ||
-      id_local.length <= 0 ||
-      num_eleitor.length <= 0
-    ) {
-      this.setState({ errorMessage: "Por favor, preencha todos os dados." });
-    } else {*/
-    const {
-      nome_eleitor,
-      telefone_eleitor,
-      cpf_eleitor,
-      endereco_eleitor,
-      num_eleitor,
-      id_local,
-      secao,
-      desc_demanda,
-      connected,
-    } = this.state;
-    if (connected) {
-      try {
-        const response = await api.post("/V_Eleitor.php", {
-          tipo: "1",
-          nome_eleitor,
-          telefone_eleitor,
-          cpf_eleitor,
-          endereco_eleitor,
-          num_eleitor,
-          id_local,
-          secao,
-          desc_demanda,
-          idLogado,
-        });
-        if (response.data != null) {
-          console.log(response.data);
-          this.setState({
-            nome_eleitor: "",
-            telefone_eleitor: "",
-            cpf_eleitor: "",
-            endereco_eleitor: "",
-            num_eleitor: "",
-            id_local: "",
-            secao: "",
-            desc_demanda: "",
-            disabled: true,
-          });
-          /*const { 
-            token, 
-          } = response.data;
-          //console.log(qrkey)
-          await AsyncStorage.setItem('@PoliNet_token', token)
-          //console.log(AsyncStorage.getItem('@InvestSe_token'))
-          //this.props.navigation.navigate("AppNavigator", {keyRef: qrkey});
-          const { navigation } = this.props;
-          navigation.dispatch({ type: "Login", user: null });
-          */
-          this.setState({
-            mensagem: JSON.stringify(response.data),
-          });
-          this.makeRemoteRequest2();
-        } else {
-          this.setState({
-            errorMessage: "Dados incorretos. Tente novamente.",
-          });
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    } else {
-      let auxx = false;
-      aux.map((item) => {
-        if (
-          nome_eleitor == item.nome_eleitor &&
-          telefone_eleitor == item.telefone_eleitor &&
-          endereco_eleitor == item.endereco_eleitor &&
-          cpf_eleitor == item.cpf_eleitor &&
-          num_eleitor == item.num_eleitor &&
-          id_local == item.id_local &&
-          secao == item.secao
-        ) {
-          auxx = true;
-        }
-      });
-      if (auxx) {
-      } else {
-        aux.push({
-          tipo: "1",
-          nome_eleitor: nome_eleitor,
-          telefone_eleitor: telefone_eleitor,
-          cpf_eleitor: cpf_eleitor,
-          endereco_eleitor: endereco_eleitor,
-          num_eleitor: num_eleitor,
-          id_local: id_local,
-          secao: secao,
-          idLogado: idLogado,
-        });
-        console.log(aux);
-        await AsyncStorage.setItem(
-          "@PoliNet_dadosOffline",
-          JSON.stringify(aux)
-        );
-      }
-      this.setState({
-        nome_eleitor: "",
-        telefone_eleitor: "",
-        cpf_eleitor: "",
-        endereco_eleitor: "",
-        num_eleitor: "",
-        id_local: "",
-        secao: "",
-        disabled: true,
-      });
-    }
-  };
+
+
   /*state = {
     appState: AppState.currentState,
   };*/
   componentDidMount() {
-    this.retornaBairros();
-    this.getConnect();
-    NetInfo.fetch().then((state) => {
-      if (state.isInternetReachable) {
-        this.setState({ connected: true, aviso: "online" });
-      } else {
-        this.setState({ connected: false, aviso: "offline" });
-      }
-    });
-    this.unsubscribe = NetInfo.addEventListener(this.handleConnectivityChange);
-  }
-  componentWillUnmount() {
-    this.unsubscribe();
+
+
+    this.makeRemoteRequest();
+
+    
   }
   componentWillMount() {
-    this.validaCampos();
-    this.makeRemoteRequest();
-    this.makeRemoteRequest2();
+
+
   }
-  handleConnectivityChange = (state) => {
-    if (state.isInternetReachable) {
-      this.setState({ connected: true, aviso: "online" });
-      this.sincronizaDados();
-    } else {
-      this.setState({ connected: false, aviso: "offline" });
-    }
-    console.log(state.isConnected ? "connected" : "not connected");
-  };
-  async getConnect() {
-    console.log(Platform.OS);
-    NetInfo.isConnected.fetch().then((isConnected) => {
-      if (isConnected == true) {
-        this.setState({ connected: true, aviso: "online" });
-      } else {
-        this.setState({ connected: false, aviso: "offline" });
-      }
-    });
-    NetInfo.isConnected.addEventListener(
-      "connectionChange",
-      this._handleConnectivityChange
-    );
-  }
+ 
   /*_handleConnectivityChange = (isConnected) => {
     if (isConnected == true) {
       this.setState({ connected: true, aviso: "online" });
@@ -459,9 +182,7 @@ class HomeScreen extends React.Component {
       this.setState({ connected: false, aviso: "offline" });
     }
   };*/
-  componentDidUpdate() {
-    console.log("component did update :", this.state); // one step behind child state
-  }
+
   /*verificaCampos1() {
     const { nome_lider, telefone_lider, senha_lider, conf_senha } = this.state;
     if (nome_lider.length <= 0 || telefone_lider.length <= 0 || senha_lider.length <= 0 || conf_senha.length <= 0) {
@@ -470,40 +191,7 @@ class HomeScreen extends React.Component {
       this.setState({errorMessage: "A confirmação deve ser igual à senha!"});
     }
   }*/
-  verificaCampos2() {
-    const {
-      nome_eleitor,
-      telefone_eleitor,
-      endereco_eleitor,
-      num_eleitor,
-      id_local,
-      secao,
-    } = this.state;
-    console.log(
-      nome_eleitor.length +
-        " " +
-        telefone_eleitor.length +
-        " " +
-        secao.length +
-        " " +
-        endereco_eleitor.length +
-        " " +
-        num_eleitor.length +
-        " "
-    );
-    if (
-      nome_eleitor.length <= 0 ||
-      telefone_eleitor.length <= 0 ||
-      secao.length <= 0 ||
-      endereco_eleitor.length <= 0 ||
-      id_local == null ||
-      num_eleitor.length <= 0
-    ) {
-      this.setState({ disabled: true });
-    } else {
-      this.setState({ disabled: false });
-    }
-  }
+
   makeRemoteRequest = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
     const { token } = this.state;
@@ -554,79 +242,8 @@ class HomeScreen extends React.Component {
         this.setState({ error, loading: false });
       });*/
   };
-  makeRemoteRequest2 = async () => {
-    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
-    const { token } = this.state;
-    try {
-      const response = await api.post("/V_User.php", {
-        tipo: "3",
-        token,
-      });
-      console.log(response.data);
-      const { nome, id, tipo } = response.data;
-      nomeLogado = nome;
-      idLogado = id;
-      tipoLogado = tipo;
-      this.setState({ idLog: id });
-      this.setState({ nomeLog: nome });
-      this.setState({ tipoLog: tipo });
-      console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
-      const { idLog } = this.state;
-      try {
-        const response = await api.post("/V_Eleitor.php", {
-          tipo: "2",
-          idL: idLog,
-        });
-        if (response.data != null) {
-          let dados = response.data.data;
-          console.log("dados: " + dados);
-          response.data.data = dados;
-          this.setState({ data: response.data.data, loading: false });
-          console.log(this.state.data);
-        } else {
-          console.log("nullll");
-        }
-      } catch (e) {
-        console.log("deu erro: " + e);
-      }
-    } catch (e) {
-      console.log(e);
-    }
-    /*getUsers()
-      .then(users => {
-        this.setState({
-           : false,
-          data: users
-        });
-      })
-      .catch(error => {
-        this.setState({ error, loading: false });
-      });*/
-  };
-  retornaBairros = async () => {
-    try {
-      const response = await api.post("/V_Lider.php", {
-        tipo: "3",
-      });
-      if (response.data != null) {
-        console.log(response.data);
-        const dados = response.data.dados;
-        const bairros = dados.filter((dado) => dado.distrito === "0");
-        const distritos = dados.filter((dado) => dado.distrito === "1");
-        this.setState({
-          locais: dados,
-          bairros: bairros,
-          distritos: distritos,
-          loading: false,
-        });
-        console.log(this.state.bairros);
-      } else {
-        console.log("nullll");
-      }
-    } catch (e) {
-      console.log("deu erro: " + e);
-    }
-  };
+  
+  
   renderSeparator = () => {
     return (
       <View
@@ -663,202 +280,15 @@ class HomeScreen extends React.Component {
       </View>
     );
   };
-  renderCpf() {
-    if (this.state.valida_cpf) {
-      return (
-        <View style={styles.InputContainer}>
-          <TextInputMask
-            type={"cpf"}
-            placeholder="CPF"
-            style={styles.body}
-            value={this.state.cpf_eleitor}
-            placeholderTextColor={AppStyles.color.grey}
-            underlineColorAndroid="transparent"
-            onChangeText={(text) => {
-              this.setState({
-                cpf_eleitor: text,
-              });
-            }}
-          />
-        </View>
-      );
-    } else {
-      return null;
-    }
-  }
-  renderLocal2() {
-    const bairros = this.state.bairros;
-    const distritos = this.state.distritos;
-    const { checked } = this.state;
-    if (this.state.valida_local) {
-      return (
-        <View style={styles.InputContainer}>
-          <this.renderPicker
-            checked={checked}
-            bairros={bairros}
-            distritos={distritos}
-            mudaLocal={this.mudaLocal}
-          ></this.renderPicker>
-        </View>
-      );
-    } else {
-      return null;
-    }
-  }
-  renderLocal() {
-    const bairros = this.state.bairros;
-    const distritos = this.state.distritos;
-    const { checked } = this.state;
-    if (this.state.valida_local) {
-      return (
-        <View style={styles.RadioContainer}>
-          <RadioButton
-            color="#3179CF"
-            value="bairro"
-            status={checked === "bairro" ? "checked" : "unchecked"}
-            onPress={() => {
-              this.setState({ checked: "bairro" });
-            }}
-          />
-          <Text style={styles.labelRadio}>Bairro</Text>
-          <RadioButton
-            value="distrito"
-            color="#3179CF"
-            status={checked === "distrito" ? "checked" : "unchecked"}
-            onPress={() => {
-              this.setState({ checked: "distrito" });
-            }}
-          />
-          <Text style={styles.labelRadio}>Distrito</Text>
-        </View>
-      );
-    } else {
-      return null;
-    }
-  }
-  renderNumero() {
-    if (this.state.valida_endereco) {
-      return (
-        <View style={styles.InputContainer}>
-          <TextInput
-            style={styles.body}
-            placeholder="Número da residência"
-            onChangeText={(text) => {
-              this.setState({ num_eleitor: text });
-              this.verificaCampos2();
-            }}
-            keyboardType="numeric"
-            value={this.state.num_eleitor}
-            placeholderTextColor={AppStyles.color.grey}
-            underlineColorAndroid="transparent"
-          />
-        </View>
-      );
-    } else {
-      return null;
-    }
-  }
-  renderEndereco() {
-    if (this.state.valida_endereco) {
-      return (
-        <View style={styles.InputContainer}>
-          <TextInput
-            style={styles.body}
-            placeholder="Endereço"
-            onChangeText={(text) => {
-              this.setState({ endereco_eleitor: text });
-              this.verificaCampos2();
-            }}
-            value={this.state.endereco_eleitor}
-            placeholderTextColor={AppStyles.color.grey}
-            underlineColorAndroid="transparent"
-          />
-        </View>
-      );
-    } else {
-      return null;
-    }
-  }
-  renderSecao() {
-    if (this.state.valida_secao) {
-      return (
-        <View style={styles.InputContainer}>
-          <TextInput
-            style={styles.body}
-            placeholder="Seção de votação"
-            onChangeText={(text) => {
-              this.setState({ secao: text });
-              this.verificaCampos2();
-            }}
-            keyboardType="numeric"
-            value={this.state.secao}
-            placeholderTextColor={AppStyles.color.grey}
-            underlineColorAndroid="transparent"
-          />
-        </View>
-      );
-    } else {
-      return null;
-    }
-  }
+
+
+
   renderRow({ item }) {
     return <ListItem title={item.nome_lider} subtitle={item.telefone_lider} />;
   }
-  renderRow2({ item }) {
-    return (
-      <ListItem title={item.nome_eleitor} subtitle={item.telefone_eleitor} />
-    );
-  }
-  mudaLocal = (local) => {
-    this.setState({ id_local: local }); // receives date and updates state
-  };
-  renderPicker(props) {
-    const [selectedValue, setSelectedValue] = React.useState(
-      props.selectedValue
-    );
-    const { mudaLocal } = props;
-    useEffect(() => {
-      mudaLocal(selectedValue);
-    }, [selectedValue, mudaLocal]);
-    const change = (local) => {
-      setSelectedValue(local);
-    };
-    if (props.checked == "bairro") {
-      return (
-        <Picker selectedValue={selectedValue} onValueChange={change}>
-          <Picker.Item
-            label={"Selecione o bairro do apoiador"}
-            value={null}
-            key={null}
-          />
-          {props.bairros.map((item) => (
-            <Picker.Item
-              label={item.nome_local}
-              value={item.id_local}
-              key={item.id_local}
-            />
-          ))}
-        </Picker>
-      );
-    } else {
-      return (
-        <Picker selectedValue={selectedValue} onValueChange={change}>
-          <Picker.Item
-            label={"Selecione o distrito do apoiador"}
-            value={null}
-            key={null}
-          />
-          {props.distritos.map((item) => (
-            <Picker.Item
-              label={item.nome_local}
-              value={item.id_local}
-              key={item.id_local}
-            />
-          ))}
-        </Picker>
-      );
-    }
-  }
+
+
+ 
   /*mudaState = (conn) => {
     this.setState({ connected: conn });
   };
@@ -883,9 +313,7 @@ class HomeScreen extends React.Component {
     return <Text>{aviso}</Text>;
   }*/
   render() {
-    const bairros = this.state.bairros;
-    const distritos = this.state.distritos;
-    const { checked } = this.state;
+
     /*const DATA = [
       {
         title: "Main dishes",
@@ -917,7 +345,7 @@ class HomeScreen extends React.Component {
         <View style={styles.containerForm}>
           <Text style={styles.title}>
             Novo líder de campanha
-            {/*{this.props.user.email}*/}
+            {/*{this.state.mensagem}*/}
           </Text>
           <Text>{this.state.errorMessage}</Text>
           <View style={styles.InputContainer}>
