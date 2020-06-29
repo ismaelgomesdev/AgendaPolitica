@@ -4,18 +4,25 @@ import {
   Text,
   TextInput,
   View,
+  Image,
+  Dimensions,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Animated
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import Button from "react-native-button";
 import { AppStyles } from "../AppStyles";
 //import firebase from "react-native-firebase";
 import api from "../services/api";
 import { TextInputMask } from "react-native-masked-text";
 import { AsyncStorage } from "react-native";
+import { normalize } from "./StatsScreen";
+import { useState, useEffect } from "react";
 const FBSDK = require("react-native-fbsdk");
 const { LoginManager, AccessToken } = FBSDK;
-
-class LoginScreen extends React.Component {
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+ class LoginScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -23,7 +30,16 @@ class LoginScreen extends React.Component {
       telefone: "",
       senha: "",
       errorMessage: null,
+      offset: new Animated.ValueXY({x: 0, y: 80}),
     };
+     }
+
+  componentDidMount(){
+    Animated.spring(this.state.offset.y, {
+      toValue: 0,
+      speed: 4,
+      bounciness: 30 
+    }).start();
   }
 
   onPressLogin = async () => {
@@ -38,7 +54,6 @@ class LoginScreen extends React.Component {
           senha,
         });
         if (response.data != null) {
-
           const { token, tipo } = response.data;
           console.log(response.data);
           //console.log(qrkey)
@@ -46,18 +61,15 @@ class LoginScreen extends React.Component {
           //console.log(AsyncStorage.getItem('@InvestSe_token'))
           //this.props.navigation.navigate("AppNavigator", {keyRef: qrkey});
           const { navigation } = this.props;
-          if(tipo == 'candidato'){
+          if (tipo == "candidato") {
             navigation.dispatch({ type: "LoginC", user: null });
           } else {
             navigation.dispatch({ type: "LoginL", user: null });
           }
         } else {
-
           this.setState({ errorMessage: "Dados incorretos. Tente novamente." });
         }
-      } catch (err) {
-
-      }
+      } catch (err) {}
     }
     /*firebase
       .auth()
@@ -151,13 +163,33 @@ class LoginScreen extends React.Component {
       }
     );
   };*/
-
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={[styles.title, styles.leftTitle]}>Login</Text>
-        <View style={styles.InputContainer}>
-          {/*<TextInput
+      <KeyboardAvoidingView style={styles.background}>
+        <LinearGradient
+          colors={["transparent", "#EDEEF0"]}
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 0,
+            height: Dimensions.get("window").height + 50,
+          }}
+        />
+
+          <Image source={require("../assets/images/logo.png")}></Image>
+
+          <Text style={[styles.title, styles.leftTitle]}>
+            Insira seus dados para continuar
+          </Text>
+          <Animated.View style={[styles.InputContainer,
+          {
+            transform: [
+              { translateY: this.state.offset.y }
+            ]
+          }
+          ]}>
+            {/*<TextInput
             style={styles.body}
             placeholder="Telefone"
             onChangeText={text => this.setState({ telefone: text })}
@@ -165,44 +197,52 @@ class LoginScreen extends React.Component {
             placeholderTextColor={AppStyles.color.grey}
             underlineColorAndroid="transparent"
           />*/}
-          <TextInputMask
-            style={styles.body}
-            placeholder="Telefone"
-            placeholderTextColor={AppStyles.color.grey}
-            underlineColorAndroid="transparent"
-            type={"cel-phone"}
-            options={{
-              maskType: "BRL",
-              withDDD: true,
-              dddMask: "(99) ",
-            }}
-            value={this.state.telefone}
-            onChangeText={(text) => {
-              this.setState({
-                telefone: text,
-              });
-            }}
-          />
-        </View>
-        <View style={styles.InputContainer}>
-          <TextInput
-            style={styles.body}
-            secureTextEntry={true}
-            placeholder="Senha"
-            onChangeText={(text) => this.setState({ senha: text })}
-            value={this.state.senha}
-            placeholderTextColor={AppStyles.color.grey}
-            underlineColorAndroid="transparent"
-          />
-        </View>
+            <TextInputMask
+              style={styles.body}
+              placeholder="Telefone"
+              placeholderTextColor={AppStyles.color.grey}
+              underlineColorAndroid="transparent"
+              type={"cel-phone"}
+              options={{
+                maskType: "BRL",
+                withDDD: true,
+                dddMask: "(99) ",
+              }}
+              value={this.state.telefone}
+              onChangeText={(text) => {
+                this.setState({
+                  telefone: text,
+                });
+              }}
+            />
+          </Animated.View>
+          <Animated.View style={[styles.InputContainer,
+          {
+            transform: [
+              { translateY: this.state.offset.y }
+            ]
+          }
+          ]}>
+            <TextInput
+              style={styles.body}
+              secureTextEntry={true}
+              placeholder="Senha"
+              onChangeText={(text) => this.setState({ senha: text })}
+              value={this.state.senha}
+              placeholderTextColor={AppStyles.color.grey}
+              underlineColorAndroid="transparent"
+            />
+          </Animated.View>
           <Text>{this.state.errorMessage}</Text>
-        <Button
-          containerStyle={styles.loginContainer}
-          style={styles.loginText}
-          onPress={() => this.onPressLogin()}
-        >
-          Entrar
-        </Button>
+          <Button
+            containerStyle={styles.loginContainer}
+            style={styles.loginText}
+            onPress={() => this.onPressLogin()}
+          >
+            Acessar
+          </Button>
+
+
         {/*<Text style={styles.or}>OR</Text>
         <Button
           containerStyle={styles.facebookContainer}
@@ -211,15 +251,25 @@ class LoginScreen extends React.Component {
         >
           Login with Facebook
     </Button>*/}
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
     alignItems: "center",
+    justifyContent: "center",
+  },
+  containerLogo: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  container: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1
   },
   or: {
     fontFamily: AppStyles.fontName.main,
@@ -228,16 +278,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   title: {
+    marginTop: 30,
     fontSize: AppStyles.fontSize.title,
     fontWeight: "bold",
     color: AppStyles.color.tint,
-    marginTop: 20,
-    marginBottom: 20,
+    fontSize: normalize(15),
   },
   leftTitle: {
     alignSelf: "stretch",
     textAlign: "left",
-    marginLeft: 20,
+    marginLeft: 40,
   },
   content: {
     paddingLeft: 50,
@@ -251,7 +301,7 @@ const styles = StyleSheet.create({
     backgroundColor: AppStyles.color.tint,
     borderRadius: AppStyles.borderRadius.main,
     padding: 10,
-    marginTop: 30,
+    marginTop: 10,
   },
   loginText: {
     color: AppStyles.color.white,
