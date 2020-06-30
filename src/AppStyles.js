@@ -22,7 +22,7 @@ export const AppStyles = {
     grey: "grey",
     greenBlue: "#00aea8",
     placeholder: "#a0a0a0",
-    background: "#f2f2f2",
+    background: "#EDEEF0",
     blue: "#3293fe"
   },
   fontSize: {
@@ -65,6 +65,7 @@ export const AppIcon = {
     home: require("../assets/icons/home1.png"),
     defaultUser: require("../assets/icons/default_user.jpg"),
     logout: require("../assets/icons/shutdown.png"),
+    logout1:require("../assets/icons/logout.png"),
     search: require("../assets/icons/search.png")
   }
 };

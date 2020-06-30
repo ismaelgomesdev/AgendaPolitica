@@ -15,6 +15,7 @@ import {
   AppState,
   Platform,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { List, ListItem, SearchBar } from "react-native-elements";
 import Button from "react-native-button";
 import { connect } from "react-redux";
@@ -24,6 +25,7 @@ import { TextInputMask } from "react-native-masked-text";
 import { Configuration } from "../Configuration";
 import { Dimensions, AsyncStorage } from "react-native";
 import Constants from "expo-constants";
+import { normalize } from "./StatsScreen";
 import { RadioButton } from "react-native-paper";
 import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
 import Dialog, {
@@ -269,14 +271,14 @@ class HomeScreen2 extends React.Component {
     this.setState({
       dadosOffline: await AsyncStorage.getItem("@PoliNet_dadosOffline"),
     });
-    
+
     let dadosOffline = JSON.parse(this.state.dadosOffline);
     await AsyncStorage.setItem("@PoliNet_dadosOffline", JSON.stringify(aux));
 
     let cont = 0;
     if (dadosOffline != []) {
       dadosOffline.map(async (item) => {
-        cont = (cont + 1);
+        cont = cont + 1;
         try {
           const response = await api.post("/V_Eleitor.php", {
             tipo: item.tipo,
@@ -289,8 +291,8 @@ class HomeScreen2 extends React.Component {
             secao: item.secao,
             idLogado: item.idLogado,
           });
-          aux.push(JSON.stringify(response.data))
-          this.setState({mensagem: JSON.stringify(aux)})
+          aux.push(JSON.stringify(response.data));
+          this.setState({ mensagem: JSON.stringify(aux) });
           aux = [];
           if (response.data != null) {
             console.log(response.data);
@@ -418,7 +420,7 @@ class HomeScreen2 extends React.Component {
           idLogado: idLogado,
         });
         this.setState({
-          mensagem:JSON.stringify(aux)
+          mensagem: JSON.stringify(aux),
         });
         console.log(aux);
         await AsyncStorage.setItem(
@@ -524,7 +526,7 @@ class HomeScreen2 extends React.Component {
       valida_cpf,
       valida_endereco,
       valida_local,
-      valida_secao
+      valida_secao,
     } = this.state;
     console.log(
       nome_eleitor.length +
@@ -538,15 +540,11 @@ class HomeScreen2 extends React.Component {
         num_eleitor.length +
         " "
     );
-    if (
-      nome_eleitor.length <= 0 ||
-      telefone_eleitor.length <= 0
-    ) {
+    if (nome_eleitor.length <= 0 || telefone_eleitor.length <= 0) {
       this.setState({ disabled: true });
     } else {
       this.setState({ disabled: false });
     }
-
   }
   makeRemoteRequest = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
@@ -1063,23 +1061,39 @@ class HomeScreen2 extends React.Component {
             </Text>
           </DialogContent>
         </Dialog>
+        <Text>
+          Status de Rede: {this.state.aviso}
+          {
+            //<this.netState mudaState={this.mudaState}></this.netState>
+          }
+        </Text>
+        <Text>
+          {
+            //this.state.mensagem
+          }
+        </Text>
+        <LinearGradient
+          style={styles.headerNew}
+          colors={["#2060AD", "#58C6CA"]}
+          start={{ x: 0.0, y: 0.25 }}
+          end={{ x: 0.5, y: 1.0 }}
+        >
+          <View style={styles.titleContainer}>
+          <TouchableOpacity
+            style={{ flexDirection: "row" }}
+            onPress={() => {
+              this.props.navigation.openDrawer();
+            }}
+          ><Image style={styles.logoutIcon} source={AppIcon.images.logout1}></Image></TouchableOpacity>
+
+            <Text style={styles.titleNew}> Olá! </Text>
+            
+          </View>
+        </LinearGradient>
         <View style={styles.containerForm}>
-          <Text>
-            Status de Rede: {this.state.aviso}
-            {
-              //<this.netState mudaState={this.mudaState}></this.netState>
-            }
-          </Text>
-          <Text>
-            {
-              //this.state.mensagem
-            }
-          </Text>
           <Text style={styles.title}>Novo apoiador</Text>
 
           {/*{this.props.user.email}*/}
-
-          <Text>{this.state.errorMessage}</Text>
           <View style={styles.InputContainer}>
             <TextInput
               style={styles.body}
@@ -1182,10 +1196,7 @@ class HomeScreen2 extends React.Component {
             borderBottomWidth: 0,
           }}
         >
-          <Text style={styles.title}>
-            Eleitores cadastrados por você
-           
-          </Text>
+          <Text style={styles.title}>Eleitores cadastrados por você</Text>
           <Text>
             {aux.map(
               (item) => item.nome_eleitor + " (aguardando sincronização)\n"
@@ -1205,18 +1216,52 @@ class HomeScreen2 extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  
+  headerNew: {
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#fff",
+    position: "absolute",
+    left: 0,
+    top: 0,
+    right: 0,
+    flex: 1,
+    height: 155,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  containerForm: {
+    margin: 30,
+    borderRadius: 10,
+    shadowColor: "#444",
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 1,
+    paddingLeft: 10,
+    padding: 5,
+    backgroundColor: "white",
+    flex: 1,
+    alignItems: "center",
+  },
+  titleContainer: {
+    backgroundColor: 'transparent',
+  },
+  titleNew: {
+    fontSize: normalize(15),
+    marginBottom: 60,
+    color: '#ffffff',
+    textAlign: 'center',
+  },
+  
   header: {
     flexDirection: "row",
   },
   container: {
-    backgroundColor: "white",
+    backgroundColor: AppStyles.color.background,
     flex: 1,
-    padding: Configuration.home.listing_item.offset,
   },
-  containerForm: {
-    flex: 1,
-    alignItems: "center",
-  },
+  
   titleHeader: {
     fontFamily: AppStyles.fontName.bold,
     color: AppStyles.color.tint,
@@ -1228,13 +1273,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
     marginLeft: 5,
   },
-  title: {
-    fontFamily: AppStyles.fontName.bold,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: AppStyles.color.title,
-    fontSize: 25,
-  },
+
   userPhoto: {
     width: 40,
     height: 40,
@@ -1249,8 +1288,8 @@ const styles = StyleSheet.create({
     fontSize: AppStyles.fontSize.normal,
     fontWeight: "bold",
     color: AppStyles.color.tint,
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 10,
+    marginBottom: 10,
   },
   leftTitle: {
     alignSelf: "stretch",
@@ -1311,6 +1350,8 @@ const styles = StyleSheet.create({
     backgroundColor: AppStyles.color.tint,
     borderRadius: AppStyles.borderRadius.main,
     padding: 10,
+    marginBottom: -25,
+    marginTop: -10
   },
   facebookText: {
     color: AppStyles.color.white,
