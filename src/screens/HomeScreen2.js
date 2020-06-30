@@ -1086,7 +1086,7 @@ class HomeScreen2 extends React.Component {
             }}
           ><Image style={styles.logoutIcon} source={AppIcon.images.logout1}></Image></TouchableOpacity>
 
-            <Text style={styles.titleNew}> Olá! </Text>
+          <Text style={styles.titleNew}> Olá, {nomeLogado}! </Text>
             
           </View>
         </LinearGradient>
@@ -1226,12 +1226,13 @@ const styles = StyleSheet.create({
     top: 0,
     right: 0,
     flex: 1,
-    height: 155,
+    height: 200,
     flexDirection: "row",
     justifyContent: "center",
   },
   containerForm: {
     margin: 30,
+    marginTop: 50,
     borderRadius: 10,
     shadowColor: "#444",
     shadowOffset: { width: 5, height: 5 },
@@ -1244,12 +1245,25 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
+  logoutIcon: {
+    tintColor: "#ffffff",
+    marginLeft: 15,
+    marginTop: normalize(80),
+    paddingTop: normalize(15),
+    maxWidth: 24,
+    maxHeight: 24,
+
+  },
   titleContainer: {
     backgroundColor: 'transparent',
+    width: "100%"
   },
   titleNew: {
     fontSize: normalize(15),
-    marginBottom: 60,
+    marginBottom: normalize(150),
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: {width: -0.25, height: 0.25},
+    textShadowRadius: 10,
     color: '#ffffff',
     textAlign: 'center',
   },
