@@ -16,6 +16,7 @@ import {
   Platform,
   PixelRatio,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { List, ListItem, SearchBar } from "react-native-elements";
 import Button from "react-native-button";
 import { connect } from "react-redux";
@@ -315,7 +316,7 @@ class StatsScreen extends React.Component {
     if (item.quantidade != null) {
       return (
         <View style={styles.item}>
-          <Text style={styles.itemText}>Total de eleitores cadastrados:</Text>
+          <Text style={styles.itemText}>Total de membros da equipe:</Text>
 
           <Text style={styles.itemNumber}>
             <Text style={styles.itemNumber}>{item.quantidade}</Text>
@@ -325,14 +326,14 @@ class StatsScreen extends React.Component {
     } else if (item.quantidade_semana != null) {
       return (
         <View style={styles.item}>
-          <Text style={styles.itemText}>Novos eleitores nesta semana:</Text>
+          <Text style={styles.itemText}>Novos membros nesta semana:</Text>
           <Text style={styles.itemNumber}>{item.quantidade_semana}</Text>
         </View>
       );
     } else {
       return (
         <View style={styles.item}>
-          <Text style={styles.itemText}>Novos eleitores neste mês:</Text>
+          <Text style={styles.itemText}>Novos membros neste mês:</Text>
           <Text style={styles.itemNumber}>{item.quantidade_mes}</Text>
         </View>
       );
@@ -347,74 +348,96 @@ class StatsScreen extends React.Component {
       <View style={styles.item}>
         <Text style={styles.itemText}>{item.nome_lider}</Text>
         <Text style={styles.itemNumber}>{item.quantidade_lider}</Text>
-        <Text style={styles.itemText}>eleitores</Text>
+        <Text style={styles.itemText}>membros</Text>
       </View>
     );
   };
 
   render() {
-      const data = [
-        { quantidade: this.state.quantidade },
-        { quantidade_semana: this.state.quantidade_semana },
-        { quantidade_mes: this.state.quantidade_mes },
+    const data = [
+      { quantidade: this.state.quantidade },
+      { quantidade_semana: this.state.quantidade_semana },
+      { quantidade_mes: this.state.quantidade_mes },
 
-        // { key: 'K' },
-        // { key: 'L' },
-      ];
+      // { key: 'K' },
+      // { key: 'L' },
+    ];
 
-      const porLider = this.state.quantidade_lider;
+    const porLider = this.state.quantidade_lider;
 
-      const formatData = (data, numColumns) => {
-        const numberOfFullRows = Math.floor(data.length / numColumns);
+    const formatData = (data, numColumns) => {
+      const numberOfFullRows = Math.floor(data.length / numColumns);
 
-        let numberOfElementsLastRow =
-          data.length - numberOfFullRows * numColumns;
-        while (
-          numberOfElementsLastRow !== numColumns &&
-          numberOfElementsLastRow !== 0
-        ) {
-          data.push({ key: `blank-${numberOfElementsLastRow}`, empty: true });
-          numberOfElementsLastRow++;
-        }
+      let numberOfElementsLastRow = data.length - numberOfFullRows * numColumns;
+      while (
+        numberOfElementsLastRow !== numColumns &&
+        numberOfElementsLastRow !== 0
+      ) {
+        data.push({ key: `blank-${numberOfElementsLastRow}`, empty: true });
+        numberOfElementsLastRow++;
+      }
 
-        return data;
-      };
-      const data2 = [];
-      const data3 = [];
-      const quantidade_bairro = this.state.quantidade_local.filter(
-        (item) => item.distrito === "0"
-      );
-      console.log(quantidade_bairro);
-      const quantidade_distrito = this.state.quantidade_local.filter(
-        (item) => item.distrito === "1"
-      );
-      let aux = [];
-      console.log(quantidade_distrito);
-      quantidade_bairro.map((item) => {
-        (aux = {
-          name: item.nome_local,
-          population: parseInt(item.qtd),
-          color: item.color,
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        }),
-          data2.push(aux);
-      });
-      quantidade_distrito.map((item) => {
-        (aux = {
-          name: item.nome_local,
-          population: parseInt(item.qtd),
-          color: item.color,
-          legendFontColor: "#7F7F7F",
-          legendFontSize: 15,
-        }),
-          data3.push(aux);
-      });
-      return (
-        <ScrollView style={styles.container}>
+      return data;
+    };
+    const data2 = [];
+    const data3 = [];
+    const quantidade_bairro = this.state.quantidade_local.filter(
+      (item) => item.distrito === "0"
+    );
+    console.log(quantidade_bairro);
+    const quantidade_distrito = this.state.quantidade_local.filter(
+      (item) => item.distrito === "1"
+    );
+    let aux = [];
+    console.log(quantidade_distrito);
+    quantidade_bairro.map((item) => {
+      (aux = {
+        name: item.nome_local,
+        population: parseInt(item.qtd),
+        color: item.color,
+        legendFontColor: "#7F7F7F",
+        legendFontSize: 15,
+      }),
+        data2.push(aux);
+    });
+    quantidade_distrito.map((item) => {
+      (aux = {
+        name: item.nome_local,
+        population: parseInt(item.qtd),
+        color: item.color,
+        legendFontColor: "#7F7F7F",
+        legendFontSize: 15,
+      }),
+        data3.push(aux);
+    });
+    return (
+      <ScrollView style={styles.container}>
+        <LinearGradient
+          style={styles.headerNew}
+          colors={["#2060AD", "#58C6CA"]}
+          start={{ x: 0.0, y: 0.25 }}
+          end={{ x: 0.5, y: 1.0 }}
+        >
+          <View style={styles.titleContainer}>
+            <TouchableOpacity
+              style={{ flexDirection: "row" }}
+              onPress={() => {
+                this.props.navigation.openDrawer();
+              }}
+            >
+              <Image
+                style={styles.logoutIcon}
+                source={AppIcon.images.logout1}
+              ></Image>
+            </TouchableOpacity>
+
+            <Text style={styles.titleNew}> Relatórios </Text>
+          </View>
+        </LinearGradient>
+        <View style={styles.containerForm}>
           <FlatList
             data={formatData(data, numColumns)}
-            style={styles.container}
+            style={styles.containerList}
             renderItem={this.renderItem}
             numColumns={numColumns}
           />
@@ -466,11 +489,11 @@ class StatsScreen extends React.Component {
           <Text style={styles.title}>Desempenho dos líderes</Text>
           <FlatList
             data={formatData(porLider, numColumns)}
-            style={styles.container}
+            style={styles.containerList}
             renderItem={this.renderItem2}
             numColumns={numColumns}
           />
-          <Text style={styles.title}>Eleitores por bairro</Text>
+          <Text style={styles.title}>Membros por bairro</Text>
           <PieChart
             data={data2}
             width={width}
@@ -481,7 +504,7 @@ class StatsScreen extends React.Component {
             paddingLeft="15"
             absolute
           />
-          <Text style={styles.title}>Eleitores por distrito</Text>
+          <Text style={styles.title}>Membros por distrito</Text>
           <PieChart
             data={data3}
             width={width}
@@ -492,15 +515,90 @@ class StatsScreen extends React.Component {
             paddingLeft="15"
             absolute
           />
-        </ScrollView>
-      );
+        </View>
+      </ScrollView>
+    );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
+  headerNew: {
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#fff",
+    position: "absolute",
+    left: 0,
+    top: 0,
+    right: 0,
     flex: 1,
-    marginVertical: 1,
+    height: 200,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  containerForm: {
+    margin: 10,
+    marginTop: normalize(85),
+    borderRadius: 10,
+    shadowColor: "#444",
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 1,
+    paddingLeft: 10,
+    padding: 5,
+    backgroundColor: "white",
+    flex: 1,
+    alignItems: "center",
+  },
+  containerForm1: {
+    margin: 30,
+    marginTop: 20,
+    borderRadius: 10,
+    shadowColor: "#444",
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 1,
+    paddingLeft: 0,
+    paddingRight: 0,
+    padding: 5,
+    backgroundColor: "white",
+    flex: 1,
+    alignItems: "center",
+  },
+  logoutIcon: {
+    tintColor: "#ffffff",
+    marginLeft: 15,
+    marginTop: normalize(80),
+    paddingTop: normalize(15),
+    maxWidth: 24,
+    maxHeight: 24,
+  },
+  titleContainer: {
+    backgroundColor: "transparent",
+    width: "100%",
+  },
+  titleNew: {
+    fontSize: normalize(15),
+    marginBottom: normalize(150),
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: -0.25, height: 0.25 },
+    textShadowRadius: 10,
+    color: "#ffffff",
+    textAlign: "center",
+  },
+
+  header: {
+    flexDirection: "row",
+  },
+  container: {
+    backgroundColor: AppStyles.color.background,
+    flex: 1,
+  },
+  containerList: {
+    borderRadius: 10,
+    width: "100%",
+    flex: 1,
   },
   title: {
     fontSize: AppStyles.fontSize.normal,

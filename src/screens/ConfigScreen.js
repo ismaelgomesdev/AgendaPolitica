@@ -23,7 +23,7 @@ import { connect } from "react-redux";
 import NumberFormat from "react-number-format";
 import { AppIcon, AppStyles } from "../AppStyles";
 import api from "../services/api";
-
+import { LinearGradient } from "expo-linear-gradient";
 import {
   LineChart,
   BarChart,
@@ -408,74 +408,94 @@ class ConfigScreen extends React.Component {
     const { nome_campo } = this.state;
     return (
       <ScrollView style={styles.container}>
+        <LinearGradient
+          style={styles.headerNew}
+          colors={["#2060AD", "#58C6CA"]}
+          start={{ x: 0.0, y: 0.25 }}
+          end={{ x: 0.5, y: 1.0 }}
+        >
+          <View style={styles.titleContainer}>
+            <TouchableOpacity
+              style={{ flexDirection: "row" }}
+              onPress={() => {
+                this.props.navigation.openDrawer();
+              }}
+            >
+              <Image
+                style={styles.logoutIcon}
+                source={AppIcon.images.logout1}
+              ></Image>
+            </TouchableOpacity>
+
+            <Text style={styles.titleNew}> Relatórios </Text>
+          </View>
+        </LinearGradient>
         <View style={styles.containerForm}>
-          <View style={styles.containerForm1}>
-            <Text style={styles.title}>
-              Campos a serem preenchidos no formulário de novo apoiador
-            </Text>
-            <View style={styles.InputContainer}>
-              <View style={{ padding: 10 }}>
-                <Text>Nome</Text>
-                <Switch value={this.state.nome} onValueChange={(v) => {}} />
-              </View>
-              <View style={{ padding: 10 }}>
-                <Text>Telefone</Text>
-                <Switch value={this.state.telefone} onValueChange={(v) => {}} />
-              </View>
-              <View style={{ padding: 10 }}>
-                <Text>CPF</Text>
-                <Switch
-                  value={this.state.cpf}
-                  onValueChange={(v) => {
-                    if (v) {
-                      this.setState({ cpf: v });
-                    } else {
-                      this.setState({ cpf: "0" });
-                    }
-                  }}
-                />
-              </View>
+          <Text style={styles.title}>
+            Campos a serem preenchidos para cadastrar membros na equipe
+          </Text>
+          <View style={styles.InputContainer}>
+            <View style={{ padding: 10 }}>
+              <Text>Nome</Text>
+              <Switch value={this.state.nome} onValueChange={(v) => {}} />
             </View>
-            <View style={styles.InputContainer}>
-              <View style={{ padding: 10 }}>
-                <Text>Bairro/Distrito</Text>
-                <Switch
-                  value={this.state.local}
-                  onValueChange={(v) => {
-                    if (v) {
-                      this.setState({ local: v });
-                    } else {
-                      this.setState({ local: "0" });
-                    }
-                  }}
-                />
-              </View>
-              <View style={{ padding: 10 }}>
-                <Text>Endereço</Text>
-                <Switch
-                  value={this.state.endereco}
-                  onValueChange={(v) => {
-                    if (v) {
-                      this.setState({ endereco: v });
-                    } else {
-                      this.setState({ endereco: "0" });
-                    }
-                  }}
-                />
-              </View>
-              <View style={{ padding: 10 }}>
-                <Text>Seção</Text>
-                <Switch
-                  value={this.state.secao}
-                  onValueChange={(v) => {
-                    if (v) {
-                      this.setState({ secao: v });
-                    } else {
-                      this.setState({ secao: "0" });
-                    }
-                  }}
-                />
-              </View>
+            <View style={{ padding: 10 }}>
+              <Text>Telefone</Text>
+              <Switch value={this.state.telefone} onValueChange={(v) => {}} />
+            </View>
+            <View style={{ padding: 10 }}>
+              <Text>CPF</Text>
+              <Switch
+                value={this.state.cpf}
+                onValueChange={(v) => {
+                  if (v) {
+                    this.setState({ cpf: v });
+                  } else {
+                    this.setState({ cpf: "0" });
+                  }
+                }}
+              />
+            </View>
+          </View>
+          <View style={styles.InputContainer}>
+            <View style={{ padding: 10 }}>
+              <Text>Bairro/Distrito</Text>
+              <Switch
+                value={this.state.local}
+                onValueChange={(v) => {
+                  if (v) {
+                    this.setState({ local: v });
+                  } else {
+                    this.setState({ local: "0" });
+                  }
+                }}
+              />
+            </View>
+            <View style={{ padding: 10 }}>
+              <Text>Endereço</Text>
+              <Switch
+                value={this.state.endereco}
+                onValueChange={(v) => {
+                  if (v) {
+                    this.setState({ endereco: v });
+                  } else {
+                    this.setState({ endereco: "0" });
+                  }
+                }}
+              />
+            </View>
+            <View style={{ padding: 10 }}>
+              <Text>Seção</Text>
+              <Switch
+                value={this.state.secao}
+                onValueChange={(v) => {
+                  if (v) {
+                    this.setState({ secao: v });
+                  } else {
+                    this.setState({ secao: "0" });
+                  }
+                }}
+              />
             </View>
           </View>
           <Button
@@ -488,7 +508,8 @@ class ConfigScreen extends React.Component {
             Aplicar
           </Button>
         </View>
-        <View style={{ flex: 1, alignItems: "center" }}>
+
+        <View style={styles.containerForm1}>
           <Text style={styles.title}>Campos personalizados</Text>
           <View style={styles.containerForm2}>
             <View style={styles.InputContainer1}>
@@ -521,7 +542,7 @@ class ConfigScreen extends React.Component {
               +
             </Button>
           </View>
-          <View style={{ flexDirection: "row", marginBottom: 50 }}>
+          <View style={{ flexDirection: "row" }}>
             <FlatList
               data={this.state.data}
               renderItem={this.renderCampo}
@@ -529,17 +550,17 @@ class ConfigScreen extends React.Component {
               ListFooterComponent={this.renderFooter}
             />
           </View>
-          <View style={styles.containerForm1}>
-            <Text style={styles.title}>Demandas dos apoiadores</Text>
-            <View style={{ flexDirection: "row" }}>
-              <FlatList
-                data={this.state.data1}
-                renderItem={this.renderDemanda}
-                keyExtractor={(item) => item.id_demanda}
-                ListFooterComponent={this.renderFooter}
-                ItemSeparatorComponent={this.renderSeparator}
-              />
-            </View>
+        </View>
+        <View style={styles.containerForm1}>
+          <Text style={styles.title}>Demandas da equipe</Text>
+          <View style={{ flexDirection: "row" }}>
+            <FlatList
+              data={this.state.data1}
+              renderItem={this.renderDemanda}
+              keyExtractor={(item) => item.id_demanda}
+              ListFooterComponent={this.renderFooter}
+              ItemSeparatorComponent={this.renderSeparator}
+            />
           </View>
         </View>
       </ScrollView>
@@ -548,22 +569,77 @@ class ConfigScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  headerNew: {
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#fff",
+    position: "absolute",
+    left: 0,
+    top: 0,
+    right: 0,
     flex: 1,
-    marginVertical: 1,
-    padding: Configuration.home.listing_item.offset,
+    height: 200,
+    flexDirection: "row",
+    justifyContent: "center",
   },
   containerForm: {
+    margin: 10,
+    marginTop: normalize(85),
+    borderRadius: 10,
+    shadowColor: "#444",
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 1,
+    paddingLeft: 10,
+    padding: 5,
+    backgroundColor: "white",
     flex: 1,
     alignItems: "center",
-    marginBottom: 50,
   },
   containerForm1: {
+    margin: 30,
+    marginTop: 20,
+    marginBottom: 10,
+    borderRadius: 10,
+    shadowColor: "#444",
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 1,
+    padding: 5,
+    backgroundColor: "white",
     flex: 1,
-    width: "100%",
     alignItems: "center",
-    marginBottom: 0,
-    justifyContent: "center",
+  },
+  logoutIcon: {
+    tintColor: "#ffffff",
+    marginLeft: 15,
+    marginTop: normalize(80),
+    paddingTop: normalize(15),
+    maxWidth: 24,
+    maxHeight: 24,
+  },
+  titleContainer: {
+    backgroundColor: "transparent",
+    width: "100%",
+  },
+  titleNew: {
+    fontSize: normalize(15),
+    marginBottom: normalize(150),
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: -0.25, height: 0.25 },
+    textShadowRadius: 10,
+    color: "#ffffff",
+    textAlign: "center",
+  },
+
+  header: {
+    flexDirection: "row",
+  },
+  container: {
+    backgroundColor: AppStyles.color.background,
+    flex: 1,
   },
   title: {
     fontSize: AppStyles.fontSize.normal,
@@ -607,6 +683,8 @@ const styles = StyleSheet.create({
     backgroundColor: AppStyles.color.tint,
     borderRadius: AppStyles.borderRadius.main,
     padding: 10,
+    marginBottom: -25,
+    marginTop: -10,
   },
   facebookText: {
     color: AppStyles.color.white,

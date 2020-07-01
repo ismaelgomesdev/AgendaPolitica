@@ -176,8 +176,6 @@ class HomeScreen2 extends React.Component {
     }
   };
 
-
-
   static navigationOptions = ({ navigation }) => ({
     headerLeft: () => {
       return (
@@ -693,27 +691,27 @@ class HomeScreen2 extends React.Component {
       />
     );
   };
-  searchFilterFunction = text => {    
-    const newData = arrayholder.filter(item => {      
+  searchFilterFunction = (text) => {
+    const newData = arrayholder.filter((item) => {
       const itemData = `${item.nome_eleitor.toUpperCase()}`;
-      
-       const textData = text.toUpperCase();
-        
-       return itemData.indexOf(textData) > -1;    
+
+      const textData = text.toUpperCase();
+
+      return itemData.indexOf(textData) > -1;
     });
-    
-    this.setState({ data: newData });  
+
+    this.setState({ data: newData });
   };
-  renderHeader = () => {    
-    return (      
-      <SearchBar        
-        placeholder="Pesquise aqui..."        
-        lightTheme        
-        round        
-        onChangeText={text => this.searchFilterFunction(text)}
-        autoCorrect={false}             
-      />    
-    );  
+  renderHeader = () => {
+    return (
+      <SearchBar
+        placeholder="Pesquise aqui..."
+        lightTheme
+        round
+        onChangeText={(text) => this.searchFilterFunction(text)}
+        autoCorrect={false}
+      />
+    );
   };
 
   renderFooter = () => {
@@ -898,11 +896,7 @@ class HomeScreen2 extends React.Component {
     if (props.checked == "bairro") {
       return (
         <Picker selectedValue={selectedValue} onValueChange={change}>
-          <Picker.Item
-            label={"Selecione o bairro"}
-            value={null}
-            key={null}
-          />
+          <Picker.Item label={"Selecione o bairro"} value={null} key={null} />
           {props.bairros.map((item) => (
             <Picker.Item
               label={item.nome_local}
@@ -915,11 +909,7 @@ class HomeScreen2 extends React.Component {
     } else {
       return (
         <Picker selectedValue={selectedValue} onValueChange={change}>
-          <Picker.Item
-            label={"Selecione o distrito"}
-            value={null}
-            key={null}
-          />
+          <Picker.Item label={"Selecione o distrito"} value={null} key={null} />
           {props.distritos.map((item) => (
             <Picker.Item
               label={item.nome_local}
@@ -1089,19 +1079,23 @@ class HomeScreen2 extends React.Component {
           end={{ x: 0.5, y: 1.0 }}
         >
           <View style={styles.titleContainer}>
-          <TouchableOpacity
-            style={{ flexDirection: "row" }}
-            onPress={() => {
-              this.props.navigation.openDrawer();
-            }}
-          ><Image style={styles.logoutIcon} source={AppIcon.images.logout1}></Image></TouchableOpacity>
+            <TouchableOpacity
+              style={{ flexDirection: "row" }}
+              onPress={() => {
+                this.props.navigation.openDrawer();
+              }}
+            >
+              <Image
+                style={styles.logoutIcon}
+                source={AppIcon.images.logout1}
+              ></Image>
+            </TouchableOpacity>
 
-          <Text style={styles.titleNew}> Olá, {nomeLogado}! </Text>
-            
+            <Text style={styles.titleNew}> Olá, {nomeLogado}! </Text>
           </View>
         </LinearGradient>
         <View style={styles.containerForm}>
-          <Text style={styles.title}>Novo apoiador</Text>
+          <Text style={styles.title}>Novo membro da equipe</Text>
 
           {/*{this.props.user.email}*/}
           <View style={styles.InputContainer}>
@@ -1173,7 +1167,7 @@ class HomeScreen2 extends React.Component {
           <View style={styles.InputContainer}>
             <TextInput
               style={styles.body}
-              placeholder="Demanda do apoiador"
+              placeholder="Demanda"
               onChangeText={(text) => {
                 this.setState({ desc_demanda: text });
                 this.verificaCampos2();
@@ -1207,18 +1201,18 @@ class HomeScreen2 extends React.Component {
           }}
           style={styles.containerForm1}
         >
-          <Text style={styles.title}>Apoiadores cadastrados por você</Text>
+          <Text style={styles.title}>Membros da equipe cadastrados por você</Text>
           <Text>
             {aux.map(
               (item) => item.nome_eleitor + " (aguardando sincronização)\n"
             )}
           </Text>
           <FlatList
-            style={{width: '100%'}}
+            style={{ width: "100%" }}
             data={this.state.data}
             renderItem={this.renderRow2}
             keyExtractor={(item) => item.id_eleitor}
-            ListHeaderComponent={this.renderHeader}    
+            ListHeaderComponent={this.renderHeader}
             //ItemSeparatorComponent={this.renderSeparator}
             //ListFooterComponent={this.renderFooter}
           />
@@ -1229,7 +1223,6 @@ class HomeScreen2 extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  
   headerNew: {
     alignItems: "center",
     borderBottomWidth: 1,
@@ -1281,22 +1274,21 @@ const styles = StyleSheet.create({
     paddingTop: normalize(15),
     maxWidth: 24,
     maxHeight: 24,
-
   },
   titleContainer: {
-    backgroundColor: 'transparent',
-    width: "100%"
+    backgroundColor: "transparent",
+    width: "100%",
   },
   titleNew: {
     fontSize: normalize(15),
     marginBottom: normalize(150),
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: {width: -0.25, height: 0.25},
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: -0.25, height: 0.25 },
     textShadowRadius: 10,
-    color: '#ffffff',
-    textAlign: 'center',
+    color: "#ffffff",
+    textAlign: "center",
   },
-  
+
   header: {
     flexDirection: "row",
   },
@@ -1304,7 +1296,7 @@ const styles = StyleSheet.create({
     backgroundColor: AppStyles.color.background,
     flex: 1,
   },
-  
+
   titleHeader: {
     fontFamily: AppStyles.fontName.bold,
     color: AppStyles.color.tint,
@@ -1332,7 +1324,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: AppStyles.color.tint,
     marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 5,
+    textAlign: 'center',
   },
   leftTitle: {
     alignSelf: "stretch",
@@ -1394,7 +1387,7 @@ const styles = StyleSheet.create({
     borderRadius: AppStyles.borderRadius.main,
     padding: 10,
     marginBottom: -25,
-    marginTop: -10
+    marginTop: -10,
   },
   facebookText: {
     color: AppStyles.color.white,

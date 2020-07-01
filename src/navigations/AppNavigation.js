@@ -100,7 +100,7 @@ const StatsStack = createStackNavigator(
   },
   {
     initialRouteName: "Relatórios",
-    headerMode: "float",
+    headerMode: "none",
 
     headerLayoutPreset: "center",
     navigationOptions: ({ navigation }) => ({
@@ -163,7 +163,7 @@ const ConfigStack = createStackNavigator(
   },
   {
     initialRouteName: "Configurações",
-    headerMode: "float",
+    headerMode: "none",
 
     headerLayoutPreset: "center",
     navigationOptions: ({ navigation }) => ({
