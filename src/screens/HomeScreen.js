@@ -15,9 +15,11 @@ import {
   AppState,
   Platform,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { List, ListItem, SearchBar } from "react-native-elements";
 import Button from "react-native-button";
 import { connect } from "react-redux";
+import { normalize } from "./StatsScreen";
 import { AppIcon, AppStyles } from "../AppStyles";
 import api from "../services/api";
 import { TextInputMask } from "react-native-masked-text";
@@ -30,6 +32,7 @@ let idLogado = "";
 let nomeLogado = "";
 let tipoLogado = "";
 let aux = [];
+let arrayholder = [];
 class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -42,14 +45,12 @@ class HomeScreen extends React.Component {
       telefone_lider: "",
       senha_lider: "",
       errorMessage: "",
-      
-      
+
       loading: false,
       data: [],
-      
+
       error: null,
       disabled: true,
-
 
       aviso: "indefinido",
       mensagem: "",
@@ -59,7 +60,7 @@ class HomeScreen extends React.Component {
     this.state.token = await AsyncStorage.getItem('@PoliNet_token'); 
     console.log(this.state.token)
   }*/
-  
+
   pesqDados = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
     const { token } = this.state;
@@ -136,7 +137,7 @@ class HomeScreen extends React.Component {
             telefone_lider: "",
             senha_lider: "",
             conf_senha: "",
-            errorMessage: ""
+            errorMessage: "",
           });
           /*const { 
             token, 
@@ -158,22 +159,14 @@ class HomeScreen extends React.Component {
     }
   };
 
-
   /*state = {
     appState: AppState.currentState,
   };*/
   componentDidMount() {
-
-
     this.makeRemoteRequest();
-
-    
   }
-  componentWillMount() {
+  componentWillMount() {}
 
-
-  }
- 
   /*_handleConnectivityChange = (isConnected) => {
     if (isConnected == true) {
       this.setState({ connected: true, aviso: "online" });
@@ -222,6 +215,7 @@ class HomeScreen extends React.Component {
           response.data.data = dados;
           this.setState({ data: response.data.data, loading: false });
           console.log(this.state.data);
+          arrayholder = dados;
         } else {
           console.log("nullll");
         }
@@ -242,8 +236,7 @@ class HomeScreen extends React.Component {
         this.setState({ error, loading: false });
       });*/
   };
-  
-  
+
   renderSeparator = () => {
     return (
       <View
@@ -256,15 +249,27 @@ class HomeScreen extends React.Component {
       />
     );
   };
-  renderHeader = () => {
-    return (
-      <View>
-        {
-          //<Text style={styles.title}>Meus líderes de campanha</Text>
-        }
-        <SearchBar placeholder="Pesquise aqui..." lightTheme round />
-      </View>
-    );
+  searchFilterFunction = text => {    
+    const newData = arrayholder.filter(item => {      
+      const itemData = `${item.nome_lider.toUpperCase()}`;
+      
+       const textData = text.toUpperCase();
+        
+       return itemData.indexOf(textData) > -1;    
+    });
+    
+    this.setState({ data: newData });  
+  };
+  renderHeader = () => {    
+    return (      
+      <SearchBar        
+        placeholder="Pesquise aqui..."        
+        lightTheme        
+        round        
+        onChangeText={text => this.searchFilterFunction(text)}
+        autoCorrect={false}             
+      />    
+    );  
   };
   renderFooter = () => {
     if (!this.state.loading) return null;
@@ -281,14 +286,10 @@ class HomeScreen extends React.Component {
     );
   };
 
-
-
   renderRow({ item }) {
     return <ListItem title={item.nome_lider} subtitle={item.telefone_lider} />;
   }
 
-
- 
   /*mudaState = (conn) => {
     this.setState({ connected: conn });
   };
@@ -313,7 +314,6 @@ class HomeScreen extends React.Component {
     return <Text>{aviso}</Text>;
   }*/
   render() {
-
     /*const DATA = [
       {
         title: "Main dishes",
@@ -342,12 +342,34 @@ class HomeScreen extends React.Component {
 
     return (
       <ScrollView style={styles.container}>
+        <LinearGradient
+          style={styles.headerNew}
+          colors={["#2060AD", "#58C6CA"]}
+          start={{ x: 0.0, y: 0.25 }}
+          end={{ x: 0.5, y: 1.0 }}
+        >
+          <View style={styles.titleContainer}>
+            <TouchableOpacity
+              style={{ flexDirection: "row" }}
+              onPress={() => {
+                this.props.navigation.openDrawer();
+              }}
+            >
+              <Image
+                style={styles.logoutIcon}
+                source={AppIcon.images.logout1}
+              ></Image>
+            </TouchableOpacity>
+
+            <Text style={styles.titleNew}> Olá, {nomeLogado}! </Text>
+          </View>
+        </LinearGradient>
         <View style={styles.containerForm}>
           <Text style={styles.title}>
             Novo líder de campanha
             {/*{this.state.mensagem}*/}
           </Text>
-          <Text>{this.state.errorMessage}</Text>
+
           <View style={styles.InputContainer}>
             <TextInput
               style={styles.body}
@@ -435,17 +457,18 @@ class HomeScreen extends React.Component {
             borderTopWidth: 0,
             borderBottomWidth: 0,
           }}
+          style={styles.containerForm1}
         >
           <Text style={styles.title}>
             Líderes cadastrados
             {/*{this.props.user.email}*/}
           </Text>
           <FlatList
+            style={{ width: "100%" }}
             data={this.state.data}
             renderItem={this.renderRow}
             keyExtractor={(item) => item.id_lider}
-            ItemSeparatorComponent={this.renderSeparator}
-            ListFooterComponent={this.renderFooter}
+            ListHeaderComponent={this.renderHeader}  
           />
         </View>
       </ScrollView>
@@ -453,18 +476,80 @@ class HomeScreen extends React.Component {
   }
 }
 const styles = StyleSheet.create({
+  headerNew: {
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#fff",
+    position: "absolute",
+    left: 0,
+    top: 0,
+    right: 0,
+    flex: 1,
+    height: 200,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  containerForm: {
+    margin: 30,
+    marginTop: normalize(85),
+    borderRadius: 10,
+    shadowColor: "#444",
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 1,
+    paddingLeft: 10,
+    padding: 5,
+    backgroundColor: "white",
+    flex: 1,
+    alignItems: "center",
+  },
+  containerForm1: {
+    margin: 30,
+    marginTop: 20,
+    borderRadius: 10,
+    shadowColor: "#444",
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 1,
+    paddingLeft: 0,
+    paddingRight: 0,
+    padding: 5,
+    backgroundColor: "white",
+    flex: 1,
+    alignItems: "center",
+  },
+  logoutIcon: {
+    tintColor: "#ffffff",
+    marginLeft: 15,
+    marginTop: normalize(80),
+    paddingTop: normalize(15),
+    maxWidth: 24,
+    maxHeight: 24,
+  },
+  titleContainer: {
+    backgroundColor: "transparent",
+    width: "100%",
+  },
+  titleNew: {
+    fontSize: normalize(15),
+    marginBottom: normalize(150),
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: -0.25, height: 0.25 },
+    textShadowRadius: 10,
+    color: "#ffffff",
+    textAlign: "center",
+  },
+
   header: {
     flexDirection: "row",
   },
   container: {
-    backgroundColor: "white",
+    backgroundColor: AppStyles.color.background,
     flex: 1,
-    padding: Configuration.home.listing_item.offset,
   },
-  containerForm: {
-    flex: 1,
-    alignItems: "center",
-  },
+
   titleHeader: {
     fontFamily: AppStyles.fontName.bold,
     color: AppStyles.color.tint,
@@ -497,8 +582,8 @@ const styles = StyleSheet.create({
     fontSize: AppStyles.fontSize.normal,
     fontWeight: "bold",
     color: AppStyles.color.tint,
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 15,
+    marginBottom: 15,
   },
   leftTitle: {
     alignSelf: "stretch",
@@ -559,6 +644,8 @@ const styles = StyleSheet.create({
     backgroundColor: AppStyles.color.tint,
     borderRadius: AppStyles.borderRadius.main,
     padding: 10,
+    marginBottom: -25,
+    marginTop: -10,
   },
   facebookText: {
     color: AppStyles.color.white,

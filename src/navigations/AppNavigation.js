@@ -66,7 +66,7 @@ const HomeStack = createStackNavigator(
   },
   {
     initialRouteName: "Home",
-    headerMode: "float",
+    headerMode: "none",
 
     headerLayoutPreset: "center",
     navigationOptions: ({ navigation }) => ({

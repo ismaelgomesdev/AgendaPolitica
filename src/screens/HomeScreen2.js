@@ -176,9 +176,7 @@ class HomeScreen2 extends React.Component {
     }
   };
 
-  nomeCandidato = () => {
-    return nomeLogado;
-  };
+
 
   static navigationOptions = ({ navigation }) => ({
     headerLeft: () => {
@@ -901,7 +899,7 @@ class HomeScreen2 extends React.Component {
       return (
         <Picker selectedValue={selectedValue} onValueChange={change}>
           <Picker.Item
-            label={"Selecione o bairro do apoiador"}
+            label={"Selecione o bairro"}
             value={null}
             key={null}
           />
@@ -918,7 +916,7 @@ class HomeScreen2 extends React.Component {
       return (
         <Picker selectedValue={selectedValue} onValueChange={change}>
           <Picker.Item
-            label={"Selecione o distrito do apoiador"}
+            label={"Selecione o distrito"}
             value={null}
             key={null}
           />
@@ -1210,7 +1208,11 @@ class HomeScreen2 extends React.Component {
           style={styles.containerForm1}
         >
           <Text style={styles.title}>Apoiadores cadastrados por você</Text>
-          
+          <Text>
+            {aux.map(
+              (item) => item.nome_eleitor + " (aguardando sincronização)\n"
+            )}
+          </Text>
           <FlatList
             style={{width: '100%'}}
             data={this.state.data}
@@ -1243,7 +1245,7 @@ const styles = StyleSheet.create({
   },
   containerForm: {
     margin: 30,
-    marginTop: 50,
+    marginTop: normalize(50),
     borderRadius: 10,
     shadowColor: "#444",
     shadowOffset: { width: 5, height: 5 },
