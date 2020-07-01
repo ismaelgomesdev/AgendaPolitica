@@ -40,7 +40,7 @@ let idLogado = "";
 let nomeLogado = "";
 let tipoLogado = "";
 let aux = [];
-
+let arrayholder = [];
 class HomeScreen2 extends React.Component {
   constructor(props) {
     super(props);
@@ -636,6 +636,7 @@ class HomeScreen2 extends React.Component {
           console.log("dados: " + dados);
           response.data.data = dados;
           this.setState({ data: response.data.data, loading: false });
+          arrayholder = dados;
           console.log(this.state.data);
         } else {
           console.log("nullll");
@@ -694,16 +695,27 @@ class HomeScreen2 extends React.Component {
       />
     );
   };
-
-  renderHeader = () => {
-    return (
-      <View>
-        {
-          //<Text style={styles.title}>Meus líderes de campanha</Text>
-        }
-        <SearchBar placeholder="Pesquise aqui..." lightTheme round />
-      </View>
-    );
+  searchFilterFunction = text => {    
+    const newData = arrayholder.filter(item => {      
+      const itemData = `${item.nome_eleitor.toUpperCase()}`;
+      
+       const textData = text.toUpperCase();
+        
+       return itemData.indexOf(textData) > -1;    
+    });
+    
+    this.setState({ data: newData });  
+  };
+  renderHeader = () => {    
+    return (      
+      <SearchBar        
+        placeholder="Pesquise aqui..."        
+        lightTheme        
+        round        
+        onChangeText={text => this.searchFilterFunction(text)}
+        autoCorrect={false}             
+      />    
+    );  
   };
 
   renderFooter = () => {
@@ -1195,19 +1207,18 @@ class HomeScreen2 extends React.Component {
             borderTopWidth: 0,
             borderBottomWidth: 0,
           }}
+          style={styles.containerForm1}
         >
-          <Text style={styles.title}>Eleitores cadastrados por você</Text>
-          <Text>
-            {aux.map(
-              (item) => item.nome_eleitor + " (aguardando sincronização)\n"
-            )}
-          </Text>
+          <Text style={styles.title}>Apoiadores cadastrados por você</Text>
+          
           <FlatList
+            style={{width: '100%'}}
             data={this.state.data}
             renderItem={this.renderRow2}
             keyExtractor={(item) => item.id_eleitor}
-            ItemSeparatorComponent={this.renderSeparator}
-            ListFooterComponent={this.renderFooter}
+            ListHeaderComponent={this.renderHeader}    
+            //ItemSeparatorComponent={this.renderSeparator}
+            //ListFooterComponent={this.renderFooter}
           />
         </View>
       </ScrollView>
@@ -1240,6 +1251,22 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 1,
     paddingLeft: 10,
+    padding: 5,
+    backgroundColor: "white",
+    flex: 1,
+    alignItems: "center",
+  },
+  containerForm1: {
+    margin: 30,
+    marginTop: 20,
+    borderRadius: 10,
+    shadowColor: "#444",
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 1,
+    paddingLeft: 0,
+    paddingRight: 0,
     padding: 5,
     backgroundColor: "white",
     flex: 1,
