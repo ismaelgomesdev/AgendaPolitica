@@ -366,7 +366,7 @@ class HomeScreen extends React.Component {
         </LinearGradient>
         <View style={styles.containerForm}>
           <Text style={styles.title}>
-            Novo líder de campanha
+            Novo líder
             {/*{this.state.mensagem}*/}
           </Text>
 

@@ -74,6 +74,7 @@ class HomeScreen2 extends React.Component {
       locais: [],
       bairros: [],
       distritos: [],
+      campos: [],
       error: null,
       disabled: true,
       checked: "bairro",
@@ -130,11 +131,60 @@ class HomeScreen2 extends React.Component {
             valida_local: local_eleitor,
             valida_endereco: endereco_eleitor,
             valida_secao: secao_eleitor,
-            mensagem: JSON.stringify(response.data),
+            //mensagem: JSON.stringify(response.data),
           });
         } else {
           this.setState({
             mensagem: "deu ruim",
+          });
+        }
+      } catch (e) {
+        this.setState({
+          mensagem: e,
+        });
+      }
+    } catch (e) {
+      this.setState({
+        mensagem: e,
+      });
+    }
+  };
+
+  personalCampos = async () => {
+    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
+
+    const { token } = this.state;
+
+    try {
+      const response = await api.post("/V_User.php", {
+        tipo: "3",
+        token,
+      });
+
+      console.log(response.data);
+      const { nome, id, tipo } = response.data;
+      nomeLogado = nome;
+      idLogado = id;
+      tipoLogado = tipo;
+
+      this.setState({ idLog: id });
+      this.setState({ nomeLog: nome });
+      this.setState({ tipoLog: tipo });
+      const { idLog } = this.state;
+      try {
+        const response = await api.post("/V_Lider.php", {
+          tipo: "5",
+          idLog,
+        });
+        if (response.data != null) {
+          let campos = response.data;
+          this.setState({
+            campos: campos,
+            mensagem: JSON.stringify(campos),
+          });
+        } else {
+          this.setState({
+            mensagem: "",
           });
         }
       } catch (e) {
@@ -324,7 +374,7 @@ class HomeScreen2 extends React.Component {
     ) {
       this.setState({ errorMessage: "Por favor, preencha todos os dados." });
     } else {*/
-    const {
+    let {
       nome_eleitor,
       telefone_eleitor,
       cpf_eleitor,
@@ -334,6 +384,7 @@ class HomeScreen2 extends React.Component {
       secao,
       desc_demanda,
       connected,
+      campos,
     } = this.state;
     if (connected) {
       try {
@@ -362,19 +413,27 @@ class HomeScreen2 extends React.Component {
             desc_demanda: "",
             disabled: true,
           });
-
-          /*const { 
-            token, 
-          } = response.data;
-          //console.log(qrkey)
-          await AsyncStorage.setItem('@PoliNet_token', token)
-          //console.log(AsyncStorage.getItem('@InvestSe_token'))
-          //this.props.navigation.navigate("AppNavigator", {keyRef: qrkey});
-          const { navigation } = this.props;
-          navigation.dispatch({ type: "Login", user: null });
-          */
+          const { id } = response.data;
+          if (campos.length > 0) {
+            campos.map(async (campo) => {
+              id_campo = campo.id_campo;
+              valor_campo = campo.valor_campo;
+              try{
+              const response = await api.post("/V_Campos.php", {
+                tipo: "4",
+                id,
+                id_campo,
+                valor_campo,
+              });
+              campo.valor_campo = "";
+            } catch (e){
+              campo.valor_campo = "";
+            }
+            });
+          }
+          let camp = campos
           this.setState({
-            mensagem: JSON.stringify(response.data),
+            campos: camp
           });
           this.makeRemoteRequest2();
         } else {
@@ -460,6 +519,7 @@ class HomeScreen2 extends React.Component {
   }
   componentWillMount() {
     this.validaCampos();
+    this.personalCampos();
     this.makeRemoteRequest();
     this.makeRemoteRequest2();
   }
@@ -846,13 +906,72 @@ class HomeScreen2 extends React.Component {
       return null;
     }
   }
+  renderDialogEndereco() {
+    if (this.state.valida_endereco) {
+      return (
+        <View style={{ flexDirection: "row", marginTop: 5 }}>
+          <Text style={{ fontWeight: "bold", fontSize: 15 }}>Endereço: </Text>
+          <Text style={{ fontSize: 15 }}>{this.state.endereco_eleitor}</Text>
+        </View>
+      );
+    } else {
+      return null;
+    }
+  }
+  renderDialogNumero() {
+    if (this.state.valida_endereco) {
+      return (
+        <View style={{ flexDirection: "row", marginTop: 5 }}>
+          <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+            Número da residência:{" "}
+          </Text>
+          <Text style={{ fontSize: 15 }}>{this.state.num_eleitor}</Text>
+        </View>
+      );
+    } else {
+      return null;
+    }
+  }
+  renderDialogLocal() {
+    const { id_local } = this.state;
+    const { locais } = this.state;
+    const local = locais.filter((dado) => dado.id_local === id_local);
+    if (this.state.valida_local) {
+      return (
+        <View style={{ flexDirection: "row", marginTop: 5 }}>
+          <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+            Bairro/Distrito:{" "}
+          </Text>
+          <Text style={{ fontSize: 15 }}>
+            {local.map((item) => item.nome_local)}
+          </Text>
+        </View>
+      );
+    } else {
+      return null;
+    }
+  }
+  renderDialogSecao() {
+    if (this.state.valida_secao) {
+      return (
+        <View style={{ flexDirection: "row", marginTop: 5 }}>
+          <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+            Seção de votação:{" "}
+          </Text>
+          <Text style={{ fontSize: 15 }}>{this.state.secao}</Text>
+        </View>
+      );
+    } else {
+      return null;
+    }
+  }
   renderSecao() {
     if (this.state.valida_secao) {
       return (
         <View style={styles.InputContainer}>
           <TextInput
             style={styles.body}
-            placeholder="Seção de votação"
+            placeholder="Seção"
             onChangeText={(text) => {
               this.setState({ secao: text });
               this.verificaCampos2();
@@ -862,6 +981,30 @@ class HomeScreen2 extends React.Component {
             placeholderTextColor={AppStyles.color.grey}
             underlineColorAndroid="transparent"
           />
+        </View>
+      );
+    } else {
+      return null;
+    }
+  }
+  renderCampos() {
+    if (this.state.campos.length > 0) {
+      return (
+        <View style={styles.InputContainer}>
+          {this.state.campos.map((campo) => {
+            return (
+              <TextInput
+                style={styles.body}
+                placeholder={campo.nome_campo}
+                onChangeText={(text) => {
+                  campo.valor_campo = text;
+                }}
+                value={campo.valor_campo}
+                placeholderTextColor={AppStyles.color.grey}
+                underlineColorAndroid="transparent"
+              />
+            );
+          })}
         </View>
       );
     } else {
@@ -1021,34 +1164,10 @@ class HomeScreen2 extends React.Component {
                 {this.state.telefone_eleitor}
               </Text>
             </View>
-            <View style={{ flexDirection: "row", marginTop: 5 }}>
-              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
-                Endereço:{" "}
-              </Text>
-              <Text style={{ fontSize: 15 }}>
-                {this.state.endereco_eleitor}
-              </Text>
-            </View>
-            <View style={{ flexDirection: "row", marginTop: 5 }}>
-              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
-                Número da residência:{" "}
-              </Text>
-              <Text style={{ fontSize: 15 }}>{this.state.num_eleitor}</Text>
-            </View>
-            <View style={{ flexDirection: "row", marginTop: 5 }}>
-              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
-                Bairro/Distrito:{" "}
-              </Text>
-              <Text style={{ fontSize: 15 }}>
-                {local.map((item) => item.nome_local)}
-              </Text>
-            </View>
-            <View style={{ flexDirection: "row", marginTop: 5 }}>
-              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
-                Seção de votação:{" "}
-              </Text>
-              <Text style={{ fontSize: 15 }}>{this.state.secao}</Text>
-            </View>
+            {this.renderDialogEndereco()}
+            {this.renderDialogNumero()}
+            {this.renderDialogLocal()}
+            {this.renderDialogSecao()}
             <Text
               style={{
                 textAlign: "center",
@@ -1095,7 +1214,8 @@ class HomeScreen2 extends React.Component {
           </View>
         </LinearGradient>
         <View style={styles.containerForm}>
-          <Text style={styles.title}>Novo membro da equipe</Text>
+          <Text style={styles.title}>Novo membro da equipe
+          {this.state.mensagem}</Text>
 
           {/*{this.props.user.email}*/}
           <View style={styles.InputContainer}>
@@ -1164,7 +1284,8 @@ class HomeScreen2 extends React.Component {
           {this.renderEndereco()}
           {this.renderNumero()}
           {this.renderSecao()}
-          <View style={styles.InputContainer}>
+          {this.renderCampos()}
+          {/*<View style={styles.InputContainer}>
             <TextInput
               style={styles.body}
               placeholder="Demanda"
@@ -1176,7 +1297,7 @@ class HomeScreen2 extends React.Component {
               placeholderTextColor={AppStyles.color.grey}
               underlineColorAndroid="transparent"
             />
-          </View>
+            </View>*/}
           <Button
             containerStyle={[styles.facebookContainer]}
             style={styles.facebookText}
@@ -1201,7 +1322,9 @@ class HomeScreen2 extends React.Component {
           }}
           style={styles.containerForm1}
         >
-          <Text style={styles.title}>Membros da equipe cadastrados por você</Text>
+          <Text style={styles.title}>
+            Membros da equipe cadastrados por você
+          </Text>
           <Text>
             {aux.map(
               (item) => item.nome_eleitor + " (aguardando sincronização)\n"
@@ -1325,7 +1448,7 @@ const styles = StyleSheet.create({
     color: AppStyles.color.tint,
     marginTop: 10,
     marginBottom: 5,
-    textAlign: 'center',
+    textAlign: "center",
   },
   leftTitle: {
     alignSelf: "stretch",

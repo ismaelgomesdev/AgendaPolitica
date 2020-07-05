@@ -111,12 +111,19 @@ class ConfigScreen extends React.Component {
         idLog,
         nome_campo,
       });
+      this.setState({
+        mensagem: JSON.stringify(response.data),
+        nome_campo: "",
+        disabled: true,
+      });
       this.pesquisaCampos();
+    } catch (e) {
       this.setState({
         nome_campo: "",
         disabled: true,
       });
-    } catch (e) {}
+      this.pesquisaCampos();      
+    }
   };
 
   alteraCampos = async () => {
@@ -427,7 +434,7 @@ class ConfigScreen extends React.Component {
               ></Image>
             </TouchableOpacity>
 
-            <Text style={styles.titleNew}> Relatórios </Text>
+            <Text style={styles.titleNew}> Configurações </Text>
           </View>
         </LinearGradient>
         <View style={styles.containerForm}>
@@ -551,7 +558,7 @@ class ConfigScreen extends React.Component {
             />
           </View>
         </View>
-        <View style={styles.containerForm1}>
+        {/*<View style={styles.containerForm1}>
           <Text style={styles.title}>Demandas da equipe</Text>
           <View style={{ flexDirection: "row" }}>
             <FlatList
@@ -562,7 +569,7 @@ class ConfigScreen extends React.Component {
               ItemSeparatorComponent={this.renderSeparator}
             />
           </View>
-        </View>
+            </View>*/}
       </ScrollView>
     );
   }
