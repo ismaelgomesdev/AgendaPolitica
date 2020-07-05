@@ -418,22 +418,22 @@ class HomeScreen2 extends React.Component {
             campos.map(async (campo) => {
               id_campo = campo.id_campo;
               valor_campo = campo.valor_campo;
-              try{
-              const response = await api.post("/V_Campos.php", {
-                tipo: "4",
-                id,
-                id_campo,
-                valor_campo,
-              });
-              campo.valor_campo = "";
-            } catch (e){
-              campo.valor_campo = "";
-            }
+              try {
+                const response = await api.post("/V_Campos.php", {
+                  tipo: "4",
+                  id,
+                  id_campo,
+                  valor_campo,
+                });
+                campo.valor_campo = "";
+              } catch (e) {
+                campo.valor_campo = "";
+              }
             });
           }
-          let camp = campos
+          let camp = campos;
           this.setState({
-            campos: camp
+            campos: camp,
           });
           this.makeRemoteRequest2();
         } else {
@@ -1095,6 +1095,27 @@ class HomeScreen2 extends React.Component {
     const bairros = this.state.bairros;
     const distritos = this.state.distritos;
     const { checked } = this.state;
+    let color;
+    let color2;
+    let backColor;
+    let backColor2;
+    let text;
+    let icon;
+    if (this.state.connected) {
+      color = "#000000";
+      color2 = "transparent";
+      backColor = "#FCCB0A";
+      backColor2 = "transparent";
+      text = "online.";
+      icon = AppIcon.images.wifi;
+    } else {
+      color = "#FCCB0A";
+      color2 = "#FCCB0A";
+      text = "offline.";
+      icon = AppIcon.images.wifioff;
+      backColor = "#000000";
+      backColor2 = "#000000";
+    }
     /*const DATA = [
       {
         title: "Main dishes",
@@ -1214,8 +1235,42 @@ class HomeScreen2 extends React.Component {
           </View>
         </LinearGradient>
         <View style={styles.containerForm}>
-          <Text style={styles.title}>Novo membro da equipe
-          {this.state.mensagem}</Text>
+          <View
+            style={{
+              width: "100%",
+              backgroundColor: backColor,
+              borderTopLeftRadius: 10,
+              borderTopRightRadius: 10,
+              shadowColor: "#444",
+              shadowOffset: { width: 5, height: 5 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              flexDirection: "row",
+              justifyContent: "center",
+              padding: 3,
+            }}
+          >
+            <Image
+              style={{
+                width: 16,
+                height: 16,
+                tintColor: color,
+                fontWeight: "bold",
+              }}
+              source={icon}
+            ></Image>
+            <Text
+              style={{
+                paddingStart: 3,
+                textAlign: "center",
+                color: color,
+                fontWeight: "bold",
+              }}
+            >
+              Você está {text}
+            </Text>
+          </View>
+          <Text style={styles.title}>Novo membro da equipe</Text>
 
           {/*{this.props.user.email}*/}
           <View style={styles.InputContainer}>
@@ -1325,11 +1380,23 @@ class HomeScreen2 extends React.Component {
           <Text style={styles.title}>
             Membros da equipe cadastrados por você
           </Text>
-          <Text>
-            {aux.map(
-              (item) => item.nome_eleitor + " (aguardando sincronização)\n"
-            )}
-          </Text>
+          <View style={{
+              width: "100%",
+              backgroundColor: backColor2,
+              shadowColor: "#444",
+              shadowOffset: { width: 5, height: 5 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              flexDirection: "row",
+              justifyContent: "center",
+              padding: 0,
+            }}>
+            <Text style={{color:color2}}>Aguardando conexão para salvar:</Text>
+              {aux.map((item) => {
+                return <Text>{item.nome_eleitor}</Text>;
+              })}
+            
+          </View>
           <FlatList
             style={{ width: "100%" }}
             data={this.state.data}
@@ -1368,8 +1435,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 1,
-    paddingLeft: 10,
-    padding: 5,
+    paddingLeft: 0,
+    padding: 0,
     backgroundColor: "white",
     flex: 1,
     alignItems: "center",
