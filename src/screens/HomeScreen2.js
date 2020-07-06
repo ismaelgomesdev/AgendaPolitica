@@ -323,6 +323,7 @@ class HomeScreen2 extends React.Component {
 
     let cont = 0;
     if (dadosOffline != []) {
+      this.setState({mensagem: dadosOffline.length});
       dadosOffline.map(async (item) => {
         cont = cont + 1;
         try {
@@ -338,7 +339,6 @@ class HomeScreen2 extends React.Component {
             idLogado: item.idLogado,
           });
           aux.push(JSON.stringify(response.data));
-          this.setState({ mensagem: JSON.stringify(aux) });
           aux = [];
           if (response.data != null) {
             console.log(response.data);
@@ -351,6 +351,24 @@ class HomeScreen2 extends React.Component {
               secao: "",
               disabled: true,
             });
+            const { id } = response.data;
+            if (item.campos.length > 0) {
+              item.campos.map(async (campo) => {
+                id_campo = campo.id_campo;
+                valor_campo = campo.valor_campo;
+                try {
+                  const response = await api.post("/V_Campos.php", {
+                    tipo: "4",
+                    id,
+                    id_campo,
+                    valor_campo,
+                  });
+                  campo.valor_campo = "";
+                } catch (e) {
+                  campo.valor_campo = "";
+                }
+              });
+            }
             this.makeRemoteRequest2();
           } else {
             this.setState({
@@ -386,6 +404,7 @@ class HomeScreen2 extends React.Component {
       connected,
       campos,
     } = this.state;
+    _textInput.setNativeProps({text: ''});
     if (connected) {
       try {
         const response = await api.post("/V_Eleitor.php", {
@@ -413,6 +432,7 @@ class HomeScreen2 extends React.Component {
             desc_demanda: "",
             disabled: true,
           });
+          
           const { id } = response.data;
           if (campos.length > 0) {
             campos.map(async (campo) => {
@@ -472,6 +492,7 @@ class HomeScreen2 extends React.Component {
           id_local: id_local,
           secao: secao,
           desc_demanda: desc_demanda,
+          campos: campos,
           idLogado: idLogado,
         });
         this.setState({
@@ -483,6 +504,9 @@ class HomeScreen2 extends React.Component {
           JSON.stringify(aux)
         );
       }
+      campos.map((campo) => {
+        campo.valor_campo = "";
+      });
       this.setState({
         nome_eleitor: "",
         telefone_eleitor: "",
@@ -491,6 +515,7 @@ class HomeScreen2 extends React.Component {
         num_eleitor: "",
         secao: "",
         desc_demanda: "",
+        campos: campos,
         disabled: true,
       });
     }
@@ -999,7 +1024,7 @@ class HomeScreen2 extends React.Component {
                 onChangeText={(text) => {
                   campo.valor_campo = text;
                 }}
-                value={campo.valor_campo}
+                ref={component => _textInput = component}
                 placeholderTextColor={AppStyles.color.grey}
                 underlineColorAndroid="transparent"
               />
@@ -1380,22 +1405,24 @@ class HomeScreen2 extends React.Component {
           <Text style={styles.title}>
             Membros da equipe cadastrados por você
           </Text>
-          <View style={{
+          <View
+            style={{
               width: "100%",
               backgroundColor: backColor2,
               shadowColor: "#444",
               shadowOffset: { width: 5, height: 5 },
               shadowOpacity: 0.2,
               shadowRadius: 8,
-              flexDirection: "row",
               justifyContent: "center",
               padding: 0,
-            }}>
-            <Text style={{color:color2}}>Aguardando conexão para salvar:</Text>
-              {aux.map((item) => {
-                return <Text>{item.nome_eleitor}</Text>;
-              })}
-            
+            }}
+          >
+            <Text style={{ color: color2, textAlign: "center" }}>
+              Aguardando conexão para salvar:
+            </Text>
+            {aux.map((item) => {
+              return <Text style={{ color: color2, textAlign: "center" }}>{item.nome_eleitor}</Text>;
+            })}
           </View>
           <FlatList
             style={{ width: "100%" }}
