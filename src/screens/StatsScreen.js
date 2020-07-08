@@ -311,30 +311,30 @@ class StatsScreen extends React.Component {
 
   renderItem = ({ item, index }) => {
     if (item.empty === true) {
-      return <View style={[styles.item, styles.itemInvisible]} />;
+      return <View style={[styles.item1, styles.itemInvisible]} />;
     }
     if (item.quantidade != null) {
       return (
-        <View style={styles.item}>
-          <Text style={styles.itemText}>Total de membros da equipe:</Text>
+        <View style={styles.item1}>
+          <Text style={styles.itemText1}>Total de membros da equipe:</Text>
 
-          <Text style={styles.itemNumber}>
-            <Text style={styles.itemNumber}>{item.quantidade}</Text>
+          <Text style={styles.itemNumber1}>
+            <Text style={styles.itemNumber1}>{item.quantidade}</Text>
           </Text>
         </View>
       );
     } else if (item.quantidade_semana != null) {
       return (
-        <View style={styles.item}>
-          <Text style={styles.itemText}>Novos membros nesta semana:</Text>
-          <Text style={styles.itemNumber}>{item.quantidade_semana}</Text>
+        <View style={styles.item1}>
+          <Text style={styles.itemText1}>Novos membros nesta semana:</Text>
+          <Text style={styles.itemNumber1}>{item.quantidade_semana}</Text>
         </View>
       );
     } else {
       return (
-        <View style={styles.item}>
-          <Text style={styles.itemText}>Novos membros neste mês:</Text>
-          <Text style={styles.itemNumber}>{item.quantidade_mes}</Text>
+        <View style={styles.item1}>
+          <Text style={styles.itemText1}>Novos membros neste mês:</Text>
+          <Text style={styles.itemNumber1}>{item.quantidade_mes}</Text>
         </View>
       );
     }
@@ -342,13 +342,13 @@ class StatsScreen extends React.Component {
 
   renderItem2 = ({ item, index }) => {
     if (item.empty === true) {
-      return <View style={[styles.item, styles.itemInvisible]} />;
+      return <View style={[styles.item1, styles.itemInvisible]} />;
     }
     return (
-      <View style={styles.item}>
-        <Text style={styles.itemText}>{item.nome_lider}</Text>
-        <Text style={styles.itemNumber}>{item.quantidade_lider}</Text>
-        <Text style={styles.itemText}>membros</Text>
+      <View style={styles.item1}>
+        <Text style={styles.itemText1}>{item.nome_lider}</Text>
+        <Text style={styles.itemNumber1}>{item.quantidade_lider}</Text>
+        <Text style={styles.itemText1}>membros</Text>
       </View>
     );
   };
@@ -461,9 +461,9 @@ class StatsScreen extends React.Component {
                   yAxisSuffix=""
                   yAxisInterval={1} // optional, defaults to 1
                   chartConfig={{
-                    backgroundColor: "#E2B500",
-                    backgroundGradientFrom: "#3179CF",
-                    backgroundGradientTo: "#2F70BD",
+                    backgroundColor: "#000000",
+                    backgroundGradientFrom: "#000000",
+                    backgroundGradientTo: "#000000",
                     decimalPlaces: 0, // optional, defaults to 2dp
                     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                     labelColor: (opacity = 1) =>
@@ -474,7 +474,7 @@ class StatsScreen extends React.Component {
                     propsForDots: {
                       r: "6",
                       strokeWidth: "2",
-                      stroke: "#ffa726",
+                      stroke: "#FCCB0A",
                     },
                   }}
                   bezier
@@ -609,7 +609,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   item: {
-    backgroundColor: "#3179CF",
+    backgroundColor: "#000000",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    margin: 1,
+    height: Dimensions.get("window").width / numColumns, // approximate a square
+  },
+  item1: {
+    backgroundColor: "#000000",
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
@@ -627,6 +636,15 @@ const styles = StyleSheet.create({
   },
   itemNumber: {
     color: "#fff",
+    fontSize: normalize(30),
+  },
+  itemText1: {
+    color: "#FCCB0A",
+    textAlign: "center",
+    justifyContent: "center",
+  },
+  itemNumber1: {
+    color: "#FCCB0A",
     fontSize: normalize(30),
   },
 });

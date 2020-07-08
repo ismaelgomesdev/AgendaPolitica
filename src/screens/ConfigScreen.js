@@ -434,7 +434,7 @@ class ConfigScreen extends React.Component {
               ></Image>
             </TouchableOpacity>
 
-            <Text style={styles.titleNew}> Configurações </Text>
+            <Text style={styles.titleNew}> Ajustes </Text>
           </View>
         </LinearGradient>
         <View style={styles.containerForm}>

@@ -14,10 +14,12 @@ import {
   createStackNavigator,
   createBottomTabNavigator,
 } from "react-navigation";
+import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
 import {
   createReactNavigationReduxMiddleware,
   reduxifyNavigator,
 } from "react-navigation-redux-helpers";
+import Icon from "react-native-vector-icons/Octicons";
 import ConfigScreen from "../screens/ConfigScreen";
 import StatsScreen from "../screens/StatsScreen";
 import HomeScreen from "../screens/HomeScreen";
@@ -159,10 +161,10 @@ const StatsStack = createStackNavigator(
 
 const ConfigStack = createStackNavigator(
   {
-    Configurações: { screen: ConfigScreen },
+    Ajustes: { screen: ConfigScreen },
   },
   {
-    initialRouteName: "Configurações",
+    initialRouteName: "Ajustes",
     headerMode: "none",
 
     headerLayoutPreset: "center",
@@ -220,39 +222,34 @@ const ConfigStack = createStackNavigator(
   }
 );
 
-const TabNavigatorC = createBottomTabNavigator(
+const TabNavigatorC = createMaterialBottomTabNavigator(
   {
-    Início: { screen: HomeStack },
-    Relatórios: { screen: StatsStack },
-    Configurações: { screen: ConfigStack },
+    Início: {
+      screen: HomeStack,
+      navigationOptions: {
+        tabBarIcon: ({ tintColor }) => (
+          <Icon name="home" color={tintColor} size={24} />
+        ),
+      },
+    },
+    Relatórios: {
+      screen: StatsStack,
+      navigationOptions: {
+        tabBarIcon: ({ tintColor }) => (
+          <Icon name="graph" color={tintColor} size={24} />
+        ),
+      },
+    },
+    Ajustes: {
+      screen: ConfigStack,
+      navigationOptions: {
+        tabBarIcon: ({ tintColor }) => (
+          <Icon name="settings" color={tintColor} size={24} />
+        ),
+      },
+    },
   },
   {
-    navigationOptions: ({ navigation }) => ({
-      tabBarIcon: ({ focused, tintColor }) => {
-        const { routeName } = navigation.state;
-        let iconName;
-        if (routeName === "Início") {
-          iconName = AppIcon.images.home;
-        }
-        if (routeName === "Relatórios") {
-          iconName = AppIcon.images.stats;
-        }
-        if (routeName === "Configurações") {
-          iconName = AppIcon.images.config;
-        }
-        // You can return any component that you like here! We usually use an
-        // icon component from react-native-vector-icons
-        return (
-          <Image
-            style={{
-              tintColor: focused ? AppStyles.color.tint : AppStyles.color.grey,
-            }}
-            source={iconName}
-          />
-        );
-      },
-      params: { nomeLogado: "teste" },
-    }),
     initialLayout: {
       height: 300,
     },
@@ -263,34 +260,22 @@ const TabNavigatorC = createBottomTabNavigator(
         height: Configuration.home.tab_bar_height,
       },
     },
+    shifting: true,
+    activeTintColor: "white",
   }
 );
 
 const TabNavigatorL = createBottomTabNavigator(
   {
-    Início: { screen: HomeStack2 },
+    Início: { screen: HomeStack2,
+      navigationOptions: {
+        tabBarIcon: ({ tintColor }) => (
+          <Icon name="home" color={tintColor} size={24} />
+        ),
+      },
+    },
   },
   {
-    navigationOptions: ({ navigation }) => ({
-      tabBarIcon: ({ focused, tintColor }) => {
-        const { routeName } = navigation.state;
-        let iconName;
-        if (routeName === "Início") {
-          iconName = AppIcon.images.home;
-        }
-        // You can return any component that you like here! We usually use an
-        // icon component from react-native-vector-icons
-        return (
-          <Image
-            style={{
-              tintColor: focused ? AppStyles.color.tint : AppStyles.color.grey,
-            }}
-            source={iconName}
-          />
-        );
-      },
-      params: { nomeLogado: "teste" },
-    }),
     initialLayout: {
       height: 300,
     },

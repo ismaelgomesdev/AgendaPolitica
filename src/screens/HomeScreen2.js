@@ -16,6 +16,7 @@ import {
   Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import Icon from "react-native-vector-icons/Feather";
 import { List, ListItem, SearchBar } from "react-native-elements";
 import Button from "react-native-button";
 import { connect } from "react-redux";
@@ -81,7 +82,8 @@ class HomeScreen2 extends React.Component {
       connected: true,
       dadosOffline: [],
       aviso: "indefinido",
-
+      visible: false,
+      visible1: false,
       mensagem: "",
     };
     this.unsubscribe = null;
@@ -323,7 +325,7 @@ class HomeScreen2 extends React.Component {
 
     let cont = 0;
     if (dadosOffline != []) {
-      this.setState({mensagem: dadosOffline.length});
+      this.setState({ mensagem: dadosOffline.length });
       dadosOffline.map(async (item) => {
         cont = cont + 1;
         try {
@@ -404,7 +406,7 @@ class HomeScreen2 extends React.Component {
       connected,
       campos,
     } = this.state;
-    _textInput.setNativeProps({text: ''});
+    _textInput.setNativeProps({ text: "" });
     if (connected) {
       try {
         const response = await api.post("/V_Eleitor.php", {
@@ -432,7 +434,7 @@ class HomeScreen2 extends React.Component {
             desc_demanda: "",
             disabled: true,
           });
-          
+
           const { id } = response.data;
           if (campos.length > 0) {
             campos.map(async (campo) => {
@@ -740,6 +742,38 @@ class HomeScreen2 extends React.Component {
         this.setState({ error, loading: false });
       });*/
   };
+  visualizarEleitor = async (id) => {
+    try {
+      const response = await api.post("/V_Eleitor.php", {
+        tipo: "3",
+        id,
+      });
+      if (response.data != null) {
+        const {
+          nome,
+          telefone,
+          cpf,
+          endereco,
+          num,
+          id_local,
+          id_secao,
+        } = response.data;
+        this.setState({
+          nome_eleitor: nome,
+          telefone_eleitor: telefone,
+          cpf_eleitor: cpf,
+          endereco_eleitor: endereco,
+          num_eleitor: num,
+          id_local: id_local,
+          secao: id_secao,
+        });
+      } else {
+        console.log("nullll");
+      }
+    } catch (e) {
+      console.log("deu erro: " + e);
+    }
+  };
   retornaBairros = async () => {
     try {
       const response = await api.post("/V_Lider.php", {
@@ -1024,7 +1058,7 @@ class HomeScreen2 extends React.Component {
                 onChangeText={(text) => {
                   campo.valor_campo = text;
                 }}
-                ref={component => _textInput = component}
+                ref={(component) => (_textInput = component)}
                 placeholderTextColor={AppStyles.color.grey}
                 underlineColorAndroid="transparent"
               />
@@ -1040,11 +1074,18 @@ class HomeScreen2 extends React.Component {
     return <ListItem title={item.nome_lider} subtitle={item.telefone_lider} />;
   }
 
-  renderRow2({ item }) {
+  renderRow2 = ({ item }) => {
     return (
-      <ListItem title={item.nome_eleitor} subtitle={item.telefone_eleitor} />
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({ visible1: true });
+          this.visualizarEleitor(item.id_eleitor);
+        }}
+      >
+        <ListItem title={item.nome_eleitor} subtitle={item.telefone_eleitor} />
+      </TouchableOpacity>
     );
-  }
+  };
   mudaLocal = (local) => {
     this.setState({ id_local: local }); // receives date and updates state
   };
@@ -1132,12 +1173,12 @@ class HomeScreen2 extends React.Component {
       backColor = "#FCCB0A";
       backColor2 = "transparent";
       text = "online.";
-      icon = AppIcon.images.wifi;
+      icon = "wifi";
     } else {
       color = "#FCCB0A";
       color2 = "#FCCB0A";
       text = "offline.";
-      icon = AppIcon.images.wifioff;
+      icon = "wifi-off";
       backColor = "#000000";
       backColor2 = "#000000";
     }
@@ -1174,7 +1215,7 @@ class HomeScreen2 extends React.Component {
 
     console.log(local);
     return (
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} ref="_scrollView">
         <Dialog
           visible={this.state.visible}
           dialogAnimation={new ScaleAnimation({})}
@@ -1226,6 +1267,62 @@ class HomeScreen2 extends React.Component {
             </Text>
           </DialogContent>
         </Dialog>
+        <Dialog
+          visible={this.state.visible1}
+          dialogAnimation={new ScaleAnimation({})}
+          width={0.8}
+          footer={
+            <DialogFooter>
+              <DialogButton
+                text="Fechar"
+                onPress={() => {
+                  let campos = this.state.campos;
+                  campos.map((campo) => {
+                    campo.valor_campo = "";
+                  });
+                  this.setState({campos: campos});
+                  this.setState({
+                    visible1: false,
+                    nome_eleitor: "",
+                    telefone_eleitor: "",
+                    cpf_eleitor: "",
+                    endereco_eleitor: "",
+                    num_eleitor: "",
+                    secao: "",
+                    desc_demanda: "",
+                    campos: campos
+                  });
+                }}
+              />
+              <DialogButton
+                text="Editar"
+                onPress={() => {
+                  this.refs._scrollView.scrollTo(0);
+                  this.setState({ visible1: false });
+                }}
+              />
+            </DialogFooter>
+          }
+        >
+          <DialogContent>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>Nome: </Text>
+              <Text style={{ fontSize: 15 }}>{this.state.nome_eleitor}</Text>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+                Telefone:{" "}
+              </Text>
+              <Text style={{ fontSize: 15 }}>
+                {this.state.telefone_eleitor}
+              </Text>
+            </View>
+            {this.renderDialogEndereco()}
+            {this.renderDialogNumero()}
+            {this.renderDialogLocal()}
+            {this.renderDialogSecao()}
+          </DialogContent>
+        </Dialog>
         <Text>
           Status de Rede: {this.state.aviso}
           {
@@ -1275,15 +1372,7 @@ class HomeScreen2 extends React.Component {
               padding: 3,
             }}
           >
-            <Image
-              style={{
-                width: 16,
-                height: 16,
-                tintColor: color,
-                fontWeight: "bold",
-              }}
-              source={icon}
-            ></Image>
+            <Icon name={icon} color={color} size={16} />
             <Text
               style={{
                 paddingStart: 3,
@@ -1421,7 +1510,11 @@ class HomeScreen2 extends React.Component {
               Aguardando conexão para salvar:
             </Text>
             {aux.map((item) => {
-              return <Text style={{ color: color2, textAlign: "center" }}>{item.nome_eleitor}</Text>;
+              return (
+                <Text style={{ color: color2, textAlign: "center" }}>
+                  {item.nome_eleitor}
+                </Text>
+              );
             })}
           </View>
           <FlatList
