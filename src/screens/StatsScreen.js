@@ -405,7 +405,7 @@ class StatsScreen extends React.Component {
 
   renderItem3 = ({ item, index }) => {
     if (item.empty === true) {
-      return <View style={[styles.item1, styles.itemInvisible]} />;
+      return null
     }
     return (
       <View style={styles.item1}>
@@ -435,12 +435,12 @@ class StatsScreen extends React.Component {
       };
       const { quantidade_secao } = this.state;
       return (
-        <View style={{ flex: 1 }}>
+        <View style={{ width: "100%" }}>
           <Text style={styles.title}>Membros por seção</Text>
           <FlatList
             data={formatData(quantidade_secao, numColumns)}
             style={styles.containerList}
-            renderItem={this.renderItem2}
+            renderItem={this.renderItem3}
             numColumns={numColumns}
           />
         </View>
