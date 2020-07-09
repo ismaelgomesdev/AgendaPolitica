@@ -27,6 +27,12 @@ import { Configuration } from "../Configuration";
 import { Dimensions, AsyncStorage } from "react-native";
 import Constants from "expo-constants";
 import { RadioButton } from "react-native-paper";
+import Dialog, {
+  ScaleAnimation,
+  DialogFooter,
+  DialogButton,
+  DialogContent,
+} from "react-native-popup-dialog";
 const width = Dimensions.get("window").width;
 let idLogado = "";
 let nomeLogado = "";
@@ -45,10 +51,12 @@ class HomeScreen extends React.Component {
       telefone_lider: "",
       senha_lider: "",
       errorMessage: "",
-
+      acesso: "",
+      cadastro: "",
       loading: false,
       data: [],
 
+      visible1: false,
       error: null,
       disabled: true,
 
@@ -249,27 +257,27 @@ class HomeScreen extends React.Component {
       />
     );
   };
-  searchFilterFunction = text => {    
-    const newData = arrayholder.filter(item => {      
+  searchFilterFunction = (text) => {
+    const newData = arrayholder.filter((item) => {
       const itemData = `${item.nome_lider.toUpperCase()}`;
-      
-       const textData = text.toUpperCase();
-        
-       return itemData.indexOf(textData) > -1;    
+
+      const textData = text.toUpperCase();
+
+      return itemData.indexOf(textData) > -1;
     });
-    
-    this.setState({ data: newData });  
+
+    this.setState({ data: newData });
   };
-  renderHeader = () => {    
-    return (      
-      <SearchBar        
-        placeholder="Pesquise aqui..."        
-        lightTheme        
-        round        
-        onChangeText={text => this.searchFilterFunction(text)}
-        autoCorrect={false}             
-      />    
-    );  
+  renderHeader = () => {
+    return (
+      <SearchBar
+        placeholder="Pesquise aqui..."
+        lightTheme
+        round
+        onChangeText={(text) => this.searchFilterFunction(text)}
+        autoCorrect={false}
+      />
+    );
   };
   renderFooter = () => {
     if (!this.state.loading) return null;
@@ -286,8 +294,39 @@ class HomeScreen extends React.Component {
     );
   };
 
-  renderRow({ item }) {
-    return <ListItem title={item.nome_lider} subtitle={item.telefone_lider} />;
+  visualizarLider = async (id) => {
+    try {
+      const response = await api.post("/V_Lider.php", {
+        tipo: "6",
+        id,
+      });
+      if (response.data != null) {
+        const { nome, telefone, acesso, cadastro } = response.data;
+        this.setState({
+          nome_lider: nome,
+          telefone_lider: telefone,
+          acesso: acesso,
+          cadastro: cadastro,
+        });
+      } else {
+        console.log("nullll");
+      }
+    } catch (e) {
+      console.log("deu erro: " + e);
+    }
+  };
+
+  renderRow = ({ item }) => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          this.setState({ visible1: true });
+          this.visualizarLider(item.id_lider);
+        }}
+      >
+        <ListItem title={item.nome_lider} subtitle={item.telefone_lider} />
+      </TouchableOpacity>
+    );
   }
 
   /*mudaState = (conn) => {
@@ -342,6 +381,65 @@ class HomeScreen extends React.Component {
 
     return (
       <ScrollView style={styles.container}>
+        <Dialog
+          visible={this.state.visible1}
+          dialogAnimation={new ScaleAnimation({})}
+          width={0.8}
+          footer={
+            <DialogFooter>
+              <DialogButton
+                text="Fechar"
+                onPress={() => {
+                  this.setState({
+                    visible1: false,
+                    nome_lider: "",
+                    telefone_lider: "",
+                    acesso: "",
+                    cadastro: ""
+                  });
+                }}
+              />
+              {/*<DialogButton
+                text="Editar"
+                onPress={() => {
+                  this.refs._scrollView.scrollTo(0);
+                  this.setState({ visible1: false });
+                }}
+              />*/}
+            </DialogFooter>
+          }
+        >
+          <DialogContent>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>Nome: </Text>
+              <Text style={{ fontSize: 15 }}>{this.state.nome_lider}</Text>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+                Telefone:{" "}
+              </Text>
+              <Text style={{ fontSize: 15 }}>
+                {this.state.telefone_lider}
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+                Último acesso em{" "}
+              </Text>
+              <Text style={{ fontSize: 15 }}>
+                {this.state.acesso}
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", marginTop: 5 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 15 }}>
+                Cadastrado em{" "}
+              </Text>
+              <Text style={{ fontSize: 15 }}>
+                {this.state.cadastro}
+              </Text>
+            </View>
+          </DialogContent>
+        </Dialog>
         <LinearGradient
           style={styles.headerNew}
           colors={["#2060AD", "#58C6CA"]}
@@ -468,7 +566,7 @@ class HomeScreen extends React.Component {
             data={this.state.data}
             renderItem={this.renderRow}
             keyExtractor={(item) => item.id_lider}
-            ListHeaderComponent={this.renderHeader}  
+            ListHeaderComponent={this.renderHeader}
           />
         </View>
       </ScrollView>

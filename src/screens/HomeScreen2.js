@@ -65,10 +65,10 @@ class HomeScreen2 extends React.Component {
       secao: "",
       desc_demanda: "",
 
-      valida_endereco: true,
-      valida_local: true,
-      valida_secao: true,
-      valida_cpf: true,
+      valida_endereco: false,
+      valida_local: false,
+      valida_secao: false,
+      valida_cpf: false,
 
       loading: false,
       data: [],
@@ -406,7 +406,7 @@ class HomeScreen2 extends React.Component {
       connected,
       campos,
     } = this.state;
-    _textInput.setNativeProps({ text: "" });
+    if (campos.length > 0) _textInput.setNativeProps({ text: "" });
     if (connected) {
       try {
         const response = await api.post("/V_Eleitor.php", {
@@ -876,6 +876,7 @@ class HomeScreen2 extends React.Component {
     const bairros = this.state.bairros;
     const distritos = this.state.distritos;
     const { checked } = this.state;
+    const { id_local } = this.state;
     if (this.state.valida_local) {
       return (
         <View style={styles.InputContainer}>
@@ -883,6 +884,7 @@ class HomeScreen2 extends React.Component {
             checked={checked}
             bairros={bairros}
             distritos={distritos}
+            selectedValue={id_local}
             mudaLocal={this.mudaLocal}
           ></this.renderPicker>
         </View>
@@ -1280,7 +1282,7 @@ class HomeScreen2 extends React.Component {
                   campos.map((campo) => {
                     campo.valor_campo = "";
                   });
-                  this.setState({campos: campos});
+                  this.setState({ campos: campos });
                   this.setState({
                     visible1: false,
                     nome_eleitor: "",
@@ -1290,17 +1292,17 @@ class HomeScreen2 extends React.Component {
                     num_eleitor: "",
                     secao: "",
                     desc_demanda: "",
-                    campos: campos
+                    campos: campos,
                   });
                 }}
               />
-              <DialogButton
+              {/*<DialogButton
                 text="Editar"
                 onPress={() => {
                   this.refs._scrollView.scrollTo(0);
                   this.setState({ visible1: false });
                 }}
-              />
+              />*/}
             </DialogFooter>
           }
         >
@@ -1454,7 +1456,7 @@ class HomeScreen2 extends React.Component {
           {this.renderNumero()}
           {this.renderSecao()}
           {this.renderCampos()}
-          {/*<View style={styles.InputContainer}>
+          <View style={styles.InputContainer}>
             <TextInput
               style={styles.body}
               placeholder="Demanda"
@@ -1466,7 +1468,7 @@ class HomeScreen2 extends React.Component {
               placeholderTextColor={AppStyles.color.grey}
               underlineColorAndroid="transparent"
             />
-            </View>*/}
+          </View>
           <Button
             containerStyle={[styles.facebookContainer]}
             style={styles.facebookText}

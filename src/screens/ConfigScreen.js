@@ -122,7 +122,7 @@ class ConfigScreen extends React.Component {
         nome_campo: "",
         disabled: true,
       });
-      this.pesquisaCampos();      
+      this.pesquisaCampos();
     }
   };
 
@@ -558,7 +558,7 @@ class ConfigScreen extends React.Component {
             />
           </View>
         </View>
-        {/*<View style={styles.containerForm1}>
+        <View style={styles.containerForm1}>
           <Text style={styles.title}>Demandas da equipe</Text>
           <View style={{ flexDirection: "row" }}>
             <FlatList
@@ -569,7 +569,7 @@ class ConfigScreen extends React.Component {
               ItemSeparatorComponent={this.renderSeparator}
             />
           </View>
-            </View>*/}
+        </View>
       </ScrollView>
     );
   }

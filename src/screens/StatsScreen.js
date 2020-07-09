@@ -86,6 +86,11 @@ class StatsScreen extends React.Component {
 
       errorMessage: "",
 
+      secao: false,
+      cpf: false,
+      endereco: false,
+      local: false,
+
       loading: false,
       data: [],
       error: null,
@@ -96,6 +101,7 @@ class StatsScreen extends React.Component {
       quantidade_mes: null,
       quantidade_mes2: [],
       quantidade_local: [],
+      quantidade_secao: [],
       labels: [],
       datasets: [],
     };
@@ -142,6 +148,7 @@ class StatsScreen extends React.Component {
         quantidade_mes,
         quantidade_mes2,
         quantidade_local,
+        quantidade_secao
       } = response.data;
       this.setState({
         quantidade: quantidade,
@@ -150,6 +157,7 @@ class StatsScreen extends React.Component {
         quantidade_mes: quantidade_mes,
         quantidade_mes2: quantidade_mes2,
         quantidade_local: quantidade_local,
+        quantidade_secao: quantidade_secao
       });
       console.log(quantidade_mes2);
       const quantidade_bairro = quantidade_local.filter(
@@ -203,6 +211,48 @@ class StatsScreen extends React.Component {
     this.makeRemoteRequest2();
     this.totalEleitores();
   }
+
+  componentWillMount() {
+    this.verificaCampos();
+  }
+
+  verificaCampos = async () => {
+    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
+
+    const { token } = this.state;
+
+    try {
+      const response = await api.post("/V_User.php", {
+        tipo: "3",
+        token,
+      });
+
+      const { nome, id, tipo } = response.data;
+      nomeLogado = nome;
+      idLogado = id;
+      tipoLogado = tipo;
+
+      this.setState({ idLog: id });
+      this.setState({ nomeLog: nome });
+      this.setState({ tipoLog: tipo });
+      this.setState({ loading: true });
+      const { idLog } = this.state;
+    } catch (e) {}
+    const { idLog } = this.state;
+    try {
+      const response = await api.post("/V_Candidato.php", {
+        tipo: "5",
+        idLog,
+      });
+      const { cpf, endereco, local, secao } = response.data;
+      this.setState({
+        cpf: cpf,
+        endereco: endereco,
+        local: local,
+        secao: secao,
+      });
+    } catch (e) {}
+  };
 
   makeRemoteRequest = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
@@ -351,6 +401,53 @@ class StatsScreen extends React.Component {
         <Text style={styles.itemText1}>membros</Text>
       </View>
     );
+  };
+
+  renderItem3 = ({ item, index }) => {
+    if (item.empty === true) {
+      return <View style={[styles.item1, styles.itemInvisible]} />;
+    }
+    return (
+      <View style={styles.item1}>
+        <Text style={styles.itemText1}>Seção {item.secao}:</Text>
+        <Text style={styles.itemNumber1}>{item.qtd}</Text>
+        <Text style={styles.itemText1}>membros</Text>
+      </View>
+    );
+  };
+
+  renderSecoes = () => {
+    
+    if (this.state.secao) {
+      const formatData = (data, numColumns) => {
+        const numberOfFullRows = Math.floor(data.length / numColumns);
+  
+        let numberOfElementsLastRow = data.length - numberOfFullRows * numColumns;
+        while (
+          numberOfElementsLastRow !== numColumns &&
+          numberOfElementsLastRow !== 0
+        ) {
+          data.push({ key: `blank-${numberOfElementsLastRow}`, empty: true });
+          numberOfElementsLastRow++;
+        }
+  
+        return data;
+      };
+      const { quantidade_secao } = this.state;
+      return (
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>Membros por seção</Text>
+          <FlatList
+            data={formatData(quantidade_secao, numColumns)}
+            style={styles.containerList}
+            renderItem={this.renderItem2}
+            numColumns={numColumns}
+          />
+        </View>
+      );
+    } else {
+      return null;
+    }
   };
 
   render() {
@@ -515,6 +612,7 @@ class StatsScreen extends React.Component {
             paddingLeft="15"
             absolute
           />
+          {this.renderSecoes()}
         </View>
       </ScrollView>
     );
