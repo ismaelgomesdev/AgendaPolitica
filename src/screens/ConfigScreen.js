@@ -421,7 +421,7 @@ class ConfigScreen extends React.Component {
           //visibility of Overlay Loading Spinner
           visible={this.state.loading}
           //Text with the Spinner
-          textContent={"Carregando..."}
+          //textContent={"Carregando..."}
           //Text style of the Spinner Text
           textStyle={styles.spinnerTextStyle}
         />
