@@ -29,6 +29,7 @@ import Constants from "expo-constants";
 import { normalize } from "./StatsScreen";
 import { RadioButton } from "react-native-paper";
 import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
+import Spinner from "react-native-loading-spinner-overlay";
 import Dialog, {
   ScaleAnimation,
   DialogFooter,
@@ -70,7 +71,7 @@ class HomeScreen2 extends React.Component {
       valida_secao: false,
       valida_cpf: false,
 
-      loading: false,
+      loading: true,
       data: [],
       locais: [],
       bairros: [],
@@ -662,7 +663,7 @@ class HomeScreen2 extends React.Component {
           let dados = response.data.data;
           console.log("dados: " + dados);
           response.data.data = dados;
-          this.setState({ data: response.data.data, loading: false });
+          this.setState({ data: response.data.data });
           console.log(this.state.data);
         } else {
           console.log("nullll");
@@ -788,7 +789,6 @@ class HomeScreen2 extends React.Component {
           locais: dados,
           bairros: bairros,
           distritos: distritos,
-          loading: false,
         });
         console.log(this.state.bairros);
       } else {
@@ -1218,6 +1218,14 @@ class HomeScreen2 extends React.Component {
     console.log(local);
     return (
       <ScrollView style={styles.container} ref="_scrollView">
+        <Spinner
+          //visibility of Overlay Loading Spinner
+          visible={this.state.loading}
+          //Text with the Spinner
+          textContent={"Carregando..."}
+          //Text style of the Spinner Text
+          textStyle={styles.spinnerTextStyle}
+        />
         <Dialog
           visible={this.state.visible}
           dialogAnimation={new ScaleAnimation({})}
@@ -1601,6 +1609,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  spinnerTextStyle: {
+    color: "#FFF",
+  },
   header: {
     flexDirection: "row",
   },

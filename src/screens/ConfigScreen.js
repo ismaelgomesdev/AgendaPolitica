@@ -18,6 +18,7 @@ import {
   Switch,
 } from "react-native";
 import { List, ListItem, SearchBar } from "react-native-elements";
+import Spinner from "react-native-loading-spinner-overlay";
 import Button from "react-native-button";
 import { connect } from "react-redux";
 import NumberFormat from "react-number-format";
@@ -72,7 +73,7 @@ class ConfigScreen extends React.Component {
       data1: [],
       errorMessage: "",
       mensagem: "",
-      loading: false,
+      loading: true,
       disabled: true,
       nome: true,
       telefone: true,
@@ -256,6 +257,7 @@ class ConfigScreen extends React.Component {
         endereco: endereco,
         local: local,
         secao: secao,
+        loading: false,
       });
     } catch (e) {}
   };
@@ -415,6 +417,14 @@ class ConfigScreen extends React.Component {
     const { nome_campo } = this.state;
     return (
       <ScrollView style={styles.container}>
+        <Spinner
+          //visibility of Overlay Loading Spinner
+          visible={this.state.loading}
+          //Text with the Spinner
+          textContent={"Carregando..."}
+          //Text style of the Spinner Text
+          textStyle={styles.spinnerTextStyle}
+        />
         <LinearGradient
           style={styles.headerNew}
           colors={["#2060AD", "#58C6CA"]}
@@ -641,6 +651,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  spinnerTextStyle: {
+    color: "#FFF",
+  },
   header: {
     flexDirection: "row",
   },

@@ -23,7 +23,7 @@ import { connect } from "react-redux";
 import NumberFormat from "react-number-format";
 import { AppIcon, AppStyles } from "../AppStyles";
 import api from "../services/api";
-
+import Spinner from "react-native-loading-spinner-overlay";
 import {
   LineChart,
   BarChart,
@@ -91,7 +91,7 @@ class StatsScreen extends React.Component {
       endereco: false,
       local: false,
 
-      loading: false,
+      loading: true,
       data: [],
       error: null,
       disabled: true,
@@ -148,7 +148,7 @@ class StatsScreen extends React.Component {
         quantidade_mes,
         quantidade_mes2,
         quantidade_local,
-        quantidade_secao
+        quantidade_secao,
       } = response.data;
       this.setState({
         quantidade: quantidade,
@@ -157,7 +157,8 @@ class StatsScreen extends React.Component {
         quantidade_mes: quantidade_mes,
         quantidade_mes2: quantidade_mes2,
         quantidade_local: quantidade_local,
-        quantidade_secao: quantidade_secao
+        quantidade_secao: quantidade_secao,
+        loading: false
       });
       console.log(quantidade_mes2);
       const quantidade_bairro = quantidade_local.filter(
@@ -288,7 +289,7 @@ class StatsScreen extends React.Component {
           let dados = response.data.data;
           console.log("dados: " + dados);
           response.data.data = dados;
-          this.setState({ data: response.data.data, loading: false });
+          this.setState({ data: response.data.data });
           console.log(this.state.data);
         } else {
           console.log("nullll");
@@ -336,7 +337,7 @@ class StatsScreen extends React.Component {
           let dados = response.data.data;
           console.log("dados: " + dados);
           response.data.data = dados;
-          this.setState({ data: response.data.data, loading: false });
+          this.setState({ data: response.data.data });
           console.log(this.state.data);
         } else {
           console.log("nullll");
@@ -405,7 +406,7 @@ class StatsScreen extends React.Component {
 
   renderItem3 = ({ item, index }) => {
     if (item.empty === true) {
-      return null
+      return null;
     }
     return (
       <View style={styles.item1}>
@@ -417,12 +418,12 @@ class StatsScreen extends React.Component {
   };
 
   renderSecoes = () => {
-    
     if (this.state.secao) {
       const formatData = (data, numColumns) => {
         const numberOfFullRows = Math.floor(data.length / numColumns);
-  
-        let numberOfElementsLastRow = data.length - numberOfFullRows * numColumns;
+
+        let numberOfElementsLastRow =
+          data.length - numberOfFullRows * numColumns;
         while (
           numberOfElementsLastRow !== numColumns &&
           numberOfElementsLastRow !== 0
@@ -430,7 +431,7 @@ class StatsScreen extends React.Component {
           data.push({ key: `blank-${numberOfElementsLastRow}`, empty: true });
           numberOfElementsLastRow++;
         }
-  
+
         return data;
       };
       const { quantidade_secao } = this.state;
@@ -509,6 +510,14 @@ class StatsScreen extends React.Component {
     });
     return (
       <ScrollView style={styles.container}>
+        <Spinner
+          //visibility of Overlay Loading Spinner
+          visible={this.state.loading}
+          //Text with the Spinner
+          textContent={"Carregando..."}
+          //Text style of the Spinner Text
+          textStyle={styles.spinnerTextStyle}
+        />
         <LinearGradient
           style={styles.headerNew}
           colors={["#2060AD", "#58C6CA"]}
@@ -692,6 +701,9 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: AppStyles.color.background,
     flex: 1,
+  },
+  spinnerTextStyle: {
+    color: "#FFF",
   },
   containerList: {
     borderRadius: 10,

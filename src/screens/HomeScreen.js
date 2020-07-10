@@ -16,6 +16,7 @@ import {
   Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+
 import { List, ListItem, SearchBar } from "react-native-elements";
 import Button from "react-native-button";
 import { connect } from "react-redux";
@@ -33,7 +34,10 @@ import Dialog, {
   DialogButton,
   DialogContent,
 } from "react-native-popup-dialog";
+import Spinner from "react-native-loading-spinner-overlay";
 const width = Dimensions.get("window").width;
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
 let idLogado = "";
 let nomeLogado = "";
 let tipoLogado = "";
@@ -53,7 +57,7 @@ class HomeScreen extends React.Component {
       errorMessage: "",
       acesso: "",
       cadastro: "",
-      loading: false,
+      loading: true,
       data: [],
 
       visible1: false,
@@ -327,7 +331,7 @@ class HomeScreen extends React.Component {
         <ListItem title={item.nome_lider} subtitle={item.telefone_lider} />
       </TouchableOpacity>
     );
-  }
+  };
 
   /*mudaState = (conn) => {
     this.setState({ connected: conn });
@@ -378,9 +382,16 @@ class HomeScreen extends React.Component {
       </View>
     );
 */
-
     return (
       <ScrollView style={styles.container}>
+        <Spinner
+          //visibility of Overlay Loading Spinner
+          visible={this.state.loading}
+          //Text with the Spinner
+          textContent={"Carregando..."}
+          //Text style of the Spinner Text
+          textStyle={styles.spinnerTextStyle}
+        />
         <Dialog
           visible={this.state.visible1}
           dialogAnimation={new ScaleAnimation({})}
@@ -395,7 +406,7 @@ class HomeScreen extends React.Component {
                     nome_lider: "",
                     telefone_lider: "",
                     acesso: "",
-                    cadastro: ""
+                    cadastro: "",
                   });
                 }}
               />
@@ -418,25 +429,19 @@ class HomeScreen extends React.Component {
               <Text style={{ fontWeight: "bold", fontSize: 15 }}>
                 Telefone:{" "}
               </Text>
-              <Text style={{ fontSize: 15 }}>
-                {this.state.telefone_lider}
-              </Text>
+              <Text style={{ fontSize: 15 }}>{this.state.telefone_lider}</Text>
             </View>
             <View style={{ flexDirection: "row", marginTop: 5 }}>
               <Text style={{ fontWeight: "bold", fontSize: 15 }}>
                 Último acesso em{" "}
               </Text>
-              <Text style={{ fontSize: 15 }}>
-                {this.state.acesso}
-              </Text>
+              <Text style={{ fontSize: 15 }}>{this.state.acesso}</Text>
             </View>
             <View style={{ flexDirection: "row", marginTop: 5 }}>
               <Text style={{ fontWeight: "bold", fontSize: 15 }}>
                 Cadastrado em{" "}
               </Text>
-              <Text style={{ fontSize: 15 }}>
-                {this.state.cadastro}
-              </Text>
+              <Text style={{ fontSize: 15 }}>{this.state.cadastro}</Text>
             </View>
           </DialogContent>
         </Dialog>
@@ -647,7 +652,9 @@ const styles = StyleSheet.create({
     backgroundColor: AppStyles.color.background,
     flex: 1,
   },
-
+  spinnerTextStyle: {
+    color: "#FFF",
+  },
   titleHeader: {
     fontFamily: AppStyles.fontName.bold,
     color: AppStyles.color.tint,
