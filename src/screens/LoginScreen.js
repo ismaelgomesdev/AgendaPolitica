@@ -177,7 +177,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
           }}
         />
 
-          <Image source={require("../assets/images/logo1.png")}></Image>
+          <Image source={require("../assets/images/carregamento.png")} style={{maxHeight: 205, maxWidth: 120}}></Image>
 
           <Text style={[styles.title, styles.leftTitle]}>
             Insira seus dados para continuar

@@ -339,6 +339,7 @@ class HomeScreen2 extends React.Component {
             endereco_eleitor: item.endereco_eleitor,
             num_eleitor: item.num_eleitor,
             id_local: item.id_local,
+            desc_demanda: item.desc_demanda,
             secao: item.secao,
             idLogado: item.idLogado,
           });
@@ -352,6 +353,7 @@ class HomeScreen2 extends React.Component {
               cpf_eleitor: "",
               endereco_eleitor: "",
               num_eleitor: "",
+              desc_demanda: "",
               secao: "",
               disabled: true,
             });

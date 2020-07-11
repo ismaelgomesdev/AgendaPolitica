@@ -33,10 +33,7 @@ class WelcomeScreen extends React.Component {
         {
           //<Text style={styles.title}>[[Logo do App]]</Text>
         }
-        <Image
-          source={require("../assets/images/download.png")}
-          style={styles.logo}
-        ></Image>
+        
         <Button
           containerStyle={styles.loginContainer}
           style={styles.loginText}
