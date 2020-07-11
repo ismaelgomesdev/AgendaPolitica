@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "HelloWorld",
-    "slug": "PoliNet",
+    "name": "Agenda153",
+    "slug": "Agenda153",
     "platforms": [
       "ios",
       "android",
@@ -25,7 +25,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.yourcompany.yourappname",
+      "package": "com.invest153.agenda153",
       "versionCode": 1
     }
   }

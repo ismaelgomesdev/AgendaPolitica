@@ -138,17 +138,17 @@ class HomeScreen2 extends React.Component {
           });
         } else {
           this.setState({
-            mensagem: "deu ruim",
+            //mensagem: "deu ruim",
           });
         }
       } catch (e) {
         this.setState({
-          mensagem: e,
+          //mensagem: e,
         });
       }
     } catch (e) {
       this.setState({
-        mensagem: e,
+        //mensagem: e,
       });
     }
   };
@@ -183,21 +183,21 @@ class HomeScreen2 extends React.Component {
           let campos = response.data;
           this.setState({
             campos: campos,
-            mensagem: JSON.stringify(campos),
+            //mensagem: JSON.stringify(campos),
           });
         } else {
           this.setState({
-            mensagem: "",
+            //mensagem: "",
           });
         }
       } catch (e) {
         this.setState({
-          mensagem: e,
+          //mensagem: e,
         });
       }
     } catch (e) {
       this.setState({
-        mensagem: e,
+        //mensagem: e,
       });
     }
   };
@@ -326,7 +326,8 @@ class HomeScreen2 extends React.Component {
 
     let cont = 0;
     if (dadosOffline != []) {
-      this.setState({ mensagem: dadosOffline.length });
+      this.setState({ //mensagem: dadosOffline.length
+       });
       dadosOffline.map(async (item) => {
         cont = cont + 1;
         try {
@@ -723,7 +724,7 @@ class HomeScreen2 extends React.Component {
           arrayholder = dados;
           console.log(this.state.data);
         } else {
-          console.log("nullll");
+          this.setState({ loading: false });
         }
       } catch (e) {
         console.log("deu erro: " + e);
@@ -776,27 +777,54 @@ class HomeScreen2 extends React.Component {
     }
   };
   retornaBairros = async () => {
+    this.state.token = await AsyncStorage.getItem("@PoliNet_token");
+
+    const { token } = this.state;
+
     try {
-      const response = await api.post("/V_Lider.php", {
+      const response = await api.post("/V_User.php", {
         tipo: "3",
+        token,
       });
-      if (response.data != null) {
-        console.log(response.data);
-        const dados = response.data.dados;
-        const bairros = dados.filter((dado) => dado.distrito === "0");
-        const distritos = dados.filter((dado) => dado.distrito === "1");
-        this.setState({
-          locais: dados,
-          bairros: bairros,
-          distritos: distritos,
+
+      console.log(response.data);
+      const { nome, id, tipo } = response.data;
+      nomeLogado = nome;
+      idLogado = id;
+      tipoLogado = tipo;
+
+      this.setState({ idLog: id });
+      this.setState({ nomeLog: nome });
+      this.setState({ tipoLog: tipo });
+
+      console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
+      const { idLog } = this.state;
+      console.log(idLog);
+
+      try {
+        const response = await api.post("/V_Lider.php", {
+          tipo: "3",
+          idLog,
         });
-        console.log(this.state.bairros);
-      } else {
-        console.log("nullll");
+        if (response.data != null) {
+          console.log(response.data);
+          const dados = response.data.dados;
+          const bairros = dados.filter((dado) => dado.distrito === "0");
+          const distritos = dados.filter((dado) => dado.distrito === "1");
+          this.setState({
+            locais: dados,
+            bairros: bairros,
+            distritos: distritos,
+          });
+          console.log(this.state.bairros);
+        } else {
+          console.log("nullll");
+          this.setState({
+          });
+        }
+      } catch (e) {
       }
-    } catch (e) {
-      console.log("deu erro: " + e);
-    }
+    } catch (e) {}
   };
   renderSeparator = () => {
     return (
