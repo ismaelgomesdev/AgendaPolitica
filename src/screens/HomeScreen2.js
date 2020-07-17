@@ -56,6 +56,7 @@ class HomeScreen2 extends React.Component {
       senha_lider: "",
       errorMessage: "",
 
+      id_eleitor: "",
       nome_eleitor: "",
       telefone_eleitor: "",
       cpf_eleitor: "",
@@ -65,6 +66,7 @@ class HomeScreen2 extends React.Component {
       id_local: null,
       secao: "",
       desc_demanda: "",
+      deps: [],
 
       valida_endereco: false,
       valida_local: false,
@@ -326,8 +328,9 @@ class HomeScreen2 extends React.Component {
 
     let cont = 0;
     if (dadosOffline != []) {
-      this.setState({ //mensagem: dadosOffline.length
-       });
+      this.setState({
+        //mensagem: dadosOffline.length
+      });
       dadosOffline.map(async (item) => {
         cont = cont + 1;
         try {
@@ -533,14 +536,13 @@ class HomeScreen2 extends React.Component {
   componentDidMount() {
     this.retornaBairros();
     this.validaCampos();
-    this.makeRemoteRequest();
     this.makeRemoteRequest2();
     this.getConnect();
     NetInfo.fetch().then((state) => {
       if (state.isInternetReachable) {
         this.setState({ connected: true, aviso: "online" });
       } else {
-        this.setState({ connected: false, aviso: "offline" });
+        this.setState({ connected: false, aviso: "offline", loading: false });
       }
     });
     this.unsubscribe = NetInfo.addEventListener(this.handleConnectivityChange);
@@ -551,7 +553,6 @@ class HomeScreen2 extends React.Component {
   componentWillMount() {
     this.validaCampos();
     this.personalCampos();
-    this.makeRemoteRequest();
     this.makeRemoteRequest2();
   }
 
@@ -633,6 +634,7 @@ class HomeScreen2 extends React.Component {
       this.setState({ disabled: false });
     }
   }
+
   makeRemoteRequest = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
@@ -754,6 +756,7 @@ class HomeScreen2 extends React.Component {
       });
       if (response.data != null) {
         const {
+          id,
           nome,
           telefone,
           cpf,
@@ -763,6 +766,7 @@ class HomeScreen2 extends React.Component {
           id_secao,
         } = response.data;
         this.setState({
+          id_eleitor: id,
           nome_eleitor: nome,
           telefone_eleitor: telefone,
           cpf_eleitor: cpf,
@@ -774,6 +778,34 @@ class HomeScreen2 extends React.Component {
       } else {
         console.log("nullll");
       }
+    } catch (e) {
+      console.log("deu erro: " + e);
+    }
+  };
+  excluirEleitor = async (id) => {
+    try {
+      const response = await api.post("/V_Eleitor.php", {
+        tipo: "4",
+        id,
+      });
+      let campos = this.state.campos;
+      campos.map((campo) => {
+        campo.valor_campo = "";
+      });
+      this.setState({ campos: campos });
+      this.setState({
+        visible1: false,
+        id_eleitor: "",
+        nome_eleitor: "",
+        telefone_eleitor: "",
+        cpf_eleitor: "",
+        endereco_eleitor: "",
+        num_eleitor: "",
+        secao: "",
+        desc_demanda: "",
+        campos: campos,
+      });
+      this.makeRemoteRequest2();
     } catch (e) {
       console.log("deu erro: " + e);
     }
@@ -821,11 +853,9 @@ class HomeScreen2 extends React.Component {
           console.log(this.state.bairros);
         } else {
           console.log("nullll");
-          this.setState({
-          });
+          this.setState({});
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     } catch (e) {}
   };
   renderSeparator = () => {
@@ -1047,7 +1077,7 @@ class HomeScreen2 extends React.Component {
       return (
         <View style={{ flexDirection: "row", marginTop: 5 }}>
           <Text style={{ fontWeight: "bold", fontSize: 15 }}>
-            Seção de votação:{" "}
+            Número do membro:{" "}
           </Text>
           <Text style={{ fontSize: 15 }}>{this.state.secao}</Text>
         </View>
@@ -1062,7 +1092,7 @@ class HomeScreen2 extends React.Component {
         <View style={styles.InputContainer}>
           <TextInput
             style={styles.body}
-            placeholder="Seção"
+            placeholder="Número do membro"
             onChangeText={(text) => {
               this.setState({ secao: text });
               this.verificaCampos2();
@@ -1107,16 +1137,34 @@ class HomeScreen2 extends React.Component {
   }
 
   renderRow2 = ({ item }) => {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          this.setState({ visible1: true });
-          this.visualizarEleitor(item.id_eleitor);
-        }}
-      >
-        <ListItem title={item.nome_eleitor} subtitle={item.telefone_eleitor} />
-      </TouchableOpacity>
-    );
+    if (this.state.connected) {
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            this.setState({ visible1: true });
+            this.visualizarEleitor(item.id_eleitor);
+          }}
+        >
+          <ListItem
+            title={item.nome_eleitor}
+            subtitle={item.telefone_eleitor}
+          />
+        </TouchableOpacity>
+      );
+    } else {
+      return (
+        <View
+          style={{
+            width: "100%",
+            height: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon name="wifi-off" color="gray" size={normalize(50)} />
+        </View>
+      );
+    }
   };
   mudaLocal = (local) => {
     this.setState({ id_local: local }); // receives date and updates state
@@ -1189,6 +1237,24 @@ class HomeScreen2 extends React.Component {
     }
     return <Text>{aviso}</Text>;
   }*/
+
+  adicionaDep = () => {
+    this.state.deps.push(
+      <View style={styles.InputContainer}>
+        <TextInput
+          style={styles.body}
+          placeholder="Nome completo"
+          onChangeText={(text) => {
+            this.setState({ nome_eleitor: text });
+            this.verificaCampos2();
+          }}
+          value={this.state.nome_eleitor}
+          placeholderTextColor={AppStyles.color.grey}
+          underlineColorAndroid="transparent"
+        />
+      </View>
+    );
+  };
   render() {
     const bairros = this.state.bairros;
     const distritos = this.state.distritos;
@@ -1199,6 +1265,7 @@ class HomeScreen2 extends React.Component {
     let backColor2;
     let text;
     let icon;
+
     if (this.state.connected) {
       color = "#000000";
       color2 = "transparent";
@@ -1323,6 +1390,7 @@ class HomeScreen2 extends React.Component {
                   this.setState({ campos: campos });
                   this.setState({
                     visible1: false,
+                    id_eleitor: "",
                     nome_eleitor: "",
                     telefone_eleitor: "",
                     cpf_eleitor: "",
@@ -1334,13 +1402,14 @@ class HomeScreen2 extends React.Component {
                   });
                 }}
               />
-              {/*<DialogButton
-                text="Editar"
+              <DialogButton
+                text="Excluir"
                 onPress={() => {
-                  this.refs._scrollView.scrollTo(0);
-                  this.setState({ visible1: false });
+                  //this.refs._scrollView.scrollTo(0);
+                  let id = this.state.id_eleitor;
+                  this.excluirEleitor(id);
                 }}
-              />*/}
+              />
             </DialogFooter>
           }
         >
@@ -1363,17 +1432,7 @@ class HomeScreen2 extends React.Component {
             {this.renderDialogSecao()}
           </DialogContent>
         </Dialog>
-        <Text>
-          Status de Rede: {this.state.aviso}
-          {
-            //<this.netState mudaState={this.mudaState}></this.netState>
-          }
-        </Text>
-        <Text>
-          {
-            //this.state.mensagem
-          }
-        </Text>
+
         <LinearGradient
           style={styles.headerNew}
           colors={["#2060AD", "#58C6CA"]}
@@ -1425,7 +1484,6 @@ class HomeScreen2 extends React.Component {
             </Text>
           </View>
           <Text style={styles.title}>Novo membro da equipe</Text>
-
           {/*{this.props.user.email}*/}
           <View style={styles.InputContainer}>
             <TextInput
@@ -1507,6 +1565,7 @@ class HomeScreen2 extends React.Component {
               underlineColorAndroid="transparent"
             />
           </View>
+
           <Button
             containerStyle={[styles.facebookContainer]}
             style={styles.facebookText}

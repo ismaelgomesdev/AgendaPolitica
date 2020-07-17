@@ -502,7 +502,7 @@ class ConfigScreen extends React.Component {
               />
             </View>
             <View style={{ padding: 10 }}>
-              <Text>Seção</Text>
+              <Text>Nº do membro</Text>
               <Switch
                 value={this.state.secao}
                 onValueChange={(v) => {

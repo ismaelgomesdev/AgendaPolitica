@@ -51,6 +51,7 @@ class HomeScreen extends React.Component {
       idLog: "",
       nomeLog: "",
       tipoLog: "",
+      id_lider: "",
       nome_lider: "",
       telefone_lider: "",
       senha_lider: "",
@@ -305,8 +306,9 @@ class HomeScreen extends React.Component {
         id,
       });
       if (response.data != null) {
-        const { nome, telefone, acesso, cadastro } = response.data;
+        const { id, nome, telefone, acesso, cadastro } = response.data;
         this.setState({
+          id_lider: id,
           nome_lider: nome,
           telefone_lider: telefone,
           acesso: acesso,
@@ -319,7 +321,25 @@ class HomeScreen extends React.Component {
       console.log("deu erro: " + e);
     }
   };
-
+  excluirLider = async (id) => {
+    try {
+      const response = await api.post("/V_Lider.php", {
+        tipo: "7",
+        id,
+      });
+      this.setState({
+        visible1: false,
+        id_lider: "",
+        nome_lider: "",
+        telefone_lider: "",
+        acesso: "",
+        cadastro: "",
+      });
+      this.makeRemoteRequest();
+    } catch (e) {
+      console.log("deu erro: " + e);
+    }
+  };
   renderRow = ({ item }) => {
     return (
       <TouchableOpacity
@@ -403,6 +423,7 @@ class HomeScreen extends React.Component {
                 onPress={() => {
                   this.setState({
                     visible1: false,
+                    id_lider: "",
                     nome_lider: "",
                     telefone_lider: "",
                     acesso: "",
@@ -410,13 +431,14 @@ class HomeScreen extends React.Component {
                   });
                 }}
               />
-              {/*<DialogButton
-                text="Editar"
+              <DialogButton
+                text="Excluir"
                 onPress={() => {
-                  this.refs._scrollView.scrollTo(0);
-                  this.setState({ visible1: false });
+                  //this.refs._scrollView.scrollTo(0);
+                  let id = this.state.id_lider;
+                  this.excluirLider(id);
                 }}
-              />*/}
+              />
             </DialogFooter>
           }
         >
@@ -470,7 +492,6 @@ class HomeScreen extends React.Component {
         <View style={styles.containerForm}>
           <Text style={styles.title}>
             Novo líder
-            {/*{this.state.mensagem}*/}
           </Text>
 
           <View style={styles.InputContainer}>

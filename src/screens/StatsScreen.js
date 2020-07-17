@@ -44,7 +44,7 @@ import Dialog, {
 } from "react-native-popup-dialog";
 
 const width = Dimensions.get("window").width;
-
+let arrayholder = [];
 const chartConfig = {
   backgroundGradientFrom: "#1E2923",
   backgroundGradientFromOpacity: 0,
@@ -102,8 +102,15 @@ class StatsScreen extends React.Component {
       quantidade_mes2: [],
       quantidade_local: [],
       quantidade_secao: [],
+      membros: [],
+      membros_mes: [],
+      membros_semana: [],
       labels: [],
       datasets: [],
+
+      visible: false,
+      visible1: false,
+      visible2: false,
     };
   }
 
@@ -149,7 +156,11 @@ class StatsScreen extends React.Component {
         quantidade_mes2,
         quantidade_local,
         quantidade_secao,
+        membros,
+        membros_mes,
+        membros_semana,
       } = response.data;
+      arrayholder = membros;
       this.setState({
         quantidade: quantidade,
         quantidade_lider: quantidade_lider,
@@ -158,7 +169,10 @@ class StatsScreen extends React.Component {
         quantidade_mes2: quantidade_mes2,
         quantidade_local: quantidade_local,
         quantidade_secao: quantidade_secao,
-        loading: false
+        membros: membros,
+        membros_mes: membros_mes,
+        membros_semana: membros_semana,
+        loading: false,
       });
       console.log(quantidade_mes2);
       const quantidade_bairro = quantidade_local.filter(
@@ -203,7 +217,7 @@ class StatsScreen extends React.Component {
       console.log(this.state.labels);
       console.log(this.state.datasets);
     } catch (err) {
-      console.log(err);
+      alert(err);
     }
   };
 
@@ -366,27 +380,42 @@ class StatsScreen extends React.Component {
     }
     if (item.quantidade != null) {
       return (
-        <View style={styles.item1}>
+        <TouchableOpacity
+          style={styles.item1}
+          onPress={() => {
+            this.setState({ visible: true });
+          }}
+        >
           <Text style={styles.itemText1}>Total de membros da equipe:</Text>
 
           <Text style={styles.itemNumber1}>
             <Text style={styles.itemNumber1}>{item.quantidade}</Text>
           </Text>
-        </View>
+        </TouchableOpacity>
       );
     } else if (item.quantidade_semana != null) {
       return (
-        <View style={styles.item1}>
+        <TouchableOpacity
+          style={styles.item1}
+          onPress={() => {
+            this.setState({ visible1: true });
+          }}
+        >
           <Text style={styles.itemText1}>Novos membros nesta semana:</Text>
           <Text style={styles.itemNumber1}>{item.quantidade_semana}</Text>
-        </View>
+        </TouchableOpacity>
       );
     } else {
       return (
-        <View style={styles.item1}>
+        <TouchableOpacity
+          style={styles.item1}
+          onPress={() => {
+            this.setState({ visible2: true });
+          }}
+        >
           <Text style={styles.itemText1}>Novos membros neste mês:</Text>
           <Text style={styles.itemNumber1}>{item.quantidade_mes}</Text>
-        </View>
+        </TouchableOpacity>
       );
     }
   };
@@ -410,7 +439,7 @@ class StatsScreen extends React.Component {
     }
     return (
       <View style={styles.item1}>
-        <Text style={styles.itemText1}>Seção {item.secao}:</Text>
+        <Text style={styles.itemText1}>Número {item.secao}:</Text>
         <Text style={styles.itemNumber1}>{item.qtd}</Text>
         <Text style={styles.itemText1}>membros</Text>
       </View>
@@ -437,7 +466,7 @@ class StatsScreen extends React.Component {
       const { quantidade_secao } = this.state;
       return (
         <View style={{ width: "100%" }}>
-          <Text style={styles.title}>Membros por seção</Text>
+          <Text style={styles.title}>Membros por número</Text>
           <FlatList
             data={formatData(quantidade_secao, numColumns)}
             style={styles.containerList}
@@ -450,7 +479,35 @@ class StatsScreen extends React.Component {
       return null;
     }
   };
+  searchFilterFunction = (text) => {
+    const newData = arrayholder.filter((item) => {
+      const itemData = `${item.nome_eleitor.toUpperCase()}`;
 
+      const textData = text.toUpperCase();
+
+      return itemData.indexOf(textData) > -1;
+    });
+
+    this.setState({ membros: newData });
+  };
+  renderHeader = () => {
+    return (
+      <SearchBar
+        placeholder="Pesquise aqui..."
+        lightTheme
+        round
+        onChangeText={(text) => this.searchFilterFunction(text)}
+        autoCorrect={false}
+      />
+    );
+  };
+  renderRow = ({ item }) => {
+    return (
+      <ScrollView>
+        <ListItem title={item.nome_eleitor} subtitle={"Cadastrado por: " + item.nome_lider} />
+      </ScrollView>
+    );
+  };
   render() {
     const data = [
       { quantidade: this.state.quantidade },
@@ -460,6 +517,9 @@ class StatsScreen extends React.Component {
       // { key: 'K' },
       // { key: 'L' },
     ];
+    const membros = this.state.membros;
+    const membros_semana = this.state.membros_semana;
+    const membros_mes = this.state.membros_mes;
 
     const porLider = this.state.quantidade_lider;
 
@@ -518,6 +578,102 @@ class StatsScreen extends React.Component {
           //Text style of the Spinner Text
           textStyle={styles.spinnerTextStyle}
         />
+        <Dialog
+          visible={this.state.visible}
+          dialogAnimation={new ScaleAnimation({})}
+          width={0.9}
+          footer={
+            <DialogFooter>
+              <DialogButton
+                text="Fechar"
+                onPress={() => {
+                  this.setState({
+                    visible: false,
+                    id_lider: "",
+                    nome_lider: "",
+                    telefone_lider: "",
+                    acesso: "",
+                    cadastro: "",
+                  });
+                }}
+              />
+            </DialogFooter>
+          }
+        >
+          <DialogContent>
+            <FlatList
+              style={{ minWidth: "100%" }}
+              data={membros}
+              renderItem={this.renderRow}
+              keyExtractor={(item) => item.id_eleitor}
+              ListHeaderComponent={this.renderHeader}
+            />
+          </DialogContent>
+        </Dialog>
+        <Dialog
+          visible={this.state.visible1}
+          dialogAnimation={new ScaleAnimation({})}
+          width={0.9}
+          footer={
+            <DialogFooter>
+              <DialogButton
+                text="Fechar"
+                onPress={() => {
+                  this.setState({
+                    visible1: false,
+                    id_lider: "",
+                    nome_lider: "",
+                    telefone_lider: "",
+                    acesso: "",
+                    cadastro: "",
+                  });
+                }}
+              />
+            </DialogFooter>
+          }
+        >
+          <DialogContent>
+            <FlatList
+              style={{ minWidth: "100%" }}
+              data={membros_semana}
+              renderItem={this.renderRow}
+              keyExtractor={(item) => item.id_eleitor}
+              ListHeaderComponent={this.renderHeader}
+            />
+          </DialogContent>
+        </Dialog>
+        <Dialog
+          visible={this.state.visible2}
+          dialogAnimation={new ScaleAnimation({})}
+          width={0.9}
+          footer={
+            <DialogFooter>
+              <DialogButton
+                text="Fechar"
+                onPress={() => {
+                  this.setState({
+                    visible2: false,
+                    id_lider: "",
+                    nome_lider: "",
+                    telefone_lider: "",
+                    acesso: "",
+                    cadastro: "",
+                  });
+                }}
+              />
+            </DialogFooter>
+          }
+        >
+          <DialogContent>
+            <FlatList
+              style={{ minWidth: "100%" }}
+              data={membros_mes}
+              renderItem={this.renderRow}
+              keyExtractor={(item) => item.id_eleitor}
+              ListHeaderComponent={this.renderHeader}
+            />
+          </DialogContent>
+        </Dialog>
         <LinearGradient
           style={styles.headerNew}
           colors={["#2060AD", "#58C6CA"]}

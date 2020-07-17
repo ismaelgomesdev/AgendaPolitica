@@ -8,13 +8,14 @@ import {
   Dimensions,
   TouchableOpacity,
   KeyboardAvoidingView,
-  Animated
+  Animated,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Button from "react-native-button";
 import { AppStyles } from "../AppStyles";
 //import firebase from "react-native-firebase";
 import api from "../services/api";
+import NetInfo, { useNetInfo } from "@react-native-community/netinfo";
 import { TextInputMask } from "react-native-masked-text";
 import { AsyncStorage } from "react-native";
 import { normalize } from "./StatsScreen";
@@ -22,7 +23,7 @@ import { useState, useEffect } from "react";
 const FBSDK = require("react-native-fbsdk");
 const { LoginManager, AccessToken } = FBSDK;
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
- class LoginScreen extends React.Component {
+class LoginScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -30,16 +31,55 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
       telefone: "",
       senha: "",
       errorMessage: null,
-      offset: new Animated.ValueXY({x: 0, y: 80}),
+      mensagem: "",
+      offset: new Animated.ValueXY({ x: 0, y: 80 }),
     };
-     }
+    this.unsubscribe = null;
+    this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
+  }
 
-  componentDidMount(){
+  componentDidMount() {
     Animated.spring(this.state.offset.y, {
       toValue: 0,
       speed: 4,
-      bounciness: 30 
+      bounciness: 30,
     }).start();
+    NetInfo.fetch().then((state) => {
+      if (!state.isInternetReachable) {
+        this.setState({
+          errorMessage:
+            "Você está sem internet. Conecte-se para poder acessar.",
+        });
+      }
+    });
+    this.unsubscribe = NetInfo.addEventListener(this.handleConnectivityChange);
+  }
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  handleConnectivityChange = (state) => {
+    if (state.isInternetReachable) {
+      this.setState({
+        errorMessage: null,
+      });
+    } else {
+      this.setState({
+        errorMessage: "Você está sem internet. Conecte-se para poder acessar.",
+      });
+    }
+    console.log(state.isConnected ? "connected" : "not connected");
+  };
+  componentWillMount() {
+    const { navigation } = this.props;
+    this.getToken()
+      .then((res) => {
+        if (res != false) {
+          navigation.dispatch({ type: res, user: null });
+        } else {
+        }
+      })
+      .catch((err) => alert("Erro: " + err));
   }
 
   onPressLogin = async () => {
@@ -58,6 +98,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
           console.log(response.data);
           //console.log(qrkey)
           await AsyncStorage.setItem("@PoliNet_token", token);
+          await AsyncStorage.setItem("@PoliNet_tipo", tipo);
           //console.log(AsyncStorage.getItem('@InvestSe_token'))
           //this.props.navigation.navigate("AppNavigator", {keyRef: qrkey});
           const { navigation } = this.props;
@@ -163,7 +204,27 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
       }
     );
   };*/
+  getToken = async () => {
+    const token = await AsyncStorage.getItem("@PoliNet_token");
+    const tipo = await AsyncStorage.getItem("@PoliNet_tipo");
+    if (token != null) {
+      if (tipo == "candidato") {
+        return "LoginC";
+      } else {
+        return "LoginL";
+      }
+    } else {
+      return false;
+    }
+    this.setState({ mensagem: token + " " + tipo });
+  };
   render() {
+    let backColor;
+    if (this.state.errorMessage != null) {
+      backColor = "#FCCB0A";
+    } else {
+      backColor = "transparent";
+    }
     return (
       <KeyboardAvoidingView style={styles.background}>
         <LinearGradient
@@ -177,19 +238,24 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
           }}
         />
 
-          <Image source={require("../assets/images/carregamento.png")} style={{maxHeight: 205, maxWidth: 120}}></Image>
+        <Image
+          source={require("../assets/images/carregamento.png")}
+          style={{ maxHeight: 205, maxWidth: 120 }}
+        ></Image>
 
-          <Text style={[styles.title, styles.leftTitle]}>
-            Insira seus dados para continuar
-          </Text>
-          <Animated.View style={[styles.InputContainer,
-          {
-            transform: [
-              { translateY: this.state.offset.y }
-            ]
-          }
-          ]}>
-            {/*<TextInput
+        <Text style={[styles.title, styles.leftTitle]}>
+          Insira seus dados para continuar
+          {this.state.mensagem}
+        </Text>
+        <Animated.View
+          style={[
+            styles.InputContainer,
+            {
+              transform: [{ translateY: this.state.offset.y }],
+            },
+          ]}
+        >
+          {/*<TextInput
             style={styles.body}
             placeholder="Telefone"
             onChangeText={text => this.setState({ telefone: text })}
@@ -197,51 +263,67 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
             placeholderTextColor={AppStyles.color.grey}
             underlineColorAndroid="transparent"
           />*/}
-            <TextInputMask
-              style={styles.body}
-              placeholder="Telefone"
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-              type={"cel-phone"}
-              options={{
-                maskType: "BRL",
-                withDDD: true,
-                dddMask: "(99) ",
-              }}
-              value={this.state.telefone}
-              onChangeText={(text) => {
-                this.setState({
-                  telefone: text,
-                });
-              }}
-            />
-          </Animated.View>
-          <Animated.View style={[styles.InputContainer,
-          {
-            transform: [
-              { translateY: this.state.offset.y }
-            ]
-          }
-          ]}>
-            <TextInput
-              style={styles.body}
-              secureTextEntry={true}
-              placeholder="Senha"
-              onChangeText={(text) => this.setState({ senha: text })}
-              value={this.state.senha}
-              placeholderTextColor={AppStyles.color.grey}
-              underlineColorAndroid="transparent"
-            />
-          </Animated.View>
-          <Text>{this.state.errorMessage}</Text>
-          <Button
-            containerStyle={styles.loginContainer}
-            style={styles.loginText}
-            onPress={() => this.onPressLogin()}
-          >
-            Acessar
-          </Button>
+          <TextInputMask
+            style={styles.body}
+            placeholder="Telefone"
+            placeholderTextColor={AppStyles.color.grey}
+            underlineColorAndroid="transparent"
+            type={"cel-phone"}
+            options={{
+              maskType: "BRL",
+              withDDD: true,
+              dddMask: "(99) ",
+            }}
+            value={this.state.telefone}
+            onChangeText={(text) => {
+              this.setState({
+                telefone: text,
+              });
+            }}
+          />
+        </Animated.View>
+        <Animated.View
+          style={[
+            styles.InputContainer,
+            {
+              transform: [{ translateY: this.state.offset.y }],
+            },
+          ]}
+        >
+          <TextInput
+            style={styles.body}
+            secureTextEntry={true}
+            placeholder="Senha"
+            onChangeText={(text) => this.setState({ senha: text })}
+            value={this.state.senha}
+            placeholderTextColor={AppStyles.color.grey}
+            underlineColorAndroid="transparent"
+          />
+        </Animated.View>
+        <View
+          style={{
+            width: "100%",
+            shadowColor: "#444",
+            shadowOffset: { width: 5, height: 5 },
+            shadowOpacity: 0.2,
+            shadowRadius: 8,
+            justifyContent: "center",
+            padding: 0,
+            backgroundColor: backColor,
+          }}
+        >
+          <Text style={{ textAlign: "center", fontWeight: "bold" }}>
+            {this.state.errorMessage}
+          </Text>
+        </View>
 
+        <Button
+          containerStyle={styles.loginContainer}
+          style={styles.loginText}
+          onPress={() => this.onPressLogin()}
+        >
+          Acessar
+        </Button>
 
         {/*<Text style={styles.or}>OR</Text>
         <Button
@@ -269,7 +351,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    flex: 1
+    flex: 1,
   },
   or: {
     fontFamily: AppStyles.fontName.main,
@@ -301,7 +383,7 @@ const styles = StyleSheet.create({
     backgroundColor: AppStyles.color.tint,
     borderRadius: AppStyles.borderRadius.main,
     padding: 10,
-    marginTop: 10,
+    marginTop: 0,
   },
   loginText: {
     color: AppStyles.color.white,
