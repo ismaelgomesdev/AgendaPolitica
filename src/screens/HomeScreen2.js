@@ -38,6 +38,7 @@ import Dialog, {
 } from "react-native-popup-dialog";
 
 const width = Dimensions.get("window").width;
+
 let idLogado = "";
 let nomeLogado = "";
 let tipoLogado = "";
@@ -102,45 +103,75 @@ class HomeScreen2 extends React.Component {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
     const { token } = this.state;
+    if (this.state.connected == false) {
+      const cpf_eleitor = await AsyncStorage.getItem("@PoliNet_cpf_eleitor");
+      const local_eleitor = await AsyncStorage.getItem(
+        "@PoliNet_local_eleitor"
+      );
+      const endereco_eleitor = await AsyncStorage.getItem(
+        "@PoliNet_endereco_eleitor"
+      );
+      const secao_eleitor = await AsyncStorage.getItem(
+        "@PoliNet_secao_eleitor"
+      );
 
-    try {
-      const response = await api.post("/V_User.php", {
-        tipo: "3",
-        token,
+      this.setState({
+        valida_cpf: cpf_eleitor,
+        valida_local: local_eleitor,
+        valida_endereco: endereco_eleitor,
+        valida_secao: secao_eleitor,
       });
-
-      console.log(response.data);
-      const { nome, id, tipo } = response.data;
-      nomeLogado = nome;
-      idLogado = id;
-      tipoLogado = tipo;
-
-      this.setState({ idLog: id });
-      this.setState({ nomeLog: nome });
-      this.setState({ tipoLog: tipo });
-      const { idLog } = this.state;
+    } else {
       try {
-        const response = await api.post("/V_Lider.php", {
-          tipo: "4",
-          idLog,
+        const response = await api.post("/V_User.php", {
+          tipo: "3",
+          token,
         });
-        if (response.data != null) {
-          const {
-            cpf_eleitor,
-            local_eleitor,
-            endereco_eleitor,
-            secao_eleitor,
-          } = response.data;
-          this.setState({
-            valida_cpf: cpf_eleitor,
-            valida_local: local_eleitor,
-            valida_endereco: endereco_eleitor,
-            valida_secao: secao_eleitor,
-            //mensagem: JSON.stringify(response.data),
+
+        console.log(response.data);
+        const { nome, id, tipo } = response.data;
+        nomeLogado = nome;
+        idLogado = id;
+        tipoLogado = tipo;
+
+        this.setState({ idLog: id });
+        this.setState({ nomeLog: nome });
+        this.setState({ tipoLog: tipo });
+        const { idLog } = this.state;
+        try {
+          const response = await api.post("/V_Lider.php", {
+            tipo: "4",
+            idLog,
           });
-        } else {
+          if (response.data != null) {
+            const {
+              cpf_eleitor,
+              local_eleitor,
+              endereco_eleitor,
+              secao_eleitor,
+            } = response.data;
+            this.setState({
+              valida_cpf: cpf_eleitor,
+              valida_local: local_eleitor,
+              valida_endereco: endereco_eleitor,
+              valida_secao: secao_eleitor,
+              //mensagem: JSON.stringify(response.data),
+            });
+            await AsyncStorage.setItem("@PoliNet_cpf_eleitor", cpf_eleitor);
+            await AsyncStorage.setItem("@PoliNet_local_eleitor", local_eleitor);
+            await AsyncStorage.setItem(
+              "@PoliNet_endereco_eleitor",
+              endereco_eleitor
+            );
+            await AsyncStorage.setItem("@PoliNet_secao_eleitor", secao_eleitor);
+          } else {
+            this.setState({
+              //mensagem: "deu ruim",
+            });
+          }
+        } catch (e) {
           this.setState({
-            //mensagem: "deu ruim",
+            //mensagem: e,
           });
         }
       } catch (e) {
@@ -148,10 +179,6 @@ class HomeScreen2 extends React.Component {
           //mensagem: e,
         });
       }
-    } catch (e) {
-      this.setState({
-        //mensagem: e,
-      });
     }
   };
 
@@ -160,36 +187,48 @@ class HomeScreen2 extends React.Component {
 
     const { token } = this.state;
 
-    try {
-      const response = await api.post("/V_User.php", {
-        tipo: "3",
-        token,
+    if (this.state.connected == false) {
+      const campos = await AsyncStorage.getItem("@PoliNet_campos");
+      this.setState({
+        campos: campos
       });
-
-      console.log(response.data);
-      const { nome, id, tipo } = response.data;
-      nomeLogado = nome;
-      idLogado = id;
-      tipoLogado = tipo;
-
-      this.setState({ idLog: id });
-      this.setState({ nomeLog: nome });
-      this.setState({ tipoLog: tipo });
-      const { idLog } = this.state;
+    } else {
       try {
-        const response = await api.post("/V_Lider.php", {
-          tipo: "5",
-          idLog,
+        const response = await api.post("/V_User.php", {
+          tipo: "3",
+          token,
         });
-        if (response.data != null) {
-          let campos = response.data;
-          this.setState({
-            campos: campos,
-            //mensagem: JSON.stringify(campos),
+
+        console.log(response.data);
+        const { nome, id, tipo } = response.data;
+        nomeLogado = nome;
+        idLogado = id;
+        tipoLogado = tipo;
+
+        this.setState({ idLog: id });
+        this.setState({ nomeLog: nome });
+        this.setState({ tipoLog: tipo });
+        const { idLog } = this.state;
+        try {
+          const response = await api.post("/V_Lider.php", {
+            tipo: "5",
+            idLog,
           });
-        } else {
+          if (response.data != null) {
+            let campos = response.data;
+            this.setState({
+              campos: campos,
+              //mensagem: JSON.stringify(campos),
+            });
+            await AsyncStorage.setItem("@PoliNet_campos", campos);
+          } else {
+            this.setState({
+              //mensagem: "",
+            });
+          }
+        } catch (e) {
           this.setState({
-            //mensagem: "",
+            //mensagem: e,
           });
         }
       } catch (e) {
@@ -197,10 +236,6 @@ class HomeScreen2 extends React.Component {
           //mensagem: e,
         });
       }
-    } catch (e) {
-      this.setState({
-        //mensagem: e,
-      });
     }
   };
 
@@ -534,6 +569,13 @@ class HomeScreen2 extends React.Component {
   };*/
 
   componentDidMount() {
+    NetInfo.fetch().then((state) => {
+      if (state.isInternetReachable) {
+        this.setState({ connected: true, aviso: "online" });
+      } else {
+        this.setState({ connected: false, aviso: "offline", loading: false });
+      }
+    });
     this.retornaBairros();
     this.validaCampos();
     this.makeRemoteRequest2();
@@ -696,47 +738,54 @@ class HomeScreen2 extends React.Component {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
     const { token } = this.state;
-
-    try {
-      const response = await api.post("/V_User.php", {
-        tipo: "3",
-        token,
+    if (this.state.connected == false) {
+      const data = await AsyncStorage.getItem("@PoliNet_data");
+      this.setState({
+        data: data,
+        loading: false,
       });
-
-      console.log(response.data);
-      const { nome, id, tipo } = response.data;
-      nomeLogado = nome;
-      idLogado = id;
-      tipoLogado = tipo;
-
-      this.setState({ idLog: id });
-      this.setState({ nomeLog: nome });
-      this.setState({ tipoLog: tipo });
-
-      console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
-      const { idLog } = this.state;
+    } else {
       try {
-        const response = await api.post("/V_Eleitor.php", {
-          tipo: "2",
-          idL: idLog,
+        const response = await api.post("/V_User.php", {
+          tipo: "3",
+          token,
         });
-        if (response.data != null) {
-          let dados = response.data.data;
-          console.log("dados: " + dados);
-          response.data.data = dados;
-          this.setState({ data: response.data.data, loading: false });
-          arrayholder = dados;
-          console.log(this.state.data);
-        } else {
-          this.setState({ loading: false });
+
+        console.log(response.data);
+        const { nome, id, tipo } = response.data;
+        nomeLogado = nome;
+        idLogado = id;
+        tipoLogado = tipo;
+
+        this.setState({ idLog: id });
+        this.setState({ nomeLog: nome });
+        this.setState({ tipoLog: tipo });
+
+        console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
+        const { idLog } = this.state;
+        try {
+          const response = await api.post("/V_Eleitor.php", {
+            tipo: "2",
+            idL: idLog,
+          });
+          if (response.data != null) {
+            let dados = response.data.data;
+            console.log("dados: " + dados);
+            response.data.data = dados;
+            this.setState({ data: response.data.data, loading: false });
+            await AsyncStorage.setItem("@PoliNet_data");
+            arrayholder = dados;
+            console.log(this.state.data);
+          } else {
+            this.setState({ loading: false });
+          }
+        } catch (e) {
+          console.log("deu erro: " + e);
         }
       } catch (e) {
-        console.log("deu erro: " + e);
+        console.log(e);
       }
-    } catch (e) {
-      console.log(e);
     }
-
     /*getUsers()
       .then(users => {
         this.setState({
@@ -814,49 +863,62 @@ class HomeScreen2 extends React.Component {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
     const { token } = this.state;
-
-    try {
-      const response = await api.post("/V_User.php", {
-        tipo: "3",
-        token,
+    if (this.state.connected == false) {
+      const dados = await AsyncStorage.getItem("@PoliNet_locais");
+      const bairros = await AsyncStorage.getItem("@PoliNet_bairros");
+      const distritos = await AsyncStorage.getItem("@PoliNet_distritos");
+      this.setState({
+        locais: dados,
+        bairros: bairros,
+        distritos: distritos,
       });
-
-      console.log(response.data);
-      const { nome, id, tipo } = response.data;
-      nomeLogado = nome;
-      idLogado = id;
-      tipoLogado = tipo;
-
-      this.setState({ idLog: id });
-      this.setState({ nomeLog: nome });
-      this.setState({ tipoLog: tipo });
-
-      console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
-      const { idLog } = this.state;
-      console.log(idLog);
-
+    } else {
       try {
-        const response = await api.post("/V_Lider.php", {
+        const response = await api.post("/V_User.php", {
           tipo: "3",
-          idLog,
+          token,
         });
-        if (response.data != null) {
-          console.log(response.data);
-          const dados = response.data.dados;
-          const bairros = dados.filter((dado) => dado.distrito === "0");
-          const distritos = dados.filter((dado) => dado.distrito === "1");
-          this.setState({
-            locais: dados,
-            bairros: bairros,
-            distritos: distritos,
+
+        console.log(response.data);
+        const { nome, id, tipo } = response.data;
+        nomeLogado = nome;
+        idLogado = id;
+        tipoLogado = tipo;
+
+        this.setState({ idLog: id });
+        this.setState({ nomeLog: nome });
+        this.setState({ tipoLog: tipo });
+
+        console.log(idLogado + ", " + nomeLogado + ", " + tipoLogado);
+        const { idLog } = this.state;
+        console.log(idLog);
+
+        try {
+          const response = await api.post("/V_Lider.php", {
+            tipo: "3",
+            idLog,
           });
-          console.log(this.state.bairros);
-        } else {
-          console.log("nullll");
-          this.setState({});
-        }
+          if (response.data != null) {
+            console.log(response.data);
+            const dados = response.data.dados;
+            const bairros = dados.filter((dado) => dado.distrito === "0");
+            const distritos = dados.filter((dado) => dado.distrito === "1");
+            this.setState({
+              locais: dados,
+              bairros: bairros,
+              distritos: distritos,
+            });
+            await AsyncStorage.setItem("@PoliNet_locais", dados);
+            await AsyncStorage.setItem("@PoliNet_bairros", bairros);
+            await AsyncStorage.setItem("@PoliNet_distritos", distritos);
+            console.log(this.state.bairros);
+          } else {
+            console.log("nullll");
+            this.setState({});
+          }
+        } catch (e) {}
       } catch (e) {}
-    } catch (e) {}
+    }
   };
   renderSeparator = () => {
     return (

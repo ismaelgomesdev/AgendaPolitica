@@ -503,9 +503,24 @@ class StatsScreen extends React.Component {
   };
   renderRow = ({ item }) => {
     return (
-      <ScrollView>
-        <ListItem title={item.nome_eleitor} subtitle={"Cadastrado por: " + item.nome_lider} />
-      </ScrollView>
+      <View style={{ textAlign: "center", alignItems: "center" }}>
+        <Text style={{ fontSize: normalize(15) }}>{item.nome_eleitor}</Text>
+        <Text style={{ fontSize: normalize(12) }}>{item.telefone_eleitor}</Text>
+        <Text style={{ fontSize: normalize(12) }}>
+          Cadastrado(a) por: {item.nome_lider}
+        </Text>
+        <Text style={{ fontSize: normalize(12) }}>
+          Em: {item.data_cad_eleitor}
+        </Text>
+        <View
+          style={{
+            marginVertical: 8,
+            borderColor: "black",
+            borderWidth: StyleSheet.hairlineWidth,
+            width: "100%",
+          }}
+        />
+      </View>
     );
   };
   render() {
@@ -582,8 +597,17 @@ class StatsScreen extends React.Component {
           visible={this.state.visible}
           dialogAnimation={new ScaleAnimation({})}
           width={0.9}
-          footer={
-            <DialogFooter>
+          dialogStyle={{ maxHeight: "90%" }}
+        >
+          <DialogContent>
+            <FlatList
+              style={{ width: "100%", height: "95%" }}
+              data={membros}
+              renderItem={this.renderRow}
+              keyExtractor={(item) => item.id_eleitor}
+              ListHeaderComponent={this.renderHeader}
+            />
+            <View style={{ height: "5%" }}>
               <DialogButton
                 text="Fechar"
                 onPress={() => {
@@ -597,25 +621,24 @@ class StatsScreen extends React.Component {
                   });
                 }}
               />
-            </DialogFooter>
-          }
-        >
-          <DialogContent>
-            <FlatList
-              style={{ minWidth: "100%" }}
-              data={membros}
-              renderItem={this.renderRow}
-              keyExtractor={(item) => item.id_eleitor}
-              ListHeaderComponent={this.renderHeader}
-            />
+            </View>
           </DialogContent>
         </Dialog>
         <Dialog
           visible={this.state.visible1}
           dialogAnimation={new ScaleAnimation({})}
           width={0.9}
-          footer={
-            <DialogFooter>
+          dialogStyle={{ maxHeight: "90%" }}
+        >
+          <DialogContent>
+            <FlatList
+              style={{ minWidth: "100%", height: "95%" }}
+              data={membros_semana}
+              renderItem={this.renderRow}
+              keyExtractor={(item) => item.id_eleitor}
+              ListHeaderComponent={this.renderHeader}
+            />
+            <View style={{ height: "5%" }}>
               <DialogButton
                 text="Fechar"
                 onPress={() => {
@@ -629,25 +652,24 @@ class StatsScreen extends React.Component {
                   });
                 }}
               />
-            </DialogFooter>
-          }
-        >
-          <DialogContent>
-            <FlatList
-              style={{ minWidth: "100%" }}
-              data={membros_semana}
-              renderItem={this.renderRow}
-              keyExtractor={(item) => item.id_eleitor}
-              ListHeaderComponent={this.renderHeader}
-            />
+            </View>
           </DialogContent>
         </Dialog>
         <Dialog
           visible={this.state.visible2}
           dialogAnimation={new ScaleAnimation({})}
           width={0.9}
-          footer={
-            <DialogFooter>
+          dialogStyle={{ maxHeight: "90%" }}
+        >
+          <DialogContent>
+            <FlatList
+              style={{ minWidth: "100%", height: "95%" }}
+              data={membros_mes}
+              renderItem={this.renderRow}
+              keyExtractor={(item) => item.id_eleitor}
+              ListHeaderComponent={this.renderHeader}
+            />
+            <View style={{ height: "5%" }}>
               <DialogButton
                 text="Fechar"
                 onPress={() => {
@@ -661,17 +683,7 @@ class StatsScreen extends React.Component {
                   });
                 }}
               />
-            </DialogFooter>
-          }
-        >
-          <DialogContent>
-            <FlatList
-              style={{ minWidth: "100%" }}
-              data={membros_mes}
-              renderItem={this.renderRow}
-              keyExtractor={(item) => item.id_eleitor}
-              ListHeaderComponent={this.renderHeader}
-            />
+            </View>
           </DialogContent>
         </Dialog>
         <LinearGradient
