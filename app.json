@@ -9,7 +9,7 @@
     ],
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/iconn.png",
+    "icon": "./assets/iconapp.png",
     "splash": {
       "image": "./assets/carregamentoo.png",
       "resizeMode": "contain",
@@ -22,6 +22,8 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.invest153.agenda153",
+      "buildNumber": "1.0.0",
       "supportsTablet": true
     },
     "android": {

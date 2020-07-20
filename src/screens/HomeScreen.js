@@ -490,9 +490,7 @@ class HomeScreen extends React.Component {
           </View>
         </LinearGradient>
         <View style={styles.containerForm}>
-          <Text style={styles.title}>
-            Novo líder
-          </Text>
+          <Text style={styles.title}>Novo líder</Text>
 
           <View style={styles.InputContainer}>
             <TextInput
@@ -545,7 +543,7 @@ class HomeScreen extends React.Component {
               underlineColorAndroid="transparent"
             />
           </View>
-          <View style={styles.InputContainer}>
+          <View style={styles.InputContainer1}>
             <TextInput
               style={styles.body}
               placeholder="Confirme a senha"
@@ -556,6 +554,7 @@ class HomeScreen extends React.Component {
               underlineColorAndroid="transparent"
             />
           </View>
+          <Text style={{marginBottom: 15}}>{this.state.errorMessage}</Text>
           <Button
             containerStyle={[styles.facebookContainer]}
             style={styles.facebookText}
@@ -738,6 +737,14 @@ const styles = StyleSheet.create({
   InputContainer: {
     width: AppStyles.textInputWidth.main,
     marginBottom: 30,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: AppStyles.color.grey,
+    borderRadius: AppStyles.borderRadius.main,
+  },
+  InputContainer1: {
+    width: AppStyles.textInputWidth.main,
+    marginBottom: 8,
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: AppStyles.color.grey,

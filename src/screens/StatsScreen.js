@@ -600,14 +600,15 @@ class StatsScreen extends React.Component {
           dialogStyle={{ maxHeight: "90%" }}
         >
           <DialogContent>
+            <Text style={styles.title}>Todos os membros</Text>
             <FlatList
-              style={{ width: "100%", height: "95%" }}
+              style={{ width: "100%", height: "85%" }}
               data={membros}
               renderItem={this.renderRow}
               keyExtractor={(item) => item.id_eleitor}
               ListHeaderComponent={this.renderHeader}
             />
-            <View style={{ height: "5%" }}>
+            <View style={{ height: "15%" }}>
               <DialogButton
                 text="Fechar"
                 onPress={() => {
@@ -631,16 +632,18 @@ class StatsScreen extends React.Component {
           dialogStyle={{ maxHeight: "90%" }}
         >
           <DialogContent>
+          <Text style={styles.title}>Novos nesta semana</Text>
             <FlatList
-              style={{ minWidth: "100%", height: "95%" }}
+              style={{ minWidth: "100%", height: "85%" }}
               data={membros_semana}
               renderItem={this.renderRow}
               keyExtractor={(item) => item.id_eleitor}
               ListHeaderComponent={this.renderHeader}
             />
-            <View style={{ height: "5%" }}>
+            <View style={{ height: "15%" }}>
               <DialogButton
                 text="Fechar"
+                
                 onPress={() => {
                   this.setState({
                     visible1: false,
@@ -662,14 +665,15 @@ class StatsScreen extends React.Component {
           dialogStyle={{ maxHeight: "90%" }}
         >
           <DialogContent>
+          <Text style={styles.title}>Novos neste mês</Text>
             <FlatList
-              style={{ minWidth: "100%", height: "95%" }}
+              style={{ minWidth: "100%", height: "85%" }}
               data={membros_mes}
               renderItem={this.renderRow}
               keyExtractor={(item) => item.id_eleitor}
               ListHeaderComponent={this.renderHeader}
             />
-            <View style={{ height: "5%" }}>
+            <View style={{ height: "15%" }}>
               <DialogButton
                 text="Fechar"
                 onPress={() => {

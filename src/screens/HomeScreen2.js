@@ -56,6 +56,7 @@ class HomeScreen2 extends React.Component {
       telefone_lider: "",
       senha_lider: "",
       errorMessage: "",
+      msg: "",
 
       id_eleitor: "",
       nome_eleitor: "",
@@ -190,7 +191,7 @@ class HomeScreen2 extends React.Component {
     if (this.state.connected == false) {
       const campos = await AsyncStorage.getItem("@PoliNet_campos");
       this.setState({
-        campos: campos
+        campos: campos,
       });
     } else {
       try {
@@ -448,6 +449,13 @@ class HomeScreen2 extends React.Component {
       connected,
       campos,
     } = this.state;
+    const {
+      valida_cpf,
+      valida_endereco,
+      valida_local,
+      valida_secao,
+    } = this.state;
+
     if (campos.length > 0) _textInput.setNativeProps({ text: "" });
     if (connected) {
       try {
@@ -463,50 +471,71 @@ class HomeScreen2 extends React.Component {
           desc_demanda,
           idLogado,
         });
+        const falta = "Preencha todos os dados!";
+        if (valida_cpf && cpf_eleitor == "") {
+          this.setState({ msg: falta });
+        }
+        if (valida_endereco && endereco_eleitor == "") {
+          this.setState({ msg: falta });
+        }
+        if (valida_local && id_local == "") {
+          this.setState({ msg: falta });
+        }
+        if (valida_secao && secao == "") {
+          this.setState({ msg: falta });
+        }
         if (response.data != null) {
-          console.log(response.data);
-          this.setState({
-            nome_eleitor: "",
-            telefone_eleitor: "",
-            cpf_eleitor: "",
-            endereco_eleitor: "",
-            num_eleitor: "",
-            id_local: "",
-            secao: "",
-            desc_demanda: "",
-            disabled: true,
-          });
-
-          const { id } = response.data;
-          if (campos.length > 0) {
-            campos.map(async (campo) => {
-              id_campo = campo.id_campo;
-              valor_campo = campo.valor_campo;
-              try {
-                const response = await api.post("/V_Campos.php", {
-                  tipo: "4",
-                  id,
-                  id_campo,
-                  valor_campo,
-                });
-                campo.valor_campo = "";
-              } catch (e) {
-                campo.valor_campo = "";
-              }
+          if (
+            response.data.mensagem != null &&
+            response.data.mensagem == "Esse membro já foi cadastrado!"
+          ) {
+            const msg = response.data.mensagem;
+            this.setState({ msg: msg });
+          } else {
+            console.log(response.data);
+            this.setState({
+              nome_eleitor: "",
+              telefone_eleitor: "",
+              cpf_eleitor: "",
+              endereco_eleitor: "",
+              num_eleitor: "",
+              secao: "",
+              desc_demanda: "",
+              msg: "",
+              disabled: true,
             });
+
+            const { id } = response.data;
+            if (campos.length > 0) {
+              campos.map(async (campo) => {
+                id_campo = campo.id_campo;
+                valor_campo = campo.valor_campo;
+                try {
+                  const response = await api.post("/V_Campos.php", {
+                    tipo: "4",
+                    id,
+                    id_campo,
+                    valor_campo,
+                  });
+                  campo.valor_campo = "";
+                } catch (e) {
+                  campo.valor_campo = "";
+                }
+              });
+            }
+            let camp = campos;
+            this.setState({
+              campos: camp,
+            });
+            this.makeRemoteRequest2();
           }
-          let camp = campos;
-          this.setState({
-            campos: camp,
-          });
-          this.makeRemoteRequest2();
         } else {
           this.setState({
             errorMessage: "Dados incorretos. Tente novamente.",
           });
         }
       } catch (err) {
-        console.log(err);
+        //alert(err);
       }
     } else {
       let auxx = false;
@@ -567,19 +596,7 @@ class HomeScreen2 extends React.Component {
   /*state = {
     appState: AppState.currentState,
   };*/
-
-  componentDidMount() {
-    NetInfo.fetch().then((state) => {
-      if (state.isInternetReachable) {
-        this.setState({ connected: true, aviso: "online" });
-      } else {
-        this.setState({ connected: false, aviso: "offline", loading: false });
-      }
-    });
-    this.retornaBairros();
-    this.validaCampos();
-    this.makeRemoteRequest2();
-    this.getConnect();
+  componentWillMount() {
     NetInfo.fetch().then((state) => {
       if (state.isInternetReachable) {
         this.setState({ connected: true, aviso: "online" });
@@ -589,15 +606,6 @@ class HomeScreen2 extends React.Component {
     });
     this.unsubscribe = NetInfo.addEventListener(this.handleConnectivityChange);
   }
-  componentWillUnmount() {
-    this.unsubscribe();
-  }
-  componentWillMount() {
-    this.validaCampos();
-    this.personalCampos();
-    this.makeRemoteRequest2();
-  }
-
   handleConnectivityChange = (state) => {
     if (state.isInternetReachable) {
       this.setState({ connected: true, aviso: "online" });
@@ -607,6 +615,16 @@ class HomeScreen2 extends React.Component {
     }
     console.log(state.isConnected ? "connected" : "not connected");
   };
+  componentDidMount() {
+    this.retornaBairros();
+    this.validaCampos();
+    this.personalCampos();
+    this.makeRemoteRequest2();
+    this.getConnect();
+  }
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
 
   async getConnect() {
     console.log(Platform.OS);
@@ -1614,7 +1632,7 @@ class HomeScreen2 extends React.Component {
           {this.renderNumero()}
           {this.renderSecao()}
           {this.renderCampos()}
-          <View style={styles.InputContainer}>
+          <View style={styles.InputContainer1}>
             <TextInput
               style={styles.body}
               placeholder="Demanda"
@@ -1627,7 +1645,7 @@ class HomeScreen2 extends React.Component {
               underlineColorAndroid="transparent"
             />
           </View>
-
+          <Text style={{ marginBottom: 15 }}>{this.state.msg}</Text>
           <Button
             containerStyle={[styles.facebookContainer]}
             style={styles.facebookText}
@@ -1828,6 +1846,14 @@ const styles = StyleSheet.create({
   InputContainer: {
     width: AppStyles.textInputWidth.main,
     marginBottom: 30,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: AppStyles.color.grey,
+    borderRadius: AppStyles.borderRadius.main,
+  },
+  InputContainer1: {
+    width: AppStyles.textInputWidth.main,
+    marginBottom: 8,
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: AppStyles.color.grey,
