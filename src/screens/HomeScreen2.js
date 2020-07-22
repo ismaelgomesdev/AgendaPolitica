@@ -14,6 +14,8 @@ import {
   ActivityIndicator,
   AppState,
   Platform,
+  Dimensions,
+  AsyncStorage,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/Feather";
@@ -24,7 +26,7 @@ import { AppIcon, AppStyles } from "../AppStyles";
 import api from "../services/api";
 import { TextInputMask } from "react-native-masked-text";
 import { Configuration } from "../Configuration";
-import { Dimensions, AsyncStorage } from "react-native";
+
 import Constants from "expo-constants";
 import { normalize } from "./StatsScreen";
 import { RadioButton } from "react-native-paper";
@@ -84,7 +86,7 @@ class HomeScreen2 extends React.Component {
       error: null,
       disabled: true,
       checked: "bairro",
-      connected: true,
+      connected: false,
       dadosOffline: [],
       aviso: "indefinido",
       visible: false,
@@ -95,34 +97,11 @@ class HomeScreen2 extends React.Component {
     this.handleConnectivityChange = this.handleConnectivityChange.bind(this);
   }
 
-  /*async componentWillMount() {
-    this.state.token = await AsyncStorage.getItem('@PoliNet_token'); 
-    console.log(this.state.token)
-  }*/
-
   validaCampos = async () => {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
     const { token } = this.state;
-    if (this.state.connected == false) {
-      const cpf_eleitor = await AsyncStorage.getItem("@PoliNet_cpf_eleitor");
-      const local_eleitor = await AsyncStorage.getItem(
-        "@PoliNet_local_eleitor"
-      );
-      const endereco_eleitor = await AsyncStorage.getItem(
-        "@PoliNet_endereco_eleitor"
-      );
-      const secao_eleitor = await AsyncStorage.getItem(
-        "@PoliNet_secao_eleitor"
-      );
-
-      this.setState({
-        valida_cpf: cpf_eleitor,
-        valida_local: local_eleitor,
-        valida_endereco: endereco_eleitor,
-        valida_secao: secao_eleitor,
-      });
-    } else {
+    if (this.state.connected == true) {
       try {
         const response = await api.post("/V_User.php", {
           tipo: "3",
@@ -158,13 +137,22 @@ class HomeScreen2 extends React.Component {
               valida_secao: secao_eleitor,
               //mensagem: JSON.stringify(response.data),
             });
-            await AsyncStorage.setItem("@PoliNet_cpf_eleitor", cpf_eleitor);
-            await AsyncStorage.setItem("@PoliNet_local_eleitor", local_eleitor);
+            await AsyncStorage.setItem(
+              "@PoliNet_cpf_eleitor",
+              JSON.stringify(this.state.valida_cpf)
+            );
+            await AsyncStorage.setItem(
+              "@PoliNet_local_eleitor",
+              JSON.stringify(this.state.valida_local)
+            );
             await AsyncStorage.setItem(
               "@PoliNet_endereco_eleitor",
-              endereco_eleitor
+              JSON.stringify(this.state.valida_endereco)
             );
-            await AsyncStorage.setItem("@PoliNet_secao_eleitor", secao_eleitor);
+            await AsyncStorage.setItem(
+              "@PoliNet_secao_eleitor",
+              JSON.stringify(secao_eleitor)
+            );
           } else {
             this.setState({
               //mensagem: "deu ruim",
@@ -187,13 +175,7 @@ class HomeScreen2 extends React.Component {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
     const { token } = this.state;
-
-    if (this.state.connected == false) {
-      const campos = await AsyncStorage.getItem("@PoliNet_campos");
-      this.setState({
-        campos: campos,
-      });
-    } else {
+    if (this.state.connected == true) {
       try {
         const response = await api.post("/V_User.php", {
           tipo: "3",
@@ -221,7 +203,10 @@ class HomeScreen2 extends React.Component {
               campos: campos,
               //mensagem: JSON.stringify(campos),
             });
-            await AsyncStorage.setItem("@PoliNet_campos", campos);
+            await AsyncStorage.setItem(
+              "@PoliNet_campos",
+              JSON.stringify(this.state.campos)
+            );
           } else {
             this.setState({
               //mensagem: "",
@@ -597,15 +582,88 @@ class HomeScreen2 extends React.Component {
     appState: AppState.currentState,
   };*/
   componentWillMount() {
-    NetInfo.fetch().then((state) => {
-      if (state.isInternetReachable) {
-        this.setState({ connected: true, aviso: "online" });
-      } else {
-        this.setState({ connected: false, aviso: "offline", loading: false });
+    /*await AsyncStorage.setItem("@PoliNet_locais", this.state.locais);
+    await AsyncStorage.setItem("@PoliNet_bairros", this.state.bairros);
+    await AsyncStorage.setItem("@PoliNet_distritos", this.state.distritos);
+    await AsyncStorage.setItem("@PoliNet_cpf_eleitor", this.state.valida_cpf);
+    await AsyncStorage.setItem("@PoliNet_local_eleitor", this.state.valida_local);
+    await AsyncStorage.setItem("@PoliNet_endereco_eleitor", this.state.valida_endereco);
+    await AsyncStorage.setItem("@PoliNet_secao_eleitor", this.state.valida_secao);
+    await AsyncStorage.setItem("@PoliNet_campos", this.state.campos);
+    await AsyncStorage.setItem("@PoliNet_data", this.state.data);*/
+
+    const solta = async () => {
+      try {
+        const dados = await AsyncStorage.getItem("@PoliNet_locais");
+        const bairros = await AsyncStorage.getItem("@PoliNet_bairros");
+        const distritos = await AsyncStorage.getItem("@PoliNet_distritos");
+        const cpf_eleitor = await AsyncStorage.getItem("@PoliNet_cpf_eleitor");
+        const local_eleitor = await AsyncStorage.getItem(
+          "@PoliNet_local_eleitor"
+        );
+        const endereco_eleitor = await AsyncStorage.getItem(
+          "@PoliNet_endereco_eleitor"
+        );
+        const secao_eleitor = await AsyncStorage.getItem(
+          "@PoliNet_secao_eleitor"
+        );
+        const campos = await AsyncStorage.getItem("@PoliNet_campos");
+        const data = await AsyncStorage.getItem("@PoliNet_data");
+        /*alert(
+          "data:" +
+            JSON.stringify(data) +
+            "\n campos:" +
+            JSON.stringify(campos) +
+            "\n valida_cpf: " +
+            JSON.stringify(cpf_eleitor) +
+            "\n valida_local: " +
+            JSON.stringify(local_eleitor) +
+            "\n valida_endereco: " +
+            JSON.stringify(endereco_eleitor) +
+            "\n valida_secao: " +
+            JSON.stringify(secao_eleitor) +
+            "\n locais: " +
+            JSON.stringify(dados) +
+            "\n bairros: " +
+            JSON.stringify(bairros) +
+            "\n distritos: " +
+            JSON.stringify(distritos)
+        );*/
+
+        this.setState({
+          data: JSON.parse(data),
+          loading: false,
+
+          valida_cpf: JSON.parse(cpf_eleitor),
+          valida_local: JSON.parse(local_eleitor),
+          valida_endereco: JSON.parse(endereco_eleitor),
+          valida_secao: JSON.parse(secao_eleitor),
+
+          bairros: JSON.parse(bairros),
+          distritos: JSON.parse(distritos),
+        });
+        if (campos != null) {
+          this.setState({
+            campos: JSON.parse(campos),
+          });
+        }
+        if (dados != null) {
+          this.setState({
+            locais: JSON.parse(dados),
+          });
+        }
+      } catch (e) {
+        alert(e);
       }
-    });
-    this.unsubscribe = NetInfo.addEventListener(this.handleConnectivityChange);
+    };
+    solta();
+    this.retornaBairros();
+    this.validaCampos();
+    this.personalCampos();
+    this.makeRemoteRequest2();
+    this.getConnect();
   }
+
   handleConnectivityChange = (state) => {
     if (state.isInternetReachable) {
       this.setState({ connected: true, aviso: "online" });
@@ -615,12 +673,17 @@ class HomeScreen2 extends React.Component {
     }
     console.log(state.isConnected ? "connected" : "not connected");
   };
+
+  
   componentDidMount() {
-    this.retornaBairros();
-    this.validaCampos();
-    this.personalCampos();
-    this.makeRemoteRequest2();
-    this.getConnect();
+    NetInfo.fetch().then((state) => {
+      if (state.isInternetReachable) {
+        this.setState({ connected: true, aviso: "online" });
+      } else {
+        this.setState({ connected: false, aviso: "offline" });
+      }
+    });
+    this.unsubscribe = NetInfo.addEventListener(this.handleConnectivityChange);
   }
   componentWillUnmount() {
     this.unsubscribe();
@@ -756,13 +819,7 @@ class HomeScreen2 extends React.Component {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
     const { token } = this.state;
-    if (this.state.connected == false) {
-      const data = await AsyncStorage.getItem("@PoliNet_data");
-      this.setState({
-        data: data,
-        loading: false,
-      });
-    } else {
+    if (this.state.connected == true) {
       try {
         const response = await api.post("/V_User.php", {
           tipo: "3",
@@ -788,10 +845,15 @@ class HomeScreen2 extends React.Component {
           });
           if (response.data != null) {
             let dados = response.data.data;
+
             console.log("dados: " + dados);
             response.data.data = dados;
+
             this.setState({ data: response.data.data, loading: false });
-            await AsyncStorage.setItem("@PoliNet_data");
+            await AsyncStorage.setItem(
+              "@PoliNet_data",
+              JSON.stringify(this.state.data)
+            );
             arrayholder = dados;
             console.log(this.state.data);
           } else {
@@ -881,16 +943,7 @@ class HomeScreen2 extends React.Component {
     this.state.token = await AsyncStorage.getItem("@PoliNet_token");
 
     const { token } = this.state;
-    if (this.state.connected == false) {
-      const dados = await AsyncStorage.getItem("@PoliNet_locais");
-      const bairros = await AsyncStorage.getItem("@PoliNet_bairros");
-      const distritos = await AsyncStorage.getItem("@PoliNet_distritos");
-      this.setState({
-        locais: dados,
-        bairros: bairros,
-        distritos: distritos,
-      });
-    } else {
+    if (this.state.connected == true) {
       try {
         const response = await api.post("/V_User.php", {
           tipo: "3",
@@ -926,9 +979,18 @@ class HomeScreen2 extends React.Component {
               bairros: bairros,
               distritos: distritos,
             });
-            await AsyncStorage.setItem("@PoliNet_locais", dados);
-            await AsyncStorage.setItem("@PoliNet_bairros", bairros);
-            await AsyncStorage.setItem("@PoliNet_distritos", distritos);
+            await AsyncStorage.setItem(
+              "@PoliNet_locais",
+              JSON.stringify(dados)
+            );
+            await AsyncStorage.setItem(
+              "@PoliNet_bairros",
+              JSON.stringify(this.state.bairros)
+            );
+            await AsyncStorage.setItem(
+              "@PoliNet_distritos",
+              JSON.stringify(this.state.distritos)
+            );
             console.log(this.state.bairros);
           } else {
             console.log("nullll");
@@ -1335,6 +1397,7 @@ class HomeScreen2 extends React.Component {
       </View>
     );
   };
+  hope = async () => {};
   render() {
     const bairros = this.state.bairros;
     const distritos = this.state.distritos;
